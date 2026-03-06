@@ -161,6 +161,19 @@
             color: #bf360c;
             font-weight: bold;
         }
+        .beat-num.khali {
+            color: #78909c;
+            background: #f5f5f5;
+        }
+        .beat-num.khali .bol-text { color: #b0bec5; }
+        .taal-marker {
+            font-size: 9px;
+            font-weight: bold;
+            line-height: 1.1;
+            min-height: 11px;
+            color: #bf360c;
+        }
+        .beat-num.khali .taal-marker { color: #90a4ae; }
         .bol-text {
             font-size: 10px;
             color: #d35400;
@@ -371,7 +384,10 @@
                 <option value="8_bhajani">Bhajani (8)</option>
                 <option value="6">Dadra (6)</option>
                 <option value="7">Rupak (7)</option>
+                <option value="10">Jhaptaal (10)</option>
                 <option value="12">Ektaal (12)</option>
+                <option value="12_chautaal">Chautaal (12)</option>
+                <option value="14">Dhamar (14)</option>
                 <option value="16">Teentaal (16)</option>
             </select>
         </div>
@@ -467,14 +483,32 @@ const TaalBols = {
     "8":        ["Dha","Gi","Na","Ti","Na","Ka","Dhi","Na"],
     "8_bhajani":["Dhin","Dha","Dhin","Dhinna","Tin","Ta","Tin","Tina"],
     "6":        ["Dha","Dhi","Na","Dha","Tu","Na"],
-    "7":        ["Ti","Ti","Na","Dhi","Na","Dhi","Na"],
-    "12":       ["Dhin","Dhin","Dha","Ge","Tirkit","Tirkit","Tu","Na","Kat","Ta","Dhin","Dha"],
-    "16":       ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Tin","Tin","Ta","Ta","Dhin","Dhin","Dha"]
+    "7":           ["Ti","Ti","Na","Dhi","Na","Dhi","Na"],
+    "12":          ["Dhin","Dhin","Dha","Ge","Tirkit","Tirkit","Tu","Na","Kat","Ta","Dhin","Dha"],
+    "16":          ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Tin","Tin","Ta","Ta","Dhin","Dhin","Dha"],
+    "10":          ["Dhi","Na","Dhi","Dhi","Na","Ti","Na","Dhi","Dhi","Na"],
+    "12_chautaal": ["Dha","Dha","Din","Ta","Kita","Dha","Din","Ta","Tita","Kata","Gadi","Gana"],
+    "14":          ["Ka","Da","Hi","Da","Hi","Da","Hi","Ka","Ti","Ta","Ka","Ti","Da","Hi"]
 };
 
 // Proper beat count lookup (avoids fragile parseInt("8_bhajani"))
 const TaalBeats = {
-    "4": 4, "8": 8, "8_bhajani": 8, "6": 6, "7": 7, "12": 12, "16": 16
+    "4": 4, "8": 8, "8_bhajani": 8, "6": 6, "7": 7, "12": 12, "16": 16,
+    "10": 10, "12_chautaal": 12, "14": 14
+};
+
+// Khali (empty/waved-hand) beat indices (0-based) for each taal
+const TaalKhali = {
+    "4":           [2],         // Keherwa 4: beat 3
+    "8":           [4],         // Keherwa 8: beat 5
+    "8_bhajani":   [4],         // Bhajani:   beat 5
+    "6":           [3],         // Dadra:     beat 4
+    "7":           [1, 2],      // Rupak:     vibhag-1 (beats 2-3) is khali
+    "12":          [6],         // Ektaal:    beat 7
+    "16":          [8],         // Teentaal:  beat 9
+    "10":          [5],         // Jhaptaal:  beat 6
+    "12_chautaal": [2, 6],      // Chautaal:  beats 3, 7
+    "14":          [5],         // Dhamar:    beat 6
 };
 
 // ─── Audio Initialisation ────────────────────────────────────────────────────
@@ -1252,11 +1286,16 @@ function addLine(data) {
     rowB.className = 'grid-row';
     rowB.setAttribute('data-row', 'beats');
     rowB.innerHTML = `<div class="row-label">Beat</div>`;
-    const bols = TaalBols[taalKey] || [];
+    const bols   = TaalBols[taalKey]  || [];
+    const khalis = TaalKhali[taalKey] || [];
     for (let i = 0; i < beats; i++) {
+        const isSam   = i === 0;
+        const isKhali = !isSam && khalis.includes(i);
+        const marker  = isSam ? 'X' : (isKhali ? '0' : '');
         rowB.innerHTML +=
-            `<div class="cell beat-num${i===0?' sam':''}" data-beat-idx="${i}">` +
-            `<div class="bol-text">${bols[i]||''}</div>${i+1}</div>`;
+            `<div class="cell beat-num${isSam?' sam':''}${isKhali?' khali':''}" data-beat-idx="${i}">` +
+            `<div class="bol-text">${bols[i]||''}</div>` +
+            `<div class="taal-marker">${marker}</div>${i+1}</div>`;
     }
 
     line.appendChild(rowL);
