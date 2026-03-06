@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swar-Laya Studio: Full Suite</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; padding: 20px; color: #333; }
+        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .controls { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; background: #fdfdfd; padding: 20px; border-radius: 10px; align-items: center; border: 1px solid #ddd; }
+        .line-container { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: #fff; overflow-x: auto; position: relative; }
+        .grid-row { display: flex; margin-bottom: 4px; min-width: max-content; }
+        .label { width: 95px; font-size: 13px; font-weight: bold; color: #444; display: flex; align-items: center; }
+        .cell { width: 115px; margin-right: 4px; border: 1px solid #eee; padding: 2px; }
+        .sub-cell-container { display: flex; gap: 2px; flex-direction: column; }
+        .note-unit { display: flex; gap: 2px; align-items: center; }
+        .octave-btn { cursor: pointer; border: 1px solid #ddd; background: #eee; font-size: 10px; padding: 2px 4px; border-radius: 3px; }
+        .octave-btn.active { background: #333; color: white; }
+        select, input { width: 100%; border: 1px solid #ddd; font-size: 13px; padding: 4px 0; text-align: center; border-radius: 4px; }
+        .note-select { background: #fffde7; font-weight: bold; }
+        .beat-num { text-align: center; font-size: 11px; color: #888; background: #f1f1f1; border-radius: 3px; padding: 4px 0; }
+        .bol-text { font-size: 10px; color: #d35400; font-weight: bold; height: 15px; text-align: center; }
+        .playing { background: #ffeb3b !important; transform: scale(1.02); transition: 0.1s; }
+        button { padding: 10px 14px; cursor: pointer; border: none; border-radius: 5px; font-weight: 600; }
+        .btn-tanpura { background: #ff9800; color: white; }
+        .btn-tanpura.active { background: #e65100; }
+        .btn-rec { background: #c62828; color: white; }
+        .success { background: #2e7d32; color: white; }
+        .secondary { background: #455a64; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Swar-Laya Studio: Professional Composer</h2>
+    
+    <div class="controls">
+        <div>Instrument: 
+            <select id="inst-select">
+                <option value="harmonium">Harmonium</option>
+                <option value="flute">Flute (Fluid)</option>
+                <option value="sitar">Sitar</option>
+                <option value="violin">Violin</option>
+                <option value="piano">Piano</option>
+            </select>
+        </div>
+
+        <div>Scale (Sa): 
+            <select id="scale-select" onchange="updateTanpura()">
+                <option value="130.81">P1 (C)</option><option value="138.59" selected>K1 (C#)</option>
+                <option value="146.83">P2 (D)</option><option value="155.56">K2 (D#)</option>
+                <option value="164.81">P3 (E)</option><option value="174.61">P4 (F)</option>
+                <option value="185.00">K3 (F#)</option><option value="196.00">P5 (G)</option>
+            </select>
+        </div>
+
+        <button id="tanpuraBtn" class="btn-tanpura" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
+        <div style="font-size: 10px;">Vol: <input type="range" id="tanVol" min="0" max="0.1" step="0.01" value="0.03" onchange="updateTanpura()"></div>
+
+        <div>Taal: <select id="taal-select" onchange="clearSheetAndAdd()">
+            <option value="8">Keherwa (8)</option><option value="8_bhajani">Bhajani (8)</option>
+            <option value="6">Dadra (6)</option><option value="16">Teentaal (16)</option>
+        </select></div>
+        
+        <div>Laya: <select id="sub-select"><option value="1">1 Note</option><option value="2">Dugun</option></select></div>
+        <div>BPM: <input type="number" id="bpm" value="100" style="width:55px"></div>
+
+        <button class="success" onclick="addLine()">+ Line</button>
+        <button style="background:#0277bd; color:white;" onclick="startPlayback()">▶ Play</button>
+        <button style="background:#546e7a; color:white;" onclick="stopPlayback()">■ Stop</button>
+        <button id="recBtn" class="btn-rec" onclick="toggleRecording()">● Record</button>
+        <button class="secondary" onclick="downloadFile('json')">💾 Save</button>
+        <button class="secondary" onclick="document.getElementById('file-input').click()">📂 Load</button>
+        <input type="file" id="file-input" hidden onchange="loadJsonFile(event)">
+    </div>
+
+    <div id="song-sheet"></div>
+</div>
+
+<script>
+    let audioCtx = null, playbackInterval = null, tanpuraNodes = [], isTanpuraOn = false;
+    let mainOsc = null, mainGain = null, recorder = null, audioChunks = [], dest = null;
+    
+    const SwaraMap = {"-": null, "Sa": 1, "re": 1.059, "Re": 1.122, "ga": 1.189, "Ga": 1.26, "Ma": 1.335, "ma": 1.414, "Pa": 1.498, "dha": 1.587, "Dha": 1.682, "ni": 1.782, "Ni": 1.888};
+    const TaalBols = {
+        "8": ["Dha","Gi","Na","Ti","Na","Ka","Dhi","Na"],
+        "8_bhajani": ["Dhin","Dha","Dhin","Dhinna","Tin","Ta","Tin","Tina"],
+        "6": ["Dha","Dhi","Na","Dha","Tu","Na"],
+        "16": ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Tin","Tin","Ta","Ta","Dhin","Dhin","Dha"]
+    };
+
+    function initAudio() {
+        if(!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            mainGain = audioCtx.createGain();
+            mainGain.gain.value = 0;
+            mainGain.connect(audioCtx.destination);
+        }
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function getInstSettings() {
+        const inst = document.getElementById('inst-select').value;
+        if(inst === 'harmonium') return {type: 'square', filter: 1000, glide: 0.05};
+        if(inst === 'flute') return {type: 'sine', filter: 2000, glide: 0.15};
+        if(inst === 'sitar') return {type: 'sawtooth', filter: 3000, glide: 0.08};
+        if(inst === 'violin') return {type: 'sawtooth', filter: 1200, glide: 0.18};
+        if(inst === 'piano') return {type: 'triangle', filter: 2500, glide: 0.01};
+        return {type: 'sine', filter: 2000, glide: 0.1};
+    }
+
+    function startPlayback(rec = false) {
+        initAudio(); stopPlayback();
+        const settings = getInstSettings();
+        
+        if(rec) { dest = audioCtx.createMediaStreamDestination(); audioChunks = []; recorder = new MediaRecorder(dest.stream); recorder.ondataavailable = e=>audioChunks.push(e.data); recorder.onstop = saveAudio; recorder.start(); }
+
+        mainOsc = audioCtx.createOscillator();
+        mainOsc.type = settings.type;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass"; filter.frequency.value = settings.filter;
+        mainOsc.connect(filter); filter.connect(mainGain);
+        if(dest) filter.connect(dest);
+        mainOsc.start();
+
+        const base = parseFloat(document.getElementById('scale-select').value) * 2;
+        const bpm = parseInt(document.getElementById('bpm').value) || 100;
+        const interval = (60/bpm)*1000;
+        let beat = 0;
+
+        playbackInterval = setInterval(() => {
+            const lines = document.querySelectorAll('.line-container');
+            lines.forEach(line => {
+                const total = parseInt(line.getAttribute('data-beats'));
+                const idx = beat % total;
+                line.querySelectorAll('.beat-num').forEach(el=>el.classList.remove('playing'));
+                const el = line.querySelector(`.beat-num[data-beat-idx="${idx}"]`);
+                if(el) el.classList.add('playing');
+
+                // Percussion click
+                const click = audioCtx.createOscillator();
+                const cg = audioCtx.createGain();
+                click.connect(cg); cg.connect(audioCtx.destination);
+                if(dest) cg.connect(dest);
+                click.frequency.value = idx === 0 ? 800 : 400;
+                cg.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                cg.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                click.start(); click.stop(audioCtx.currentTime + 0.05);
+
+                const units = line.querySelectorAll('.grid-row')[1].querySelectorAll('.cell')[idx].querySelectorAll('.note-unit');
+                const subInt = interval / units.length;
+
+                units.forEach((u, sidx) => {
+                    setTimeout(() => {
+                        const sw = u.querySelector('.note-select').value;
+                        const r = SwaraMap[sw];
+                        if(r) {
+                            let f = base * r;
+                            const oct = u.querySelector('.octave-btn.active');
+                            if(oct) f *= (oct.innerText==='˙'?2:0.5);
+                            mainOsc.frequency.exponentialRampToValueAtTime(f, audioCtx.currentTime + settings.glide);
+                            mainGain.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.02);
+                        } else {
+                            mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+                        }
+                    }, sidx * subInt);
+                });
+            });
+            beat++;
+        }, interval);
+    }
+
+    function stopPlayback() {
+        clearInterval(playbackInterval);
+        if(mainOsc) { try{mainOsc.stop();}catch(e){} mainOsc = null; }
+        if(mainGain) mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+        if(recorder && recorder.state === 'recording') recorder.stop();
+        document.querySelectorAll('.beat-num').forEach(el=>el.classList.remove('playing'));
+    }
+
+    function toggleTanpura() {
+        initAudio(); isTanpuraOn = !isTanpuraOn;
+        const btn = document.getElementById('tanpuraBtn');
+        btn.innerText = isTanpuraOn ? "🪕 Tanpura: ON" : "🪕 Tanpura: OFF";
+        btn.classList.toggle('active', isTanpuraOn);
+        isTanpuraOn ? playTanpura() : stopTanpura();
+    }
+
+    function playTanpura() {
+        stopTanpura();
+        const base = parseFloat(document.getElementById('scale-select').value);
+        const vol = parseFloat(document.getElementById('tanVol').value);
+        [base*0.749, base, base, base*0.5].forEach(freq => {
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.value = freq; gain.gain.value = vol;
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); tanpuraNodes.push(osc);
+        });
+    }
+
+    function stopTanpura() { tanpuraNodes.forEach(o => o.stop()); tanpuraNodes = []; }
+    function updateTanpura() { if(isTanpuraOn) playTanpura(); }
+    function saveAudio() { const blob = new Blob(audioChunks, {type:'audio/webm'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'composition.webm'; a.click(); }
+    function toggleRecording() { alert("Recording starts with Play."); startPlayback(true); }
+
+    function addLine(data = null) {
+        const taalKey = data ? data.taal_key : document.getElementById('taal-select').value;
+        const beats = parseInt(taalKey) || 8; 
+        const subs = data ? data.notes[0].length : parseInt(document.getElementById('sub-select').value);
+        const sheet = document.getElementById('song-sheet');
+        const line = document.createElement('div');
+        line.className = 'line-container';
+        line.setAttribute('data-beats', beats); line.setAttribute('data-taal', taalKey);
+
+        let html = `<div class="grid-row"><div class="label">Lyrics</div>`;
+        for(let i=0; i<beats; i++) html += `<div class="cell"><input type="text" class="lyr" value="${data?data.lyrics[i]:''}"></div>`;
+        html += `</div><div class="grid-row"><div class="label">Notes</div>`;
+        for(let i=0; i<beats; i++) {
+            html += `<div class="cell"><div class="sub-cell-container">`;
+            for(let s=0; s<subs; s++) {
+                const nv = data ? data.notes[i][s] : "-"; const oct = data ? data.octaves[i][s] : 0;
+                html += `<div class="note-unit"><select class="note-select">${Object.keys(SwaraMap).map(n=>`<option ${n===nv?'selected':''}>${n}</option>`).join('')}</select><div class="octave-controls"><button class="octave-btn ${oct===1?'active':''}" onclick="toggleOctave(this,1)">˙</button><button class="octave-btn ${oct===-1?'active':''}" onclick="toggleOctave(this,-1)">.</button></div></div>`;
+            }
+            html += `</div></div>`;
+        }
+        html += `</div><div class="grid-row"><div class="label">Beat</div>`;
+        const bols = TaalBols[taalKey] || [];
+        for(let i=0; i<beats; i++) html += `<div class="cell beat-num" data-beat-idx="${i}"><div class="bol-text">${bols[i]||''}</div>${i+1}</div>`;
+        line.innerHTML = html + `</div><button style="position:absolute; top:5px; right:5px; cursor:pointer;" onclick="this.parentElement.remove()">×</button>`;
+        sheet.appendChild(line);
+    }
+
+    function toggleOctave(btn, val) { const active = btn.classList.contains('active'); btn.parentElement.querySelectorAll('.octave-btn').forEach(b=>b.classList.remove('active')); if(!active) btn.classList.add('active'); }
+    function clearSheetAndAdd() { document.getElementById('song-sheet').innerHTML = ""; addLine(); }
+    
+    function downloadFile(format) {
+        const lines = Array.from(document.querySelectorAll('.line-container')).map(l => ({
+            lyrics: Array.from(l.querySelectorAll('.lyr')).map(i=>i.value),
+            notes: Array.from(l.querySelectorAll('.sub-cell-container')).map(c=>Array.from(c.querySelectorAll('.note-select')).map(s=>s.value)),
+            octaves: Array.from(l.querySelectorAll('.sub-cell-container')).map(c=>Array.from(c.querySelectorAll('.note-unit')).map(u=>{const b=u.querySelector('.octave-btn.active'); return b?(b.innerText==='˙'?1:-1):0;})),
+            beats: l.getAttribute('data-beats'), taal_key: l.getAttribute('data-taal')
+        }));
+        const blob = new Blob([JSON.stringify({scale:document.getElementById('scale-select').value, lines},null,2)], {type:'application/json'});
+        const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='song.json'; a.click();
+    }
+
+    function loadJsonFile(e) {
+        const reader = new FileReader(); reader.onload = (ev) => {
+            const data = JSON.parse(ev.target.result); document.getElementById('scale-select').value = data.scale;
+            document.getElementById('song-sheet').innerHTML = ""; data.lines.forEach(l => addLine(l));
+        }; reader.readAsText(e.target.files[0]);
+    }
+    addLine();
+</script>
+</body>
+</html>

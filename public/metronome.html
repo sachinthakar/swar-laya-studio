@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPM Clock Metronome</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --clock-size: 280px;
+            --accent-color: #e74c3c;
+            --downbeat-color: #f1c40f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #clock {
+            width: var(--clock-size);
+            height: var(--clock-size);
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            margin: 25px auto;
+            background: white;
+            transition: background-color 0.1s ease;
+        }
+
+        #hand {
+            width: 4px;
+            height: 50%;
+            background: var(--accent-color);
+            position: absolute;
+            bottom: 50%;
+            left: calc(50% - 2px);
+            transform-origin: bottom center;
+            transform: rotate(0deg);
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        /* Marker for the Downbeat */
+        .marker {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 15px;
+            background: #333;
+        }
+
+        .center-dot {
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        label { font-size: 0.75rem; font-weight: bold; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: var(--accent-color); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        #startBtn { background-color: #2ecc71; color: white; }
+        #stopBtn { background-color: #e74c3c; color: white; margin-top: 12px; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Animation Classes */
+        .flash { background-color: #fff9e6 !important; }
+        .downbeat-hand { background-color: var(--downbeat-color) !important; width: 6px !important; left: calc(50% - 3px) !important; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="margin-top:0; color:#333;">Metronome</h2>
+    
+    <div id="clock">
+        <div class="marker"></div>
+        <div id="hand"></div>
+        <div class="center-dot"></div>
+    </div>
+
+    <div class="controls">
+        <div class="input-group">
+            <label>BPM (Tempo)</label>
+            <input type="number" id="bpm" value="120">
+        </div>
+        <div class="input-group">
+            <label>T.S. (Beats)</label>
+            <input type="number" id="ts" value="4">
+        </div>
+    </div>
+
+    <button id="startBtn">START</button>
+    <button id="stopBtn" disabled>STOP</button>
+</div>
+
+<script>
+    let audioCtx = null;
+    let nextNoteTime = 0.0;
+    let timerID = null;
+    let beatCount = 0;
+    
+    const clock = document.getElementById('clock');
+    const hand = document.getElementById('hand');
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const bpmInput = document.getElementById('bpm');
+    const tsInput = document.getElementById('ts');
+
+    // FIX 1 & 2: Accept the exact scheduled time as a parameter.
+    // All Web Audio API calls use `scheduledTime` so the audio fires at the
+    // precisely correct future moment (sample-accurate), not at currentTime.
+    // The visual flash is delayed by the same offset so it coincides with
+    // the audio rather than firing up to 100ms early.
+    function playClick(scheduledTime, isDownbeat) {
+        const osc = audioCtx.createOscillator();
+        const envelope = audioCtx.createGain();
+
+        // Higher pitch for the first beat of the cycle
+        osc.frequency.setValueAtTime(isDownbeat ? 1200 : 800, scheduledTime);
+        osc.type = 'sine';
+
+        envelope.gain.setValueAtTime(1, scheduledTime);
+        envelope.gain.exponentialRampToValueAtTime(0.001, scheduledTime + 0.05);
+
+        osc.connect(envelope);
+        envelope.connect(audioCtx.destination);
+
+        osc.start(scheduledTime);           // ← schedules audio at exact future time
+        osc.stop(scheduledTime + 0.05);
+
+        // Visual feedback: delay the DOM change to match when audio actually plays.
+        // Without this delay the flash fired up to 100ms before the beep.
+        if (isDownbeat) {
+            const delayMs = (scheduledTime - audioCtx.currentTime) * 1000;
+            setTimeout(() => {
+                clock.classList.add('flash');
+                hand.classList.add('downbeat-hand');
+                setTimeout(() => {
+                    clock.classList.remove('flash');
+                    hand.classList.remove('downbeat-hand');
+                }, 100);
+            }, delayMs);
+        }
+    }
+
+    function scheduler() {
+        const bpm = parseInt(bpmInput.value) || 120;
+        const ts = parseInt(tsInput.value) || 4;
+        const secondsPerBeat = 60.0 / bpm;
+
+        while (nextNoteTime < audioCtx.currentTime + 0.1) {
+            const isDownbeat = (beatCount % ts === 0);
+            playClick(nextNoteTime, isDownbeat);   // ← pass the scheduled time
+            nextNoteTime += secondsPerBeat;
+            beatCount++;
+        }
+        // FIX 3: Use setTimeout instead of requestAnimationFrame.
+        // requestAnimationFrame pauses when the browser tab loses focus,
+        // which silently breaks the metronome during practice.
+        // setTimeout keeps running in the background regardless of tab focus.
+        timerID = setTimeout(scheduler, 25);
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const bpm = parseInt(bpmInput.value) || 120;
+        const ts = parseInt(tsInput.value) || 4;
+        const cycleDuration = (60 / bpm) * ts;
+
+        beatCount = 0;
+        hand.style.animation = 'none';
+        hand.offsetHeight; // force reflow
+        hand.style.animation = `rotateHand ${cycleDuration}s linear infinite`;
+
+        nextNoteTime = audioCtx.currentTime;
+        scheduler();
+
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+    });
+
+    stopBtn.addEventListener('click', () => {
+        clearTimeout(timerID);
+        hand.style.animation = 'none';
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+    });
+
+    // Dynamic Animation Logic
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes rotateHand {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+
+</body>
+</html>

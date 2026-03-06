@@ -1,0 +1,41 @@
+{
+  "scale": "207.65",
+  "lines": [
+    {
+      "line_instrument": "violin",
+      "tabla_mute": true,
+      "lyrics": ["Music", "-", "-", "-", "-", "-", "-", "-"],
+      "notes": [["Sa"], ["Ga"], ["Pa"], ["Dha"], ["Pa"], ["Ga"], ["Re"], ["Sa"]],
+      "octaves": [[0], [0], [0], [0], [0], [0], [0], [0]],
+      "beats": "8",
+      "taal_key": "8"
+    },
+    {
+      "line_instrument": "harmonium",
+      "tabla_mute": true,
+      "lyrics": ["-", "Sa", "khi", "She", "ja", "ra", "ni", "-"],
+      "notes": [["-"], ["Sa"], ["Ga"], ["Ga"], ["Sa"], ["Re"], ["Sa"], ["Ga"]],
+      "octaves": [[0], [0], [0], [0], [0], [0], [0], [0]],
+      "beats": "8",
+      "taal_key": "8"
+    },
+    {
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "lyrics": ["-", "Sa", "khi", "She", "ja", "ra", "ni", "-"],
+      "notes": [["-"], ["Sa"], ["Ga"], ["Ga"], ["Sa"], ["Re"], ["Sa"], ["Ga"]],
+      "octaves": [[0], [0], [0], [0], [0], [0], [0], [0]],
+      "beats": "8",
+      "taal_key": "8"
+    },
+    {
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "lyrics": ["-", "Tu", "ha", "sa", "ta", "ra", "ha", "-"],
+      "notes": [["-"], ["Ga"], ["Ma"], ["Ma"], ["Ga"], ["Re"], ["Sa"], ["Sa"]],
+      "octaves": [[0], [0], [0], [0], [0], [0], [0], [0]],
+      "beats": "8",
+      "taal_key": "8"
+    }
+  ]
+}

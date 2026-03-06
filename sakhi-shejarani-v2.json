@@ -1,0 +1,103 @@
+{
+  "title": "Sakhi Shejarani",
+  "scale": "207.65",
+  "bpm": 88,
+  "lines": [
+    {
+      "section": "Intro (Alaap)",
+      "line_instrument": "violin",
+      "tabla_mute": true,
+      "line_volume": 0.85,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-", "-", "-", "-", "-", "-", "-", "-"],
+      "notes":   [["-"], ["Sa"], ["Re"], ["Ga"], ["Ma"], ["Pa"], ["Ma"], ["Ga"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ]],
+      "meend":   [[false],[false],[false],[true], [true], [true], [false],[false]]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "tabla_mute": true,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-",  "Sak", "hi",  "She", "ja",  "ra",  "ni",  "-"  ],
+      "notes":   [["-"], ["Sa"], ["Ga"], ["Ga"], ["Sa"], ["Re"], ["Sa"], ["-"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [ 0]],
+      "meend":   [[false],[false],[true], [false],[false],[false],[false],[false]]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-",  "Tu",  "ha",  "sat", "ra",  "hi",  "-",   "-"  ],
+      "notes":   [["-"], ["Ga"], ["Ma"], ["Ma"], ["Ga"], ["Re"], ["Sa"], ["-"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [ 0]],
+      "meend":   [[false],[false],[true], [false],[false],[false],[false],[false]]
+    },
+    {
+      "section": "Mukhda (Repeat)",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-",  "Sak", "hi",  "She", "ja",  "ra",  "ni",  "-"  ],
+      "notes":   [["-"], ["Sa"], ["Ga"], ["Ga"], ["Sa"], ["Re"], ["Sa"], ["Ga"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [  0]],
+      "meend":   [[false],[false],[true], [false],[false],[false],[false],[false]]
+    },
+    {
+      "section": "Antara",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-", "-",   "-",   "-",   "-",   "-",   "-",   "-"  ],
+      "notes":   [["-"], ["Re"], ["Ma"], ["Pa"], ["Dha"], ["Pa"], ["Ma"], ["Ga"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [   0], [  0 ], [  0 ], [  0]],
+      "meend":   [[false],[false],[true], [true], [true],  [false],[false],[false]]
+    },
+    {
+      "section": "Antara",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-", "-",   "-",   "-",   "-",   "-",   "-",   "-"  ],
+      "notes":   [["-"], ["Pa"], ["Ni"], ["Sa"], ["Ni"], ["Dha"], ["Pa"], ["Ma"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  1 ], [  0], [   0 ], [  0 ], [  0]],
+      "meend":   [[false],[false],[true], [true], [false],[false], [false],[false]]
+    },
+    {
+      "section": "Antara",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-", "-",   "-",   "-",   "-",   "-",   "-",   "-"  ],
+      "notes":   [["-"], ["Ma"], ["Pa"], ["Ga"], ["Ma"], ["Re"], ["Ga"], ["Sa"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [  0]],
+      "meend":   [[false],[false],[true], [false],[true], [false],[false],[false]]
+    },
+    {
+      "section": "Mukhda (Return)",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": ["-",  "Sak", "hi",  "She", "ja",  "ra",  "ni",  "-"  ],
+      "notes":   [["-"], ["Sa"], ["Ga"], ["Ga"], ["Sa"], ["Re"], ["Sa"], ["-"]],
+      "octaves": [[ 0 ], [  0], [  0 ], [  0 ], [  0 ], [  0 ], [  0 ], [ 0]],
+      "meend":   [[false],[false],[true], [false],[false],[false],[false],[false]]
+    }
+  ]
+}

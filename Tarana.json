@@ -1,0 +1,583 @@
+{
+  "title": "Tarana",
+  "scale": "138.59",
+  "bpm": 90,
+  "lines": [
+    {
+      "section": "",
+      "line_instrument": "violin",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          true
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "",
+      "line_instrument": "flute",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "",
+      "line_instrument": "sitar",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "",
+      "line_instrument": "flute",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "",
+      "line_instrument": "sitar",
+      "tabla_mute": false,
+      "line_volume": 1,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    }
+  ]
+}

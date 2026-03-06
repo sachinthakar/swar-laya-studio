@@ -1,0 +1,4 @@
+# Swar-Laya Studio — Python tools dependencies
+# Install with:  pip install -r requirements.txt
+
+pretty_midi>=0.2.10

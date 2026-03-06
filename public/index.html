@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swar-Laya Studio v3: Professional Suite</title>
+    <!-- Firebase SDK (compat v10) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #eef2f3;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 98%;
+            margin: auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h2 { margin: 0 0 16px 0; color: #1a237e; font-size: 20px; }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            background-color: #fdfdfd;
+            padding: 16px;
+            border-radius: 10px;
+            align-items: flex-end;
+            border: 1px solid #ddd;
+        }
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .control-item label {
+            font-size: 10px;
+            font-weight: bold;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .line-container {
+            border: 1px solid #ccc;
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            background-color: #fff;
+            overflow-x: auto;
+            position: relative;
+        }
+        .line-settings {
+            display: flex;
+            gap: 12px;
+            background: #f5f5f5;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border: 1px solid #e8e8e8;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .line-settings label { font-size: 11px; color: #555; font-weight: 600; }
+        .grid-row {
+            display: flex;
+            margin-bottom: 4px;
+            min-width: max-content;
+        }
+        .row-label {
+            width: 80px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .cell {
+            width: 120px;
+            margin-right: 4px;
+            border: 1px solid #eee;
+            padding: 3px;
+            flex-shrink: 0;
+            border-radius: 3px;
+        }
+        .sub-cell-container {
+            display: flex;
+            gap: 3px;
+            flex-direction: column;
+        }
+        .note-unit {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+        }
+        .octave-btn {
+            cursor: pointer;
+            border: 1px solid #bbb;
+            background-color: #ececec;
+            font-size: 11px;
+            padding: 1px 5px;
+            border-radius: 3px;
+            line-height: 1.4;
+        }
+        .octave-btn.active {
+            background-color: #37474f;
+            color: white;
+            border-color: #37474f;
+        }
+        .meend-btn {
+            cursor: pointer;
+            border: 1px solid #8e24aa;
+            background-color: #f3e5f5;
+            color: #6a1b9a;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-style: italic;
+        }
+        .meend-btn.active {
+            background-color: #8e24aa;
+            color: white;
+            border-color: #6a1b9a;
+        }
+        select { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+        input[type="number"], input[type="text"] { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+        input[type="range"] { border: none; cursor: pointer; }
+        .note-select {
+            background-color: #fffde7;
+            font-weight: bold;
+            width: 56px;
+            font-size: 12px;
+            padding: 3px 2px;
+        }
+        .lyr-input {
+            width: 100%;
+            font-size: 12px;
+            padding: 3px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .beat-num {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 5px 0;
+        }
+        .beat-num.sam {
+            background-color: #fff3e0;
+            color: #bf360c;
+            font-weight: bold;
+        }
+        .bol-text {
+            font-size: 10px;
+            color: #d35400;
+            font-weight: bold;
+            height: 14px;
+            text-align: center;
+            line-height: 14px;
+        }
+        .playing {
+            background-color: #fff176 !important;
+            border: 2px solid #f9a825 !important;
+            transform: scale(1.03);
+            transition: all 0.08s;
+        }
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-tanpura { background-color: #ef6c00; color: white; }
+        .btn-play    { background-color: #0277bd; color: white; }
+        .btn-stop    { background-color: #455a64; color: white; }
+        .btn-add     { background-color: #2e7d32; color: white; }
+        .btn-save    { background-color: #4a148c; color: white; }
+        .btn-load    { background-color: #37474f; color: white; }
+        .btn-remove  {
+            position: absolute; top: 6px; right: 6px;
+            background: #c62828; color: white;
+            padding: 2px 8px; font-size: 11px; border-radius: 4px;
+        }
+        .line-badge {
+            position: absolute; top: 7px; left: 10px;
+            font-size: 10px; color: #999; font-weight: bold;
+        }
+        .section-hint {
+            font-size: 10px; color: #26a69a; font-weight: bold; margin-left: 6px;
+        }
+        /* ── Adlib / Alap line styling ── */
+        .adlib-line {
+            border-left: 5px solid #ef6c00;   /* orange accent = free tempo */
+            background-color: #fffbf7;
+        }
+        .adlib-line .bol-text { display: none; }  /* hide tabla bols — no tabla in alap */
+        .adlib-line .beat-num {
+            background-color: #fff3e0;
+            color: #bf360c;
+            font-style: italic;
+        }
+        .adlib-label {
+            font-size: 10px; color: #ef6c00; font-weight: bold;
+            margin-left: 4px; letter-spacing: 0.3px;
+        }
+
+        /* ── Auth bar ── */
+        #auth-bar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            background: #1a237e; color: white;
+            padding: 8px 20px; border-radius: 10px 10px 0 0;
+            margin: -25px -25px 16px -25px;   /* bleed to container edges */
+            font-size: 13px;
+        }
+        #auth-bar .spacer { flex: 1; }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        .user-name { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .premium-badge {
+            background: #f9a825; color: #333; font-size: 11px;
+            font-weight: 700; padding: 2px 8px; border-radius: 10px;
+        }
+        .free-badge {
+            background: rgba(255,255,255,0.2); color: white; font-size: 11px;
+            padding: 2px 8px; border-radius: 10px;
+        }
+        .btn-google {
+            background: white; color: #333; border: none; border-radius: 6px;
+            padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px;
+        }
+        .btn-email-login {
+            background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px;
+        }
+        .btn-cloud {
+            background: #0288d1; color: white; border: none; border-radius: 6px;
+            padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px;
+        }
+        .btn-signout {
+            background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 11px;
+        }
+        .btn-save-cloud {
+            background-color: #00897b; color: white;
+        }
+
+        /* ── Modals (shared overlay) ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .modal-box {
+            background: white; border-radius: 14px;
+            padding: 28px; width: 90%; max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 85vh; display: flex; flex-direction: column;
+        }
+        .modal-box h3 { margin: 0 0 16px 0; color: #1a237e; }
+        .modal-close {
+            float: right; background: none; border: none;
+            font-size: 20px; cursor: pointer; color: #888; margin-top: -4px;
+        }
+
+        /* ── Composition picker ── */
+        #comp-list { overflow-y: auto; flex: 1; }
+        .comp-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
+            border: 1px solid #eee; gap: 10px;
+        }
+        .comp-item:hover { background: #f5f5f5; }
+        .active-comp { border-color: #0277bd; background: #e3f2fd; }
+        .comp-info { flex: 1; overflow: hidden; }
+        .comp-info strong { display: block; font-size: 14px; color: #222; }
+        .comp-meta { font-size: 11px; color: #888; }
+        .comp-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .btn-load-comp {
+            background: #0277bd; color: white; border: none;
+            border-radius: 5px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+        }
+        .btn-del-comp {
+            background: #c62828; color: white; border: none;
+            border-radius: 5px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+        }
+        .btn-new-comp {
+            background: #2e7d32; color: white; border: none; border-radius: 6px;
+            padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13px;
+            margin-top: 12px; width: 100%;
+        }
+
+        /* ── Email login form ── */
+        .email-field {
+            width: 100%; padding: 10px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        .btn-email-submit {
+            width: 100%; padding: 11px; background: #1a237e; color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
+            font-weight: 600; margin-bottom: 8px;
+        }
+        .auth-divider {
+            text-align: center; color: #aaa; font-size: 12px; margin: 10px 0;
+        }
+
+        /* ── Toast notification ── */
+        #toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+            background: #323232; color: white; padding: 10px 22px;
+            border-radius: 24px; font-size: 13px; font-weight: 500;
+            z-index: 2000; opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Auth bar — updates dynamically once Firebase auth state resolves -->
+    <div id="auth-bar">
+        <span style="font-weight:700; letter-spacing:0.5px;">🎵 Swar-Laya Studio</span>
+        <div class="spacer"></div>
+        <span style="font-size:11px; opacity:0.6;">Loading…</span>
+    </div>
+
+    <h2>🎵 Swar-Laya Studio v3 &mdash; Professional Suite</h2>
+
+    <div class="controls">
+        <div class="control-item">
+            <label>Song Title</label>
+            <input type="text" id="song-title" value="Untitled" style="width:140px;">
+        </div>
+        <div class="control-item">
+            <label>Master Scale (Sa)</label>
+            <select id="scale-select" onchange="updateTanpura()">
+                <option value="130.81">Pandhri 1 (C)</option>
+                <option value="138.59">Kali 1 (C#)</option>
+                <option value="146.83">Pandhri 2 (D)</option>
+                <option value="155.56">Kali 2 (D#)</option>
+                <option value="164.81">Pandhri 3 (E)</option>
+                <option value="174.61">Pandhri 4 (F)</option>
+                <option value="185.00">Kali 3 (F#)</option>
+                <option value="196.00">Pandhri 5 (G)</option>
+                <option value="207.65">Kali 4 (G#)</option>
+                <option value="220.00">Pandhri 6 (A)</option>
+                <option value="233.08">Kali 5 (A#)</option>
+                <option value="246.94">Pandhri 7 (B)</option>
+            </select>
+        </div>
+        <div class="control-item">
+            <label>Default Taal</label>
+            <select id="taal-select">
+                <option value="4">Keherwa (4)</option>
+                <option value="8" selected>Keherwa (8)</option>
+                <option value="8_bhajani">Bhajani (8)</option>
+                <option value="6">Dadra (6)</option>
+                <option value="7">Rupak (7)</option>
+                <option value="12">Ektaal (12)</option>
+                <option value="16">Teentaal (16)</option>
+            </select>
+        </div>
+        <div class="control-item">
+            <label>Master BPM</label>
+            <input type="number" id="bpm" value="90" style="width:65px;" min="30" max="300">
+        </div>
+        <div class="control-item">
+            <label>Tabla Vol</label>
+            <input type="range" id="tabla-vol" min="0" max="1" step="0.05" value="0.7" style="width:75px;">
+        </div>
+        <div class="control-item">
+            <label>Reverb (Wet)</label>
+            <input type="range" id="reverb-wet" min="0" max="0.75" step="0.05" value="0.25" style="width:75px;" oninput="updateReverbMix()">
+        </div>
+        <div class="control-item">
+            <label>Start Beat</label>
+            <input type="number" id="start-beat" min="1" value="1" style="width:55px;">
+        </div>
+        <div class="control-item">
+            <label>Pre-roll</label>
+            <select id="pre-roll-select" style="width:80px;">
+                <option value="0">Off</option>
+                <option value="2">2 Beats</option>
+                <option value="4" selected>4 Beats</option>
+                <option value="8">8 Beats</option>
+            </select>
+        </div>
+        <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
+        <button class="btn-add"  onclick="addLine()">+ Add Line</button>
+        <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
+        <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
+        <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
+        <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
+        <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
+        <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
+        <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
+    </div>
+
+    <div id="song-sheet"></div>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let audioCtx       = null;
+let playbackTimer  = null;
+let tanpuraTimer   = null;
+let tanpuraNodes   = [];
+let isTanpuraOn    = false;
+
+// Monophonic synth nodes (shared, switches instrument per line)
+let mainOsc        = null;
+let mainGain       = null;
+let mainFilter     = null;
+let harmonics      = [];   // [{osc, gain, ratio}]
+
+// Per-instrument effects (created in setupSynth, destroyed in stopSynth)
+let vibratoLFO     = null;   // pitch-vibrato oscillator (violin, flute)
+let vibratoGain    = null;   // controls vibrato depth in cents
+let fluteNoiseNode = null;   // looping noise source for bansuri breath
+let fluteNoiseGain = null;   // mixes breath noise into the signal chain
+
+// Master bus
+let masterBus      = null;
+let dryGain        = null;
+let wetGain        = null;
+let reverbNode     = null;
+let compressor     = null;
+let noiseBuffer    = null;   // short noise buffer (tabla transients)
+let breathBuffer   = null;   // longer loopable noise buffer (flute breath)
+
+// ─── Tuning ──────────────────────────────────────────────────────────────────
+// Equal-temperament semitone ratios (12th root of 2)
+const SwaraMap = {
+    "-":  null,
+    "~":  null,   // sustain / hold — continue previous note, do not re-attack
+    "Sa": 1,
+    "re": Math.pow(2, 1/12),   // komal Re  (minor 2nd)
+    "Re": Math.pow(2, 2/12),   // shuddha Re (major 2nd)
+    "ga": Math.pow(2, 3/12),   // komal Ga  (minor 3rd)
+    "Ga": Math.pow(2, 4/12),   // shuddha Ga (major 3rd)
+    "Ma": Math.pow(2, 5/12),   // shuddha Ma (perfect 4th)
+    "ma": Math.pow(2, 6/12),   // tivra Ma  (tritone)
+    "Pa": Math.pow(2, 7/12),   // Pa        (perfect 5th)
+    "dha": Math.pow(2, 8/12),  // komal Dha (minor 6th)
+    "Dha": Math.pow(2, 9/12),  // shuddha Dha (major 6th)
+    "ni": Math.pow(2, 10/12),  // komal Ni  (minor 7th)
+    "Ni": Math.pow(2, 11/12)   // shuddha Ni (major 7th)
+};
+
+const TaalBols = {
+    "4":        ["Dha","Gi","Na","Ti"],
+    "8":        ["Dha","Gi","Na","Ti","Na","Ka","Dhi","Na"],
+    "8_bhajani":["Dhin","Dha","Dhin","Dhinna","Tin","Ta","Tin","Tina"],
+    "6":        ["Dha","Dhi","Na","Dha","Tu","Na"],
+    "7":        ["Ti","Ti","Na","Dhi","Na","Dhi","Na"],
+    "12":       ["Dhin","Dhin","Dha","Ge","Tirkit","Tirkit","Tu","Na","Kat","Ta","Dhin","Dha"],
+    "16":       ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Tin","Tin","Ta","Ta","Dhin","Dhin","Dha"]
+};
+
+// Proper beat count lookup (avoids fragile parseInt("8_bhajani"))
+const TaalBeats = {
+    "4": 4, "8": 8, "8_bhajani": 8, "6": 6, "7": 7, "12": 12, "16": 16
+};
+
+// ─── Audio Initialisation ────────────────────────────────────────────────────
+function initAudio() {
+    if (audioCtx) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        return;
+    }
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // Dynamics compressor prevents clipping from stacked harmonics
+    compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -18;
+    compressor.knee.value      = 8;
+    compressor.ratio.value     = 4;
+    compressor.attack.value    = 0.003;
+    compressor.release.value   = 0.25;
+
+    masterBus = audioCtx.createGain();
+    masterBus.gain.value = 1.0;
+
+    // Dry/wet reverb split
+    dryGain = audioCtx.createGain();
+    wetGain = audioCtx.createGain();
+    reverbNode = buildReverb(2.0, 2.2);
+
+    const wetVal = parseFloat(document.getElementById('reverb-wet').value);
+    dryGain.gain.value = 1.0 - wetVal * 0.4;
+    wetGain.gain.value = wetVal;
+
+    // Chain: instruments → masterBus → compressor → dry+reverb → destination
+    masterBus.connect(compressor);
+    compressor.connect(dryGain);
+    compressor.connect(reverbNode);
+    reverbNode.connect(wetGain);
+    dryGain.connect(audioCtx.destination);
+    wetGain.connect(audioCtx.destination);
+
+    // Pre-generate noise buffers
+    noiseBuffer  = buildNoiseBuffer(0.18);  // short burst for tabla head-slap
+    breathBuffer = buildNoiseBuffer(2.0);   // long loopable buffer for flute breath
+}
+
+function buildReverb(durationSec, decay) {
+    const rate   = audioCtx.sampleRate;
+    const length = Math.floor(rate * durationSec);
+    const buf    = audioCtx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+        const d = buf.getChannelData(ch);
+        for (let i = 0; i < length; i++) {
+            d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+        }
+    }
+    const conv = audioCtx.createConvolver();
+    conv.buffer = buf;
+    return conv;
+}
+
+function buildNoiseBuffer(sec) {
+    const len = Math.floor(audioCtx.sampleRate * sec);
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const d   = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+}
+
+function updateReverbMix() {
+    if (!dryGain || !wetGain) return;
+    const wet = parseFloat(document.getElementById('reverb-wet').value);
+    dryGain.gain.value = 1.0 - wet * 0.4;
+    wetGain.gain.value = wet;
+}
+
+// ─── Tabla Synthesis ──────────────────────────────────────────────────────────
+// Each bol modelled with:
+//   • Bayan  – two sine sweeps (fundamental + 2nd harmonic) + low-pass noise click
+//   • Dayan  – pitch glide from attack frequency down to tuned pitch (characteristic
+//              tabla sound) + presence partial + two bandpass noise bursts
+// All output routes through masterBus → compressor → reverb for proper mix level.
+function playTablaSound(bol, isSam) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const vol = parseFloat(document.getElementById('tabla-vol').value);
+    const out = masterBus;              // route through master bus (compressor + reverb)
+    const sw  = isSam ? 1.30 : 1.0;   // accent on sam (beat 1)
+
+    // ── Helper: sine oscillator with frequency glide then exponential decay ──
+    function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f0, now);
+        o.frequency.exponentialRampToValueAtTime(f1, now + sweepSec);
+        g.gain.setValueAtTime(gain * sw * vol, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + decaySec);
+        o.connect(g); g.connect(out);
+        o.start(now); o.stop(now + decaySec + 0.02);
+    }
+
+    // ── Helper: bandpass / lowpass noise transient ──
+    function noiseBurst(freq, q, gain, decaySec, btype) {
+        if (!noiseBuffer) return;
+        btype = btype || 'bandpass';
+        const ns = audioCtx.createBufferSource();
+        const nf = audioCtx.createBiquadFilter();
+        const ng = audioCtx.createGain();
+        ns.buffer = noiseBuffer;
+        nf.type = btype; nf.frequency.value = freq; nf.Q.value = q;
+        ng.gain.setValueAtTime(gain * sw * vol, now);
+        ng.gain.exponentialRampToValueAtTime(0.0001, now + decaySec);
+        ns.connect(nf); nf.connect(ng); ng.connect(out);
+        ns.start(now);
+    }
+
+    // ── Tirkit (4-stroke rapid roll) ──
+    if (bol.toLowerCase().indexOf('tirkit') !== -1) {
+        [0, 0.055, 0.11, 0.165].forEach(function(t, i) {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(i % 2 === 0 ? 1100 : 950, now + t);
+            o.frequency.exponentialRampToValueAtTime(i % 2 === 0 ? 490 : 420, now + t + 0.012);
+            g.gain.setValueAtTime(0.45 * vol, now + t);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.14);
+            o.connect(g); g.connect(out);
+            o.start(now + t); o.stop(now + t + 0.16);
+            if (noiseBuffer) {
+                const ns = audioCtx.createBufferSource();
+                const nf = audioCtx.createBiquadFilter();
+                const ng = audioCtx.createGain();
+                ns.buffer = noiseBuffer;
+                nf.type = 'bandpass'; nf.frequency.value = 4000; nf.Q.value = 1.5;
+                ng.gain.setValueAtTime(0.22 * vol, now + t);
+                ng.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.022);
+                ns.connect(nf); nf.connect(ng); ng.connect(out);
+                ns.start(now + t);
+            }
+        });
+        return;
+    }
+
+    // ── Bayan (bass / left drum): Dha, Dhin, Dhi, Dhinna, Ge, Gi ──
+    // Ge/Gi = open bayan tone only (no dayan follows)
+    if (/Dha|Dhin|Dhi|Dhinna|Ge|Gi/.test(bol)) {
+        const isGe  = /Ge|Gi/.test(bol);
+        const bF0   = isGe ? 95  : 85;
+        const bF1   = isGe ? 58  : 43;
+        const bDec  = isGe ? 0.65 : 0.52;
+        sineSwoop(bF0,       bF1,       0.080, 1.30, bDec);         // fundamental
+        sineSwoop(bF0 * 2.0, bF1 * 2.0, 0.060, 0.50, bDec * 0.70); // 2nd harmonic
+        noiseBurst(220, 1.2, 0.55, 0.030, 'lowpass');               // skin thump
+    }
+
+    // ── Dayan (treble / right drum) ──
+    // Parameters: [attackHz, tunedHz, sweepSec, bodyGain, decaySec, noiseHz, noiseGain]
+    // attackHz  = frequency at moment of strike (high, creates the characteristic glide)
+    // tunedHz   = pitch the membrane settles at (the "note" of the tabla)
+    const D = {
+        'Tin'   : [1150, 560, 0.013, 0.92, 0.52, 4800, 0.38],
+        'Tina'  : [1100, 545, 0.013, 0.88, 0.48, 4600, 0.36],
+        'Dhin'  : [1100, 540, 0.012, 0.88, 0.46, 4500, 0.35],
+        'Dhinna': [1050, 520, 0.012, 0.85, 0.42, 4400, 0.34],
+        'Dhi'   : [1050, 510, 0.011, 0.84, 0.38, 4400, 0.33],
+        'Na'    : [1050, 488, 0.011, 0.85, 0.36, 4200, 0.32],
+        'Dha'   : [1000, 470, 0.010, 0.82, 0.30, 4000, 0.30],
+        'Tu'    : [1000, 505, 0.012, 0.80, 0.55, 3800, 0.25],
+        'Tun'   : [1000, 505, 0.013, 0.80, 0.60, 3800, 0.24],
+        'Ti'    : [ 950, 470, 0.009, 0.75, 0.22, 4000, 0.30],
+        'Ka'    : [ 820, 660, 0.005, 0.70, 0.07, 5200, 0.42],
+        'Kat'   : [ 820, 660, 0.005, 0.68, 0.07, 5200, 0.40],
+        'Ta'    : [ 780, 620, 0.006, 0.65, 0.09, 4800, 0.35]
+    };
+    const p = D[bol];
+    if (!p) return;   // bayan-only bols (Ge, Gi) already handled above
+
+    const f0 = p[0], f1 = p[1], swMs = p[2], dGain = p[3],
+          dDec = p[4], nHz = p[5], nGain = p[6];
+
+    sineSwoop(f0,        f1,        swMs,        dGain,        dDec);          // fundamental
+    sineSwoop(f0 * 1.52, f1 * 1.52, swMs * 0.80, dGain * 0.28, dDec * 0.55); // presence partial
+    noiseBurst(nHz,        1.8, nGain,        0.022);  // high-freq skin snap
+    noiseBurst(nHz * 0.45, 2.5, nGain * 0.45, 0.012); // mid-range definition crack
+}
+
+// ─── Melodic Synth ────────────────────────────────────────────────────────────
+// All instruments use pure-sine additive synthesis (each oscillator produces
+// only its fundamental — no extra partials from sawtooth/triangle).
+// Harmonic gains are balanced to match real instrument spectra.
+
+const InstrumentHarmonics = {
+    // Reed organ: strong fundamental, rich harmonics, chorus layers for warmth
+    harmonium: [
+        {ratio: 1.0,  gainFactor: 0.28, detuneCents:  0},
+        {ratio: 2.0,  gainFactor: 0.22, detuneCents:  0},
+        {ratio: 3.0,  gainFactor: 0.16, detuneCents:  0},
+        {ratio: 4.0,  gainFactor: 0.10, detuneCents:  0},
+        {ratio: 5.0,  gainFactor: 0.06, detuneCents:  0},
+        {ratio: 6.0,  gainFactor: 0.03, detuneCents:  0},
+        {ratio: 1.0,  gainFactor: 0.07, detuneCents: +5},  // chorus (reed spread)
+        {ratio: 1.0,  gainFactor: 0.05, detuneCents: -5},  // chorus
+        {ratio: 2.0,  gainFactor: 0.05, detuneCents: +6}   // upper chorus
+    ],
+    // Bansuri: mostly fundamental + octave; breath noise added separately
+    flute: [
+        {ratio: 1.0,  gainFactor: 0.55, detuneCents:  0},
+        {ratio: 2.0,  gainFactor: 0.28, detuneCents:  0},
+        {ratio: 3.0,  gainFactor: 0.08, detuneCents:  0},
+        {ratio: 4.0,  gainFactor: 0.02, detuneCents:  0}
+    ],
+    // Sitar: bright, many harmonics; slight inharmonicity for jawari buzz
+    sitar: [
+        {ratio: 1.0,   gainFactor: 0.22, detuneCents:  0},
+        {ratio: 2.0,   gainFactor: 0.18, detuneCents:  0},
+        {ratio: 3.0,   gainFactor: 0.14, detuneCents:  0},
+        {ratio: 4.0,   gainFactor: 0.11, detuneCents:  0},
+        {ratio: 5.0,   gainFactor: 0.08, detuneCents:  0},
+        {ratio: 6.0,   gainFactor: 0.06, detuneCents:  0},
+        {ratio: 7.0,   gainFactor: 0.04, detuneCents:  0},
+        {ratio: 2.01,  gainFactor: 0.04, detuneCents:  0}  // jawari shimmer
+    ],
+    // Violin: 2nd partial often louder than fundamental; strong odd harmonics
+    violin: [
+        {ratio: 1.0,  gainFactor: 0.18, detuneCents:  0},
+        {ratio: 2.0,  gainFactor: 0.26, detuneCents:  0},  // 2nd strongest
+        {ratio: 3.0,  gainFactor: 0.20, detuneCents:  0},
+        {ratio: 4.0,  gainFactor: 0.14, detuneCents:  0},
+        {ratio: 5.0,  gainFactor: 0.09, detuneCents:  0},
+        {ratio: 6.0,  gainFactor: 0.05, detuneCents:  0},
+        {ratio: 7.0,  gainFactor: 0.03, detuneCents:  0}
+    ],
+    // Piano: percussive, slight inharmonicity in upper partials
+    piano: [
+        {ratio: 1.000, gainFactor: 0.36, detuneCents:  0},
+        {ratio: 2.001, gainFactor: 0.18, detuneCents:  0},
+        {ratio: 3.006, gainFactor: 0.10, detuneCents:  0},
+        {ratio: 4.015, gainFactor: 0.06, detuneCents:  0},
+        {ratio: 5.030, gainFactor: 0.03, detuneCents:  0}
+    ]
+};
+
+const InstrumentFilter = {
+    harmonium: {type: 'lowpass',  freq:  900, Q: 1.0},  // warm reed tone
+    flute:     {type: 'lowpass',  freq: 3500, Q: 0.6},  // airy, open
+    sitar:     {type: 'highpass', freq:  180, Q: 0.7},  // remove low mud
+    violin:    {type: 'lowpass',  freq: 3200, Q: 1.2},  // slight nasal peak
+    piano:     {type: 'lowpass',  freq: 4500, Q: 0.5}   // bright, clear
+};
+
+// All instruments: pure sine per oscillator — correct additive synthesis.
+// (sawtooth/triangle waveforms add uncontrolled extra partials that clash.)
+const InstrumentOscType = {
+    harmonium: 'sine',
+    flute:     'sine',
+    sitar:     'sine',
+    violin:    'sine',
+    piano:     'sine'
+};
+
+function setupSynth(instrument) {
+    stopSynth();
+
+    mainGain   = audioCtx.createGain();
+    mainGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    mainFilter = audioCtx.createBiquadFilter();
+
+    const fSpec = InstrumentFilter[instrument] || InstrumentFilter.harmonium;
+    mainFilter.type            = fSpec.type;
+    mainFilter.frequency.value = fSpec.freq;
+    mainFilter.Q.value         = fSpec.Q;
+
+    mainFilter.connect(mainGain);
+    mainGain.connect(masterBus);
+
+    const oscType = InstrumentOscType[instrument] || 'sine';
+    const hSpecs  = InstrumentHarmonics[instrument] || InstrumentHarmonics.harmonium;
+
+    harmonics = [];
+    for (const spec of hSpecs) {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type         = oscType;
+        o.detune.value = spec.detuneCents;
+        g.gain.setValueAtTime(spec.gainFactor, audioCtx.currentTime);
+        o.connect(g);
+        g.connect(mainFilter);
+        o.start();
+        harmonics.push({osc: o, gain: g, ratio: spec.ratio});
+    }
+
+    // Keep a reference to the first oscillator as "mainOsc" for frequency control
+    mainOsc = harmonics.length > 0 ? harmonics[0].osc : null;
+
+    // ── Instrument-specific effects ──────────────────────────────────────────
+    if (instrument === 'flute' || instrument === 'violin') {
+        // Pitch vibrato (LFO → detune AudioParam of every oscillator).
+        // Depth starts at 0 and is faded in per-note inside triggerNote()
+        // so the vibrato swells in naturally after the attack.
+        vibratoLFO  = audioCtx.createOscillator();
+        vibratoGain = audioCtx.createGain();
+        vibratoLFO.type             = 'sine';
+        vibratoLFO.frequency.value  = instrument === 'violin' ? 5.8 : 5.2;
+        vibratoGain.gain.value      = 0;   // triggerNote ramps this up
+        vibratoLFO.connect(vibratoGain);
+        for (const h of harmonics) {
+            vibratoGain.connect(h.osc.detune);   // ±N cents of wobble
+        }
+        vibratoLFO.start();
+    }
+
+    if (instrument === 'flute') {
+        // Bansuri breath noise: looping white noise → bandpass filter → mixed
+        // into the signal before mainGain so the ADSR silences it with the note.
+        fluteNoiseNode = audioCtx.createBufferSource();
+        fluteNoiseNode.buffer = breathBuffer;
+        fluteNoiseNode.loop   = true;
+
+        const breathFilter            = audioCtx.createBiquadFilter();
+        breathFilter.type             = 'bandpass';
+        breathFilter.frequency.value  = 800;   // centred around 800 Hz
+        breathFilter.Q.value          = 1.5;
+
+        fluteNoiseGain              = audioCtx.createGain();
+        fluteNoiseGain.gain.value   = 0;       // triggerNote sets the level
+
+        fluteNoiseNode.connect(breathFilter);
+        breathFilter.connect(fluteNoiseGain);
+        fluteNoiseGain.connect(mainFilter);    // noise passes through same filter+gain chain
+        fluteNoiseNode.start();
+    }
+}
+
+function stopSynth() {
+    // Stop and disconnect instrument-specific effects first
+    if (vibratoLFO)     { try { vibratoLFO.stop(); }     catch(e){} vibratoLFO  = null; }
+    if (fluteNoiseNode) { try { fluteNoiseNode.stop(); }  catch(e){} fluteNoiseNode = null; }
+    if (vibratoGain)    { try { vibratoGain.disconnect(); }    catch(e){} vibratoGain    = null; }
+    if (fluteNoiseGain) { try { fluteNoiseGain.disconnect(); } catch(e){} fluteNoiseGain = null; }
+
+    // Stop all harmonic oscillators
+    for (const h of harmonics) { try { h.osc.stop(); } catch(e){} }
+    harmonics = [];
+    mainOsc   = null;
+    if (mainGain) { mainGain.disconnect(); mainGain = null; }
+}
+
+function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
+    if (!mainOsc || !mainGain) return;
+    const now = audioCtx.currentTime;
+    const vs  = (volScale !== undefined) ? volScale : 1.0;
+
+    // ── Frequency (with glide or near-instant snap) ────────────────────────
+    for (const h of harmonics) {
+        const targetFreq = Math.max(freq * h.ratio, 1.0);
+        h.osc.frequency.cancelScheduledValues(now);
+        h.osc.frequency.setValueAtTime(h.osc.frequency.value || targetFreq, now);
+        // For meend the caller supplies a long glideTime; for normal notes it
+        // is only 8 ms — just enough to prevent a click, not audible as a slide.
+        h.osc.frequency.exponentialRampToValueAtTime(targetFreq,
+            now + Math.max(glideTime, 0.005));
+    }
+
+    // ── Amplitude envelope (Attack → Sustain → Release) ───────────────────
+    // Always schedule a release so the note ends cleanly before the next beat.
+    mainGain.gain.cancelScheduledValues(now);
+    mainGain.gain.setValueAtTime(mainGain.gain.value, now);
+    const peakGain = 0.18 * vs;
+
+    if (instrument === 'piano' || instrument === 'sitar') {
+        // Percussive: sharp attack, natural exponential decay
+        const decayEnd = Math.min(noteDuration * 1.4, 1.6);
+        mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
+        mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
+
+    } else if (instrument === 'flute') {
+        // Bansuri: slow breath attack, sustain, gentle release
+        const att = 0.090;
+        const rel = 0.070;
+        const sus = Math.max(0.01, noteDuration - att - rel);
+        mainGain.gain.linearRampToValueAtTime(peakGain * 0.75, now + att * 0.55);
+        mainGain.gain.linearRampToValueAtTime(peakGain,        now + att);
+        mainGain.gain.setValueAtTime(peakGain,                 now + att + sus);
+        mainGain.gain.linearRampToValueAtTime(0.0001,          now + att + sus + rel);
+
+        // Breath noise: same envelope profile as the tonal component
+        if (fluteNoiseGain) {
+            fluteNoiseGain.gain.cancelScheduledValues(now);
+            fluteNoiseGain.gain.setValueAtTime(0,      now);
+            fluteNoiseGain.gain.linearRampToValueAtTime(0.040,  now + att);
+            fluteNoiseGain.gain.setValueAtTime(0.040,           now + att + sus);
+            fluteNoiseGain.gain.linearRampToValueAtTime(0,      now + att + sus + rel);
+        }
+        // Vibrato: fades in after the attack settles
+        if (vibratoGain) {
+            vibratoGain.gain.cancelScheduledValues(now);
+            vibratoGain.gain.setValueAtTime(0,   now);
+            vibratoGain.gain.linearRampToValueAtTime(0,   now + att);
+            vibratoGain.gain.linearRampToValueAtTime(20,  now + att + 0.12); // ±20 cents
+        }
+
+    } else {
+        // Harmonium / violin: medium attack, sustain, scheduled release
+        const att = 0.045;
+        const rel = Math.min(0.065, noteDuration * 0.10);
+        const sus = Math.max(0.01, noteDuration - att - rel);
+        mainGain.gain.linearRampToValueAtTime(peakGain, now + att);
+        mainGain.gain.setValueAtTime(peakGain,          now + att + sus);
+        mainGain.gain.linearRampToValueAtTime(0.0001,   now + att + sus + rel);
+
+        // Violin vibrato: swell in after attack
+        if (instrument === 'violin' && vibratoGain) {
+            vibratoGain.gain.cancelScheduledValues(now);
+            vibratoGain.gain.setValueAtTime(0,   now);
+            vibratoGain.gain.linearRampToValueAtTime(0,   now + att);
+            vibratoGain.gain.linearRampToValueAtTime(14,  now + att + 0.10); // ±14 cents
+        }
+    }
+}
+
+function silenceNote() {
+    if (!mainGain) return;
+    mainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.04);
+}
+
+// ─── Playback Engine ──────────────────────────────────────────────────────────
+function startPlayback() {
+    initAudio();
+    stopPlayback();
+
+    const lines = document.querySelectorAll('.line-container');
+    if (!lines.length) return;
+
+    const baseSa    = parseFloat(document.getElementById('scale-select').value) * 2;
+    const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
+    const startBeat = (parseInt(document.getElementById('start-beat').value) || 1) - 1;
+    const preRoll   = parseInt(document.getElementById('pre-roll-select').value) || 0;
+
+    // Total beats across all lines
+    let totalBeats = 0;
+    lines.forEach(l => { totalBeats += parseInt(l.getAttribute('data-beats')); });
+
+    let preRollLeft    = preRoll;
+    let globalBeat     = startBeat % totalBeats;
+    let lastInstrument = '';
+
+    // Pre-roll uses master BPM and first line's taal
+    const masterBeatMs = (60 / masterBpm) * 1000;
+    const refTaal      = lines[0].getAttribute('data-taal');
+    const refBols      = TaalBols[refTaal] || [];
+
+    // ── Single tick function, rescheduled each beat with the current line's tempo ──
+    // Replaces the old fixed setInterval so Adlib/Alap lines can run at their
+    // own slower BPM while the main composition lines use the master BPM.
+    function tick() {
+        // ── Pre-roll (tabla only, always at master BPM) ──
+        if (preRollLeft > 0) {
+            const bolIdx = (preRoll - preRollLeft) % refBols.length;
+            playTablaSound(refBols[bolIdx] || 'Dha', bolIdx === 0);
+            preRollLeft--;
+            playbackTimer = setTimeout(tick, masterBeatMs);
+            return;
+        }
+
+        if (globalBeat >= totalBeats) globalBeat = 0;
+
+        // ── Find which line owns this beat ──
+        let accumulated = 0, targetLine = null, localIdx = 0;
+        for (const line of lines) {
+            const b = parseInt(line.getAttribute('data-beats'));
+            if (globalBeat < accumulated + b) {
+                targetLine = line;
+                localIdx   = globalBeat - accumulated;
+                break;
+            }
+            accumulated += b;
+        }
+
+        // ── Effective BPM for this beat ───────────────────────────────────────
+        // Any line can set its own tempo via the Line BPM input.
+        // Adlib/Alap lines typically use a slow per-line BPM (e.g. 30–50).
+        // Leave Line BPM blank to fall back to the master BPM.
+        let beatMs = masterBeatMs;
+        if (targetLine) {
+            const lineBpmEl = targetLine.querySelector('.line-bpm');
+            const lineBpm   = lineBpmEl ? parseInt(lineBpmEl.value) : 0;
+            if (lineBpm > 0) beatMs = (60 / lineBpm) * 1000;
+        }
+
+        // ── Clear previous beat highlight ──
+        document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
+
+        if (targetLine) {
+            const beatEl = targetLine.querySelector(`.beat-num[data-beat-idx="${localIdx}"]`);
+            if (beatEl) beatEl.classList.add('playing');
+
+            const inst    = targetLine.querySelector('.line-inst-select').value;
+            // Adlib lines always mute tabla regardless of the Mute Tabla checkbox
+            const isAdlib = targetLine.querySelector('.line-adlib') &&
+                            targetLine.querySelector('.line-adlib').checked;
+            const muteTbl = isAdlib || targetLine.querySelector('.line-tabla-mute').checked;
+            const lineVol = parseFloat(targetLine.querySelector('.line-vol').value);
+            const taalKey = targetLine.getAttribute('data-taal');
+
+            // Re-setup synth only when instrument changes between lines
+            if (inst !== lastInstrument) {
+                setupSynth(inst);
+                lastInstrument = inst;
+            }
+
+            // Tabla
+            if (!muteTbl) {
+                const bols = TaalBols[taalKey] || [];
+                playTablaSound(bols[localIdx] || 'Dha', localIdx === 0);
+            }
+
+            // Notes — support variable sub-beats per beat
+            const notesRow = targetLine.querySelector('.grid-row[data-row="notes"]');
+            if (notesRow) {
+                const cells = notesRow.querySelectorAll('.cell');
+                if (cells[localIdx]) {
+                    const units = cells[localIdx].querySelectorAll('.note-unit');
+                    const subMs = beatMs / (units.length || 1);
+
+                    units.forEach((unit, si) => {
+                        setTimeout(() => {
+                            const swara = unit.querySelector('.note-select').value;
+
+                            // "~" = hold/sustain: previous note is still ringing.
+                            // Do not re-attack; do not silence. Just let it ring.
+                            if (swara === '~') return;
+
+                            const ratio   = SwaraMap[swara];
+                            const isMeend = unit.querySelector('.meend-btn') &&
+                                            unit.querySelector('.meend-btn').classList.contains('active');
+                            // Meend: glide over 88% of sub-beat. Normal: 8 ms snap.
+                            const glide   = isMeend ? (subMs / 1000) * 0.88 : 0.008;
+
+                            // Look ahead for "~" hold beats; extend noteDuration so the
+                            // envelope covers all sustained beats without re-attacking.
+                            const holdBeats    = (si === 0) ? countSustains(targetLine, localIdx) : 0;
+                            const noteDuration = (subMs / 1000) * (1 + holdBeats);
+
+                            if (ratio) {
+                                let freq = baseSa * ratio;
+                                const octBtn = unit.querySelector('.octave-btn.active');
+                                if (octBtn) freq *= (octBtn.dataset.oct === '1' ? 2 : 0.5);
+                                triggerNote(freq, inst, glide, noteDuration, lineVol);
+                            } else {
+                                silenceNote();
+                            }
+                        }, si * subMs);
+                    });
+                }
+            }
+        }
+
+        globalBeat++;
+        playbackTimer = setTimeout(tick, beatMs);   // reschedule at this line's tempo
+    }
+
+    playbackTimer = setTimeout(tick, 0);   // start immediately
+}
+
+function stopPlayback() {
+    if (playbackTimer) { clearTimeout(playbackTimer); playbackTimer = null; }
+    stopSynth();
+    document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
+}
+
+// ─── Tanpura (Cycling String Drone) ──────────────────────────────────────────
+function toggleTanpura() {
+    initAudio();
+    isTanpuraOn = !isTanpuraOn;
+    const btn = document.getElementById('tanpuraBtn');
+    if (isTanpuraOn) {
+        btn.textContent = '🪕 Tanpura: ON';
+        startTanpura();
+    } else {
+        btn.textContent = '🪕 Tanpura: OFF';
+        stopTanpura();
+    }
+}
+
+function startTanpura() {
+    stopTanpura();
+    const sa = parseFloat(document.getElementById('scale-select').value);
+    // Classic tanpura string order: Pa (lower), lower Sa, Sa, Sa
+    const strings = [sa * 0.75, sa * 0.5, sa, sa];
+    let idx = 0;
+
+    function pluck() {
+        if (!isTanpuraOn) return;
+        const freq = strings[idx % strings.length];
+        idx++;
+
+        const osc  = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const lfo  = audioCtx.createOscillator();
+        const lfog = audioCtx.createGain();
+
+        osc.type          = 'sawtooth';
+        osc.frequency.value = freq;
+
+        // Subtle shimmer (sympathetic resonance simulation)
+        lfo.frequency.value = 3.5 + Math.random() * 1.5;
+        lfog.gain.value     = freq * 0.0025;
+        lfo.connect(lfog);
+        lfog.connect(osc.frequency);
+
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.038, audioCtx.currentTime + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.0);
+
+        osc.connect(gain);
+        gain.connect(masterBus || audioCtx.destination);
+        osc.start(); lfo.start();
+        osc.stop(audioCtx.currentTime + 3.1);
+        lfo.stop(audioCtx.currentTime + 3.1);
+        tanpuraNodes.push(osc, lfo);
+    }
+
+    pluck();
+    tanpuraTimer = setInterval(pluck, 650);
+}
+
+function stopTanpura() {
+    if (tanpuraTimer) { clearInterval(tanpuraTimer); tanpuraTimer = null; }
+    tanpuraNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    tanpuraNodes = [];
+}
+
+function updateTanpura() { if (isTanpuraOn) startTanpura(); }
+
+// ─── Sustain (hold) helpers ───────────────────────────────────────────────────
+
+// Apply / remove the visual "hold" style on a note-unit based on its current value.
+// Called after creating each unit (on load) and on every user change.
+function applySustainStyle(unit) {
+    const sel  = unit.querySelector('.note-select');
+    const hold = sel && sel.value === '~';
+    unit.querySelectorAll('.octave-btn, .meend-btn').forEach(btn => {
+        btn.disabled     = hold;
+        btn.style.opacity = hold ? '0.25' : '';
+    });
+    if (sel) {
+        sel.style.backgroundColor = hold ? '#e3f2fd' : '';
+        sel.style.color           = hold ? '#1565c0' : '';
+        sel.style.fontStyle       = hold ? 'italic'  : '';
+    }
+}
+
+// Count consecutive "~" beats immediately after fromBeatIdx within the same line.
+// Used by the playback engine to extend the note duration across held beats.
+function countSustains(targetLine, fromBeatIdx) {
+    const notesRow = targetLine.querySelector('.grid-row[data-row="notes"]');
+    if (!notesRow) return 0;
+    const cells = notesRow.querySelectorAll('.cell');
+    let n = 0;
+    for (let i = fromBeatIdx + 1; i < cells.length; i++) {
+        const sel = cells[i].querySelector('.note-select');
+        if (sel && sel.value === '~') n++;
+        else break;
+    }
+    return n;
+}
+
+// ─── Line Builder ─────────────────────────────────────────────────────────────
+function addLine(data) {
+    const taalKey = data ? data.taal_key : document.getElementById('taal-select').value;
+    const beats   = TaalBeats[taalKey] || parseInt(taalKey) || 8;
+
+    // Support variable sub-beats: use max across all beat arrays
+    let maxSubs = 1;
+    if (data && data.notes) {
+        data.notes.forEach(nb => { if (nb && nb.length > maxSubs) maxSubs = nb.length; });
+    }
+
+    const instVal    = data ? (data.line_instrument || 'harmonium') : 'harmonium';
+    const muteVal    = data ? !!data.tabla_mute   : false;
+    const volVal     = data ? (data.line_volume !== undefined ? data.line_volume : 1.0) : 1.0;
+    const section    = data ? (data.section || '') : '';
+    const adlibVal   = data ? !!data.adlib        : false;
+    const lineBpmVal = data ? (data.line_bpm > 0 ? data.line_bpm : '') : '';
+
+    const sheet = document.getElementById('song-sheet');
+    const line  = document.createElement('div');
+    line.className = 'line-container';
+    line.setAttribute('data-beats', beats);
+    line.setAttribute('data-taal',  taalKey);
+
+    // Badge
+    const badge = document.createElement('span');
+    badge.className = 'line-badge';
+    badge.textContent = `Line ${sheet.children.length + 1}`;
+    line.appendChild(badge);
+
+    // Settings bar
+    const settings = document.createElement('div');
+    settings.className = 'line-settings';
+    settings.innerHTML = `
+        <label>Instrument:</label>
+        <select class="line-inst-select" style="width:108px;">
+            <option value="harmonium" ${instVal==='harmonium'?'selected':''}>Harmonium</option>
+            <option value="flute"     ${instVal==='flute'    ?'selected':''}>Flute</option>
+            <option value="sitar"     ${instVal==='sitar'    ?'selected':''}>Sitar</option>
+            <option value="violin"    ${instVal==='violin'   ?'selected':''}>Violin</option>
+            <option value="piano"     ${instVal==='piano'    ?'selected':''}>Piano</option>
+        </select>
+        <label>Mute Tabla:</label>
+        <input type="checkbox" class="line-tabla-mute" ${muteVal?'checked':''} style="width:18px;">
+        <label>Volume:</label>
+        <input type="range" class="line-vol" min="0.1" max="1" step="0.05" value="${volVal}" style="width:70px;">
+        <label>Section:</label>
+        <input type="text" class="line-section" value="${section}" style="width:80px;" placeholder="e.g. Mukhda">
+        <label class="adlib-label">Adlib/Alap:</label>
+        <input type="checkbox" class="line-adlib" ${adlibVal ? 'checked' : ''}
+               title="Adlib/Alap mode: free tempo, tabla silenced. Use Line BPM to set the alap speed."
+               style="width:16px;">
+        <label>Line BPM:</label>
+        <input type="number" class="line-bpm" min="10" max="300" value="${lineBpmVal}"
+               placeholder="(master)" style="width:62px;"
+               title="Per-line tempo override. Leave blank to use the master BPM. Set a slow value (e.g. 30–50) for Alap lines.">
+    `;
+    line.appendChild(settings);
+
+    // Lyrics row
+    const rowL = document.createElement('div');
+    rowL.className = 'grid-row';
+    rowL.setAttribute('data-row', 'lyrics');
+    rowL.innerHTML = `<div class="row-label">Lyrics</div>`;
+    for (let i = 0; i < beats; i++) {
+        const lv = data && data.lyrics ? (data.lyrics[i] || '') : '';
+        rowL.innerHTML += `<div class="cell"><input type="text" class="lyr-input lyr" value="${lv}"></div>`;
+    }
+
+    // Notes row (variable sub-beats per cell)
+    const rowN = document.createElement('div');
+    rowN.className = 'grid-row';
+    rowN.setAttribute('data-row', 'notes');
+    rowN.innerHTML = `<div class="row-label">Notes</div>`;
+    for (let i = 0; i < beats; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const sub = document.createElement('div');
+        sub.className = 'sub-cell-container';
+
+        for (let s = 0; s < maxSubs; s++) {
+            const nv  = data && data.notes   && data.notes[i]   ? (data.notes[i][s]   || '-') : '-';
+            const ov  = data && data.octaves && data.octaves[i] ? (data.octaves[i][s] ||  0 ) :  0;
+            const mv  = data && data.meend   && data.meend[i]   ? (data.meend[i][s]   || false) : false;
+
+            const unit = document.createElement('div');
+            unit.className = 'note-unit';
+
+            let opts = '';
+            for (const sw in SwaraMap) {
+                opts += `<option${sw === nv ? ' selected' : ''}>${sw}</option>`;
+            }
+
+            unit.innerHTML =
+                `<select class="note-select">${opts}</select>` +
+                `<span class="octave-controls">` +
+                `<button class="octave-btn${ov===1?' active':''}" data-oct="1"  onclick="toggleOctave(this,1)"  title="Taar (upper octave)">&#730;</button>` +
+                `<button class="octave-btn${ov===-1?' active':''}" data-oct="-1" onclick="toggleOctave(this,-1)" title="Mandra (lower octave)">&#x2022;</button>` +
+                `</span>` +
+                `<button class="meend-btn${mv?' active':''}" onclick="this.classList.toggle('active')" title="Meend (glide to this note)">m</button>`;
+            applySustainStyle(unit);   // dim octave/meend controls when value is "~"
+            sub.appendChild(unit);
+        }
+        cell.appendChild(sub);
+        rowN.appendChild(cell);
+    }
+
+    // Beat/bol row
+    const rowB = document.createElement('div');
+    rowB.className = 'grid-row';
+    rowB.setAttribute('data-row', 'beats');
+    rowB.innerHTML = `<div class="row-label">Beat</div>`;
+    const bols = TaalBols[taalKey] || [];
+    for (let i = 0; i < beats; i++) {
+        rowB.innerHTML +=
+            `<div class="cell beat-num${i===0?' sam':''}" data-beat-idx="${i}">` +
+            `<div class="bol-text">${bols[i]||''}</div>${i+1}</div>`;
+    }
+
+    line.appendChild(rowL);
+    line.appendChild(rowN);
+    line.appendChild(rowB);
+
+    const rem = document.createElement('button');
+    rem.className   = 'btn-remove';
+    rem.textContent = '×';
+    rem.onclick = () => line.remove();
+    line.appendChild(rem);
+
+    if (adlibVal) line.classList.add('adlib-line');
+    sheet.appendChild(line);
+}
+
+function toggleOctave(btn, val) {
+    const parent = btn.closest('.octave-controls');
+    const wasActive = btn.classList.contains('active');
+    parent.querySelectorAll('.octave-btn').forEach(b => b.classList.remove('active'));
+    if (!wasActive) btn.classList.add('active');
+}
+
+// ─── Save / Load ──────────────────────────────────────────────────────────────
+
+// Shared helper: collect the current sheet into the JSON data object.
+// Used by both local export (downloadFile) and cloud save (saveToCloud).
+function buildCompositionData() {
+    const allLines = document.querySelectorAll('.line-container');
+    const lineArray = [];
+
+    allLines.forEach(l => {
+        const lyrics = Array.from(l.querySelectorAll('.lyr')).map(el => el.value);
+        const subs   = l.querySelectorAll('.sub-cell-container');
+        const notes  = [], octaves = [], meend = [];
+
+        subs.forEach(sub => {
+            const units = sub.querySelectorAll('.note-unit');
+            const nRow  = [], oRow = [], mRow = [];
+            units.forEach(unit => {
+                nRow.push(unit.querySelector('.note-select').value);
+                const ao = unit.querySelector('.octave-btn.active');
+                oRow.push(ao ? (ao.textContent.trim() === '˙' ? 1 : -1) : 0);
+                mRow.push(unit.querySelector('.meend-btn').classList.contains('active'));
+            });
+            notes.push(nRow); octaves.push(oRow); meend.push(mRow);
+        });
+
+        const lineBpmSaved = parseInt(l.querySelector('.line-bpm').value) || null;
+        lineArray.push({
+            section:         l.querySelector('.line-section').value,
+            line_instrument: l.querySelector('.line-inst-select').value,
+            tabla_mute:      l.querySelector('.line-tabla-mute').checked,
+            line_volume:     parseFloat(l.querySelector('.line-vol').value),
+            adlib:           l.querySelector('.line-adlib').checked,
+            line_bpm:        lineBpmSaved,
+            taal_key:        l.getAttribute('data-taal'),
+            beats:           l.getAttribute('data-beats'),
+            lyrics, notes, octaves, meend
+        });
+    });
+
+    return {
+        title: document.getElementById('song-title').value || 'Untitled',
+        scale: document.getElementById('scale-select').value,
+        bpm:   parseInt(document.getElementById('bpm').value) || 90,
+        lines: lineArray
+    };
+}
+
+// Export to local JSON file (no login required — always available as backup)
+function downloadFile() {
+    const data  = buildCompositionData();
+    const blob  = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const a     = document.createElement('a');
+    a.href      = URL.createObjectURL(blob);
+    a.download  = (data.title || 'song') + '.json';
+    a.click();
+}
+
+function loadJsonFile(e) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        const d = JSON.parse(ev.target.result);
+        if (d.title) document.getElementById('song-title').value = d.title;
+        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.bpm)   document.getElementById('bpm').value = d.bpm;
+        document.getElementById('song-sheet').innerHTML = '';
+        (d.lines || []).forEach(line => addLine(line));
+    };
+    reader.readAsText(e.target.files[0]);
+    e.target.value = '';
+}
+
+// Event delegation for the entire song-sheet:
+//   • note-select change  → apply/remove sustain styling on its note-unit
+//   • line-adlib change   → toggle adlib-line class + force-mute tabla
+document.getElementById('song-sheet').addEventListener('change', function(e) {
+
+    if (e.target.classList.contains('note-select')) {
+        applySustainStyle(e.target.closest('.note-unit'));
+    }
+
+    if (e.target.classList.contains('line-adlib')) {
+        const lineEl  = e.target.closest('.line-container');
+        const isAdlib = e.target.checked;
+        lineEl.classList.toggle('adlib-line', isAdlib);
+        // Adlib lines must silence tabla; restore checkbox freedom when unchecked
+        const muteCb = lineEl.querySelector('.line-tabla-mute');
+        if (isAdlib) muteCb.checked = true;
+    }
+});
+
+// Initialise with one blank line
+addLine();
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// SETUP: Replace the placeholder values below with your Firebase project config.
+// Get them from: Firebase Console → Project Settings → Your apps → Web app
+//
+const firebaseConfig = {
+  apiKey: "AIzaSyCsVf2UuPEgexC7WoQSK0ONxuiOUxo0a88",
+  authDomain: "swar-laya-studio.firebaseapp.com",
+  projectId: "swar-laya-studio",
+  storageBucket: "swar-laya-studio.firebasestorage.app",
+  messagingSenderId: "508121720546",
+  appId: "1:508121720546:web:61c8535e222ac0916ae0bb"
+};
+
+// ── Initialise Firebase ───────────────────────────────────────────────────────
+let auth, db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db   = firebase.firestore();
+} catch(e) {
+    // Firebase not configured yet — cloud features will be unavailable
+    console.warn('Firebase not configured. Cloud features disabled.', e.message);
+}
+
+// ── App state ─────────────────────────────────────────────────────────────────
+let currentUser   = null;
+let isPremium     = false;
+let currentCompId = null;   // Firestore document ID of the currently loaded composition
+
+const FREE_COMP_LIMIT = 3;  // max compositions for free-tier accounts
+
+// ── Auth state listener ───────────────────────────────────────────────────────
+if (auth) {
+    auth.onAuthStateChanged(async user => {
+        currentUser = user;
+        if (user) {
+            await ensureUserProfile(user);
+            const profile = await db.collection('users').doc(user.uid).get();
+            isPremium = profile.exists ? (profile.data().isPremium || false) : false;
+        } else {
+            isPremium = false;
+        }
+        updateAuthBar(user);
+    });
+}
+
+// ── Auth UI ───────────────────────────────────────────────────────────────────
+function updateAuthBar(user) {
+    const bar = document.getElementById('auth-bar');
+    const logo = '<span style="font-weight:700;letter-spacing:0.5px;">🎵 Swar-Laya Studio</span>';
+    if (user) {
+        const avatar  = user.photoURL
+            ? `<img src="${user.photoURL}" class="user-avatar" onerror="this.style.display='none'">`
+            : '';
+        const name    = user.displayName || user.email || 'User';
+        const badge   = isPremium
+            ? '<span class="premium-badge">⭐ Premium</span>'
+            : '<span class="free-badge">Free</span>';
+        bar.innerHTML = `
+            ${logo}
+            <div class="spacer"></div>
+            ${avatar}
+            <span class="user-name">${name}</span>
+            ${badge}
+            <button class="btn-signout" onclick="doSignOut()">Sign Out</button>
+        `;
+    } else {
+        bar.innerHTML = `
+            ${logo}
+            <div class="spacer"></div>
+            <button class="btn-google" onclick="signInGoogle()">Sign in with Google</button>
+            <button class="btn-email-login" onclick="document.getElementById('email-modal').style.display='flex'">
+                Sign in with Email
+            </button>
+        `;
+    }
+}
+
+// ── Google sign-in ────────────────────────────────────────────────────────────
+function signInGoogle() {
+    if (!auth) { alert('Firebase not configured yet. Add your Firebase config keys first.'); return; }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .catch(e => alert('Sign-in failed: ' + e.message));
+}
+
+// ── Email sign-in / register (auto-creates account if new) ───────────────────
+function emailSignIn() {
+    if (!auth) { alert('Firebase not configured yet.'); return; }
+    const email = document.getElementById('email-input').value.trim();
+    const pass  = document.getElementById('pass-input').value;
+    if (!email || !pass) { alert('Please enter email and password.'); return; }
+
+    auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+            document.getElementById('email-modal').style.display = 'none';
+            document.getElementById('login-modal').style.display = 'none';
+        })
+        .catch(err => {
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+                // Auto-register new user
+                auth.createUserWithEmailAndPassword(email, pass)
+                    .then(() => {
+                        document.getElementById('email-modal').style.display = 'none';
+                        document.getElementById('login-modal').style.display = 'none';
+                        showToast('Account created and signed in ✓');
+                    })
+                    .catch(e2 => alert('Registration failed: ' + e2.message));
+            } else {
+                alert('Sign-in error: ' + err.message);
+            }
+        });
+}
+
+// ── Sign out ──────────────────────────────────────────────────────────────────
+function doSignOut() {
+    if (auth) auth.signOut();
+    currentCompId = null;
+}
+
+// ── Ensure user profile doc exists in Firestore ───────────────────────────────
+async function ensureUserProfile(user) {
+    const ref = db.collection('users').doc(user.uid);
+    const doc = await ref.get();
+    if (!doc.exists) {
+        await ref.set({
+            email:       user.email || '',
+            displayName: user.displayName || '',
+            isPremium:   false,
+            createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }
+}
+
+// ── Cloud save ────────────────────────────────────────────────────────────────
+async function saveToCloud() {
+    if (!currentUser) { document.getElementById('login-modal').style.display = 'flex'; return; }
+
+    try {
+        // Free-tier limit check (only when creating a new composition)
+        if (!isPremium && !currentCompId) {
+            const existing = await db.collection('compositions')
+                .doc(currentUser.uid).collection('songs').get();
+            if (existing.size >= FREE_COMP_LIMIT) {
+                alert(`Free accounts can save up to ${FREE_COMP_LIMIT} compositions.\n\nUpgrade to Premium for unlimited cloud storage.`);
+                return;
+            }
+        }
+
+        const data = buildCompositionData();
+        const col  = db.collection('compositions').doc(currentUser.uid).collection('songs');
+
+        if (currentCompId) {
+            // Update existing composition
+            await col.doc(currentCompId).update({
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } else {
+            // Save as new composition
+            const newDoc = await col.add({
+                ...data,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            currentCompId = newDoc.id;
+        }
+        showToast('Saved to cloud ✓');
+    } catch(e) {
+        alert('Cloud save failed: ' + e.message);
+    }
+}
+
+// ── Composition picker modal ──────────────────────────────────────────────────
+async function openCompositions() {
+    if (!currentUser) { document.getElementById('login-modal').style.display = 'flex'; return; }
+
+    const modal = document.getElementById('comp-modal');
+    const list  = document.getElementById('comp-list');
+    list.innerHTML = '<div style="text-align:center;color:#888;padding:24px;">Loading…</div>';
+    modal.style.display = 'flex';
+
+    try {
+        const snap = await db.collection('compositions')
+            .doc(currentUser.uid).collection('songs')
+            .orderBy('updatedAt', 'desc').get();
+
+        if (snap.empty) {
+            list.innerHTML = `
+                <div style="text-align:center;color:#888;padding:24px;line-height:1.7;">
+                    No compositions saved yet.<br>
+                    Click <strong>Save to Cloud</strong> to save your first one.
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = '';
+        snap.forEach(doc => {
+            const d    = doc.data();
+            const date = d.updatedAt ? d.updatedAt.toDate().toLocaleDateString('en-IN') : '—';
+            const div  = document.createElement('div');
+            div.className = 'comp-item' + (doc.id === currentCompId ? ' active-comp' : '');
+            div.innerHTML = `
+                <div class="comp-info">
+                    <strong>${d.title || 'Untitled'}</strong>
+                    <span class="comp-meta">
+                        ${(d.lines || []).length} lines &nbsp;·&nbsp;
+                        ${d.bpm || '?'} BPM &nbsp;·&nbsp;
+                        saved ${date}
+                    </span>
+                </div>
+                <div class="comp-actions">
+                    <button onclick="loadFromCloud('${doc.id}')" class="btn-load-comp">Load</button>
+                    <button onclick="deleteComp('${doc.id}', this)" class="btn-del-comp">Delete</button>
+                </div>`;
+            list.appendChild(div);
+        });
+    } catch(e) {
+        list.innerHTML = `<div style="color:#c62828;padding:16px;">Error loading: ${e.message}</div>`;
+    }
+}
+
+// ── Load a composition from Firestore into the editor ────────────────────────
+async function loadFromCloud(docId) {
+    if (!currentUser) return;
+    try {
+        const doc = await db.collection('compositions')
+            .doc(currentUser.uid).collection('songs').doc(docId).get();
+        if (!doc.exists) { alert('Composition not found.'); return; }
+
+        const d = doc.data();
+        if (d.title) document.getElementById('song-title').value = d.title;
+        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.bpm)   document.getElementById('bpm').value = d.bpm;
+        document.getElementById('song-sheet').innerHTML = '';
+        (d.lines || []).forEach(line => addLine(line));
+
+        currentCompId = docId;
+        document.getElementById('comp-modal').style.display = 'none';
+        showToast('Composition loaded ✓');
+    } catch(e) {
+        alert('Load failed: ' + e.message);
+    }
+}
+
+// ── Delete a composition from Firestore ───────────────────────────────────────
+async function deleteComp(docId, btn) {
+    if (!confirm('Delete this composition permanently? This cannot be undone.')) return;
+    try {
+        await db.collection('compositions')
+            .doc(currentUser.uid).collection('songs').doc(docId).delete();
+        if (currentCompId === docId) currentCompId = null;
+        btn.closest('.comp-item').remove();
+        showToast('Composition deleted');
+    } catch(e) {
+        alert('Delete failed: ' + e.message);
+    }
+}
+
+// ── New composition (clears the editor) ───────────────────────────────────────
+function newComposition() {
+    if (!confirm('Start a new composition? Unsaved changes will be lost.')) return;
+    document.getElementById('song-title').value = 'Untitled';
+    document.getElementById('song-sheet').innerHTML = '';
+    currentCompId = null;
+    addLine();
+    document.getElementById('comp-modal').style.display = 'none';
+    showToast('New composition started');
+}
+
+// ── Toast notification helper ─────────────────────────────────────────────────
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
+}
+</script>
+<!-- ── Composition Picker Modal ── -->
+<div id="comp-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>☁ My Compositions
+            <button class="modal-close" onclick="document.getElementById('comp-modal').style.display='none'">✕</button>
+        </h3>
+        <div id="comp-list"></div>
+        <button class="btn-new-comp" onclick="newComposition()">+ New Composition</button>
+    </div>
+</div>
+
+<!-- ── Email Login Modal ── -->
+<div id="email-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:380px;">
+        <h3>Sign in / Register
+            <button class="modal-close" onclick="document.getElementById('email-modal').style.display='none'">✕</button>
+        </h3>
+        <p style="font-size:13px;color:#666;margin:0 0 16px 0;">
+            Enter your email and password. A new account is created automatically if you don't have one.
+        </p>
+        <input type="email"    id="email-input" class="email-field" placeholder="Email address">
+        <input type="password" id="pass-input"  class="email-field" placeholder="Password (min 6 characters)">
+        <button class="btn-email-submit" onclick="emailSignIn()">Continue with Email</button>
+        <div class="auth-divider">— or —</div>
+        <button class="btn-google" style="width:100%;padding:10px;"
+                onclick="signInGoogle(); document.getElementById('email-modal').style.display='none';">
+            Sign in with Google
+        </button>
+    </div>
+</div>
+
+<!-- ── Login Prompt Modal (shown when cloud action requires auth) ── -->
+<div id="login-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:360px; text-align:center;">
+        <h3>Sign in to use cloud features</h3>
+        <p style="font-size:13px;color:#666;margin:0 0 20px 0;">
+            Save your compositions to the cloud and access them on any device.
+        </p>
+        <button class="btn-google" style="width:100%;padding:11px;margin-bottom:10px;font-size:14px;"
+                onclick="signInGoogle(); document.getElementById('login-modal').style.display='none';">
+            Sign in with Google
+        </button>
+        <button class="btn-email-login" style="width:100%;padding:11px;font-size:14px;"
+                onclick="document.getElementById('login-modal').style.display='none'; document.getElementById('email-modal').style.display='flex';">
+            Sign in with Email
+        </button>
+        <button class="modal-close" style="display:block;margin-top:14px;font-size:13px;color:#888;"
+                onclick="document.getElementById('login-modal').style.display='none'">
+            Maybe later
+        </button>
+    </div>
+</div>
+
+<!-- ── Toast notification ── -->
+<div id="toast"></div>
+
+</body>
+</html>

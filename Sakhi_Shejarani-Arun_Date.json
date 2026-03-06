@@ -1,0 +1,4615 @@
+{
+  "title": "Sakhi Shejarani",
+  "scale": "207.65",
+  "bpm": 120,
+  "lines": [
+    {
+      "section": "Line 1",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 2",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 3",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 4",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 5",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 6",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 7",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 8",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 9",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 10",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "ma"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 11",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 12",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 13",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 14",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 15",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 16",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 17",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ma"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 18",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ni"
+        ]
+      ],
+      "octaves": [
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 19",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 20",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 21",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 22",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "-"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 23",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 24",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Re"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 25",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "-"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 26",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 27",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 28",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "ma"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "re"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 29",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 30",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 31",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 32",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "-"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 33",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ni"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 34",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 35",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 36",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 37",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 38",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ni"
+        ]
+      ],
+      "octaves": [
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 39",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 40",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 41",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 42",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "-"
+        ],
+        [
+          "Ni"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 43",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Re"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 44",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 45",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ],
+        [
+          -2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 46",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ni"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "re"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          -2
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          -1
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 47",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          -1
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Line 48",
+      "line_instrument": "harmonium",
+      "tabla_mute": false,
+      "line_volume": 1.0,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-",
+        "-"
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ],
+        [
+          "-"
+        ]
+      ],
+      "octaves": [
+        [
+          -1
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    }
+  ]
+}
