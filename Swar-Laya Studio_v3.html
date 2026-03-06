@@ -611,6 +611,22 @@ const TaalKhali = {
     "14":          [5],         // Dhamar:    beat 6
 };
 
+// Dholak bol patterns (one per beat) for each taal.
+// Right head (dagga): Na, Ti, Ka, Te  |  Left head (bayi): Ge
+// Combined strokes:  Dha (both open), Dhin (both resonant)
+const DholakBols = {
+    "4":           ["Dha","Ge","Na","Ge"],
+    "8":           ["Dha","Ge","Na","Ge","Dha","Ge","Na","Ge"],
+    "8_bhajani":   ["Dha","Ge","Dha","Dha","Ge","Dha","Ge","Na"],
+    "6":           ["Dha","Dhin","Na","Dha","Ti","Na"],
+    "7":           ["Ti","Ti","Na","Dhin","Na","Dhin","Na"],
+    "12":          ["Dha","Dha","Ge","Na","Dha","Ge","Na","Dha","Ge","Na","Ge","Na"],
+    "16":          ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Ti","Ti","Na","Na","Dhin","Dhin","Dha"],
+    "10":          ["Dha","Ge","Na","Ge","Na","Dha","Ge","Ti","Na","Na"],
+    "12_chautaal": ["Dha","Dha","Ge","Na","Dha","Ge","Na","Ge","Ti","Na","Ge","Na"],
+    "14":          ["Ka","Dha","Ge","Ti","Na","Ka","Dha","Ge","Ti","Na","Ka","Ti","Na","Na"],
+};
+
 // ─── Raga Definitions ────────────────────────────────────────────────────────
 // allowed: swar names that appear in this raga (uppercase = shuddha, lowercase = komal/tivra)
 // vadi: most prominent swara; samvadi: second most prominent
@@ -899,6 +915,13 @@ function playTablaSound(bol, isSam) {
     const out = masterBus;              // route through master bus (compressor + reverb)
     const sw  = isSam ? 1.30 : 1.0;   // accent on sam (beat 1)
 
+    // Tune the dayan to the composition's Sa.
+    // Calibration: hardcoded values were written for Kali 4 (G#4 ≈ 415.3 Hz).
+    // When the user selects a different scale, scaleRatio shifts the dayan pitch
+    // proportionally so the tabla sounds in tune with the melody.
+    const tuningSa   = parseFloat(document.getElementById('scale-select').value) * 2;
+    const scaleRatio = tuningSa / 415.3;
+
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
     function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
         const o = audioCtx.createOscillator();
@@ -988,13 +1011,87 @@ function playTablaSound(bol, isSam) {
     const p = D[bol];
     if (!p) return;   // bayan-only bols (Ge, Gi) already handled above
 
-    const f0 = p[0], f1 = p[1], swMs = p[2], dGain = p[3],
-          dDec = p[4], nHz = p[5], nGain = p[6];
+    // Apply scaleRatio to attack + tuned pitch; noise bands stay in their fixed
+    // spectral range since they represent the membrane's transient snap, not pitch.
+    const f0    = p[0] * scaleRatio;   // attack Hz (scaled)
+    const f1    = p[1] * scaleRatio;   // tuned Hz  (scaled — this is what you "hear" as pitch)
+    const swMs  = p[2], dGain = p[3], dDec = p[4], nHz = p[5], nGain = p[6];
 
     sineSwoop(f0,        f1,        swMs,        dGain,        dDec);          // fundamental
     sineSwoop(f0 * 1.52, f1 * 1.52, swMs * 0.80, dGain * 0.28, dDec * 0.55); // presence partial
     noiseBurst(nHz,        1.8, nGain,        0.022);  // high-freq skin snap
     noiseBurst(nHz * 0.45, 2.5, nGain * 0.45, 0.012); // mid-range definition crack
+}
+
+// ─── Dholak Synthesis ─────────────────────────────────────────────────────────
+// Dholak is a two-headed folk drum:
+//   Left head (bayi)  — deeper, rounder bass; no syahi ring
+//   Right head (dagga)— smaller, woodier, drier attack; no metallic tabla ring
+// Frequencies are NOT scaled to Sa (dholak is not a pitched instrument like tabla).
+function playDholakSound(bol, isSam) {
+    if (!audioCtx) return;
+    const now = audioCtx.currentTime;
+    const vol = parseFloat(document.getElementById('tabla-vol').value);
+    const out = masterBus;
+    const sw  = isSam ? 1.25 : 1.0;
+
+    // ── Helper: sine with frequency glide + exponential decay ──
+    function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f0, now);
+        o.frequency.exponentialRampToValueAtTime(f1, now + sweepSec);
+        g.gain.setValueAtTime(gain * sw * vol, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + decaySec);
+        o.connect(g); g.connect(out);
+        o.start(now); o.stop(now + decaySec + 0.02);
+    }
+
+    // ── Helper: bandpass noise burst ──
+    function noiseBurst(freq, q, gain, decaySec) {
+        if (!noiseBuffer) return;
+        const ns = audioCtx.createBufferSource();
+        const nf = audioCtx.createBiquadFilter();
+        const ng = audioCtx.createGain();
+        ns.buffer = noiseBuffer;
+        nf.type = 'bandpass'; nf.frequency.value = freq; nf.Q.value = q;
+        ng.gain.setValueAtTime(gain * sw * vol, now);
+        ng.gain.exponentialRampToValueAtTime(0.0001, now + decaySec);
+        ns.connect(nf); nf.connect(ng); ng.connect(out);
+        ns.start(now);
+    }
+
+    // ── Left head (bayi) — Dha, Dhin, Ge ──
+    const hasLeft = /Dha|Dhin|Ge/.test(bol);
+    if (hasLeft) {
+        const isGe = /Ge/.test(bol);
+        // Rounder/deeper than tabla bayan; longer resonance for open Ge
+        sineSwoop(isGe ? 110 : 95,  isGe ? 70 : 52,  0.10, 1.15, isGe ? 0.72 : 0.55);   // fundamental
+        sineSwoop(isGe ? 220 : 190, isGe ? 140 : 104, 0.07, 0.38, isGe ? 0.48 : 0.36);   // 2nd harmonic
+        noiseBurst(190, 1.4, 0.45, 0.032);    // skin thump (lower Q = woodier)
+    }
+
+    // ── Right head (dagga) — Dha, Dhin, Na, Ti, Ka, Te ──
+    // Shorter, drier, more wooden than tabla dayan.  No sustained ring.
+    // [attackHz, settleHz, sweepSec, gain, decaySec, noiseHz, noiseGain]
+    const R = {
+        'Dha' : [520, 380, 0.013, 0.80, 0.20, 1800, 0.24],
+        'Dhin': [500, 360, 0.012, 0.75, 0.18, 1700, 0.22],
+        'Na'  : [480, 340, 0.011, 0.72, 0.14, 2100, 0.28],
+        'Ti'  : [460, 325, 0.009, 0.68, 0.12, 2300, 0.30],
+        'Ka'  : [400, 330, 0.006, 0.62, 0.06, 2600, 0.36],
+        'Te'  : [440, 315, 0.009, 0.65, 0.11, 2000, 0.27],
+        'Ge'  : null,   // left-only bol — no right head
+    };
+    const rp = R[bol] !== undefined ? R[bol] : R['Na'];  // default to Na timbre
+    if (rp) {
+        const [rF0, rF1, swMs, rGain, rDec, nHz, nGain] = rp;
+        sineSwoop(rF0,        rF1,        swMs,        rGain,        rDec);
+        sineSwoop(rF0 * 1.42, rF1 * 1.42, swMs * 0.75, rGain * 0.20, rDec * 0.48); // 2nd partial (weaker than tabla)
+        noiseBurst(nHz,        2.2, nGain,        0.016);
+        noiseBurst(nHz * 0.50, 3.0, nGain * 0.38, 0.010);
+    }
 }
 
 // ─── Melodic Synth ────────────────────────────────────────────────────────────
@@ -1319,12 +1416,13 @@ function startPlayback() {
             if (beatEl) beatEl.classList.add('playing');
 
             const inst    = targetLine.querySelector('.line-inst-select').value;
-            // Adlib lines always mute tabla regardless of the Mute Tabla checkbox
-            const isAdlib = targetLine.querySelector('.line-adlib') &&
-                            targetLine.querySelector('.line-adlib').checked;
-            const muteTbl = isAdlib || targetLine.querySelector('.line-tabla-mute').checked;
-            const lineVol = parseFloat(targetLine.querySelector('.line-vol').value);
-            const taalKey = targetLine.getAttribute('data-taal');
+            // Adlib lines always silence percussion regardless of the dropdown
+            const isAdlib  = targetLine.querySelector('.line-adlib') &&
+                             targetLine.querySelector('.line-adlib').checked;
+            const percSel  = targetLine.querySelector('.line-perc-sel');
+            const percType = isAdlib ? 'mute' : (percSel ? percSel.value : 'tabla');
+            const lineVol  = parseFloat(targetLine.querySelector('.line-vol').value);
+            const taalKey  = targetLine.getAttribute('data-taal');
 
             // Re-setup synth only when instrument changes between lines
             if (inst !== lastInstrument) {
@@ -1332,11 +1430,15 @@ function startPlayback() {
                 lastInstrument = inst;
             }
 
-            // Tabla
-            if (!muteTbl) {
+            // Percussion — tabla, dholak, or mute
+            if (percType === 'dholak') {
+                const bols = DholakBols[taalKey] || [];
+                playDholakSound(bols[localIdx] || 'Dha', localIdx === 0);
+            } else if (percType === 'tabla') {
                 const bols = TaalBols[taalKey] || [];
                 playTablaSound(bols[localIdx] || 'Dha', localIdx === 0);
             }
+            // percType === 'mute' → do nothing
 
             // Notes — support variable sub-beats per beat
             const notesRow = targetLine.querySelector('.grid-row[data-row="notes"]');
@@ -1551,7 +1653,8 @@ function addLine(data) {
     }
 
     const instVal    = data ? (data.line_instrument || 'harmonium') : 'harmonium';
-    const muteVal    = data ? !!data.tabla_mute   : false;
+    // New JSON uses percussion:'tabla'|'dholak'|'mute'; old JSON used tabla_mute:bool
+    const percVal    = data ? (data.percussion || (data.tabla_mute ? 'mute' : 'tabla')) : 'tabla';
     const volVal     = data ? (data.line_volume !== undefined ? data.line_volume : 1.0) : 1.0;
     const section    = data ? (data.section || '') : '';
     const adlibVal   = data ? !!data.adlib        : false;
@@ -1581,8 +1684,12 @@ function addLine(data) {
             <option value="violin"    ${instVal==='violin'   ?'selected':''}>Violin</option>
             <option value="piano"     ${instVal==='piano'    ?'selected':''}>Piano</option>
         </select>
-        <label>Mute Tabla:</label>
-        <input type="checkbox" class="line-tabla-mute" ${muteVal?'checked':''} style="width:18px;">
+        <label>Percussion:</label>
+        <select class="line-perc-sel" style="width:82px;">
+            <option value="tabla"  ${percVal==='tabla' ?'selected':''}>Tabla</option>
+            <option value="dholak" ${percVal==='dholak'?'selected':''}>Dholak</option>
+            <option value="mute"   ${percVal==='mute'  ?'selected':''}>Mute</option>
+        </select>
         <label>Volume:</label>
         <input type="range" class="line-vol" min="0.1" max="1" step="0.05" value="${volVal}" style="width:70px;">
         <label>Section:</label>
@@ -1651,7 +1758,7 @@ function addLine(data) {
     rowB.className = 'grid-row';
     rowB.setAttribute('data-row', 'beats');
     rowB.innerHTML = `<div class="row-label">Beat</div>`;
-    const bols   = TaalBols[taalKey]  || [];
+    const bols   = (percVal === 'dholak' ? DholakBols[taalKey] : TaalBols[taalKey]) || [];
     const khalis = TaalKhali[taalKey] || [];
     for (let i = 0; i < beats; i++) {
         const isSam   = i === 0;
@@ -1714,7 +1821,7 @@ function buildCompositionData() {
         lineArray.push({
             section:         l.querySelector('.line-section').value,
             line_instrument: l.querySelector('.line-inst-select').value,
-            tabla_mute:      l.querySelector('.line-tabla-mute').checked,
+            percussion:      l.querySelector('.line-perc-sel')?.value || 'tabla',
             line_volume:     parseFloat(l.querySelector('.line-vol').value),
             adlib:           l.querySelector('.line-adlib').checked,
             line_bpm:        lineBpmSaved,
@@ -1770,9 +1877,23 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
         const lineEl  = e.target.closest('.line-container');
         const isAdlib = e.target.checked;
         lineEl.classList.toggle('adlib-line', isAdlib);
-        // Adlib lines must silence tabla; restore checkbox freedom when unchecked
-        const muteCb = lineEl.querySelector('.line-tabla-mute');
-        if (isAdlib) muteCb.checked = true;
+        // Adlib forces percussion to Mute (playback already ignores select when adlib,
+        // but switching the UI makes the state visible and consistent).
+        const percSel = lineEl.querySelector('.line-perc-sel');
+        if (isAdlib && percSel) percSel.value = 'mute';
+    }
+
+    // When the user switches the per-line Percussion dropdown, live-update the
+    // bol labels in the Beat row so they match the chosen instrument.
+    if (e.target.classList.contains('line-perc-sel')) {
+        const lineEl  = e.target.closest('.line-container');
+        const taalKey = lineEl.getAttribute('data-taal');
+        const newBols = e.target.value === 'dholak'
+            ? (DholakBols[taalKey] || [])
+            : (TaalBols[taalKey]   || []);
+        lineEl.querySelectorAll('.bol-text').forEach((el, i) => {
+            el.textContent = newBols[i] || '';
+        });
     }
 });
 
