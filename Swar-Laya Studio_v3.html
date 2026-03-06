@@ -741,6 +741,29 @@ const SAMPLE_DEFS = {
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
 const SampleLoadState = {};  // instrument → 'pending'|'loading'|'done'
+const CACHE_NAME = 'swar-laya-samples-v1';  // bump version to force re-download
+
+// Fetch a sample MP3 — checks the browser's persistent Cache API first,
+// so after the first visit the files load from disk with zero network traffic.
+async function fetchSampleArrayBuffer(url) {
+    if (typeof caches !== 'undefined') {
+        try {
+            const cache = await caches.open(CACHE_NAME);
+            let cached  = await cache.match(url);
+            if (!cached) {
+                const fresh = await fetch(url);
+                if (!fresh.ok) throw new Error(fresh.status);
+                await cache.put(url, fresh.clone());   // store for next visit
+                cached = fresh;
+            }
+            return cached.arrayBuffer();
+        } catch (e) { /* fall through to plain fetch */ }
+    }
+    // Cache API unavailable (e.g. file:// protocol) — plain network fetch
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    return r.arrayBuffer();
+}
 
 // Convert note name (e.g. "Ds4", "A3", "Cs5") to Hz
 function noteNameToHz(name) {
@@ -761,9 +784,7 @@ async function ensureSamplesLoaded(instrument) {
     const results = await Promise.allSettled(def.notes.map(async noteName => {
         const key = `${instrument}|${noteName}`;
         if (SampleCache[key]) return;
-        const resp = await fetch(def.base + noteName + '.mp3');
-        if (!resp.ok) throw new Error(resp.status);
-        const arr  = await resp.arrayBuffer();
+        const arr  = await fetchSampleArrayBuffer(def.base + noteName + '.mp3');
         const buf  = await audioCtx.decodeAudioData(arr);
         buf.baseHz = noteNameToHz(noteName);
         if (buf.baseHz) SampleCache[key] = buf;
