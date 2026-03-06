@@ -258,6 +258,11 @@
         .note-unit.raga-samvadi { outline:2px solid #90caf9; border-radius:4px; background:#e3f2fd; }
         .note-unit.raga-out     { opacity:0.42; outline:2px solid #ef9a9a; border-radius:4px; }
         .raga-label { font-size:10px; color:#6a1b9a; font-weight:bold; margin-left:4px; }
+        /* Sample loading status pill */
+        #sample-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:bold; transition:background 0.4s, color 0.4s; }
+        #sample-status.loading { background:#fff3e0; color:#e65100; }
+        #sample-status.ready   { background:#e8f5e9; color:#2e7d32; }
+        #sample-status.osc     { background:#f3e5f5; color:#6a1b9a; }
 
         /* ── Auth bar ── */
         #auth-bar {
@@ -489,6 +494,7 @@
         <button class="btn-add"  onclick="addLine()">+ Add Line</button>
         <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
         <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
+        <span id="sample-status" class="osc" title="Instrument audio mode">♪ Synth</span>
         <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
         <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
         <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
@@ -544,12 +550,14 @@ let fluteNoiseGain = null;   // mixes breath noise into the signal chain
 
 // Master bus
 let masterBus      = null;
+let sampleBus      = null;   // gain node for all sampled notes — zeroed on Stop
 let dryGain        = null;
 let wetGain        = null;
 let reverbNode     = null;
 let compressor     = null;
 let noiseBuffer    = null;   // short noise buffer (tabla transients)
 let breathBuffer   = null;   // longer loopable noise buffer (flute breath)
+let lastPlayedFreq = null;   // tracks prev note freq for meend glide with samples
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
 // Equal-temperament semitone ratios (12th root of 2)
@@ -662,6 +670,19 @@ function initAudio() {
     // Pre-generate noise buffers
     noiseBuffer  = buildNoiseBuffer(0.18);  // short burst for tabla head-slap
     breathBuffer = buildNoiseBuffer(2.0);   // long loopable buffer for flute breath
+
+    // Sample bus: a single gain that all sampled notes route through.
+    // Setting it to 0 on Stop immediately silences all ringing samples.
+    sampleBus = audioCtx.createGain();
+    sampleBus.gain.value = 1.0;
+    sampleBus.connect(masterBus);
+
+    // Start loading all instrument samples in the background (non-blocking).
+    // triggerNote() uses oscillator fallback until samples are available.
+    const el = document.getElementById('sample-status');
+    if (el) { el.className = 'loading'; el.textContent = '♪ Loading…'; }
+    Promise.allSettled(Object.keys(SAMPLE_DEFS).map(ensureSamplesLoaded))
+        .then(updateSampleStatusPill);
 }
 
 function buildReverb(durationSec, decay) {
@@ -685,6 +706,156 @@ function buildNoiseBuffer(sec) {
     const d   = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     return buf;
+}
+
+// ─── Sample-based Audio Engine ───────────────────────────────────────────────
+// Samples are fetched from free CDNs once and cached as AudioBuffers.
+// triggerNote() prefers samples; falls back to oscillator synthesis when
+// a sample for that instrument is not yet loaded.
+
+const SAMPLE_DEFS = {
+    // nbrosowsky/tonejs-instruments (GitHub Pages, CORS-enabled, MIT)
+    harmonium: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/harmonium/',
+        notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5']
+    },
+    flute: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
+        notes: ['A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+    },
+    sitar: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/',
+        notes: ['As2','E3','A3','Cs4','E4','A4']
+    },
+    violin: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/violin/',
+        notes: ['A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+    },
+    // Salamander Grand Piano (tonejs.github.io, verified CORS-enabled)
+    piano: {
+        base: 'https://tonejs.github.io/audio/salamander/',
+        notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+    }
+};
+
+// Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
+const SampleCache = {};
+const SampleLoadState = {};  // instrument → 'pending'|'loading'|'done'
+
+// Convert note name (e.g. "Ds4", "A3", "Cs5") to Hz
+function noteNameToHz(name) {
+    const map = {C:0,Cs:1,D:2,Ds:3,E:4,F:5,Fs:6,G:7,Gs:8,A:9,As:10,B:11};
+    const m   = name.match(/^([A-G]s?)(\d)$/);
+    if (!m || !(m[1] in map)) return null;
+    return 440 * Math.pow(2, (map[m[1]] - 9 + (parseInt(m[2]) - 4) * 12) / 12);
+}
+
+// Load all samples for one instrument; silently skips failed URLs
+async function ensureSamplesLoaded(instrument) {
+    if (SampleLoadState[instrument] === 'loading' ||
+        SampleLoadState[instrument] === 'done') return;
+    const def = SAMPLE_DEFS[instrument];
+    if (!def || !audioCtx) return;
+
+    SampleLoadState[instrument] = 'loading';
+    const results = await Promise.allSettled(def.notes.map(async noteName => {
+        const key = `${instrument}|${noteName}`;
+        if (SampleCache[key]) return;
+        const resp = await fetch(def.base + noteName + '.mp3');
+        if (!resp.ok) throw new Error(resp.status);
+        const arr  = await resp.arrayBuffer();
+        const buf  = await audioCtx.decodeAudioData(arr);
+        buf.baseHz = noteNameToHz(noteName);
+        if (buf.baseHz) SampleCache[key] = buf;
+    }));
+    SampleLoadState[instrument] = 'done';
+
+    const loaded = results.filter(r => r.status === 'fulfilled').length;
+    console.log(`[Samples] ${instrument}: ${loaded}/${def.notes.length} loaded`);
+    updateSampleStatusPill();
+}
+
+// Return closest cached AudioBuffer for a target frequency
+function findBestSample(instrument, targetHz) {
+    const def = SAMPLE_DEFS[instrument];
+    if (!def) return null;
+    let bestBuf = null, bestDiff = Infinity;
+    for (const noteName of def.notes) {
+        const buf = SampleCache[`${instrument}|${noteName}`];
+        if (!buf) continue;
+        const diff = Math.abs(Math.log2(targetHz / buf.baseHz));
+        if (diff < bestDiff) { bestDiff = diff; bestBuf = buf; }
+    }
+    return bestBuf;
+}
+
+// Play one note from a sample; returns true if a sample was found and played
+function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq) {
+    const buf = findBestSample(instrument, freq);
+    if (!buf || !sampleBus) return false;
+    const now = audioCtx.currentTime;
+
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+
+    // Pitch: if meend (glide > ~20ms), ramp playbackRate from prevFreq to freq
+    const endRate   = freq / buf.baseHz;
+    const startRate = (glideTime > 0.02 && prevFreq) ? (prevFreq / buf.baseHz) : endRate;
+    src.playbackRate.setValueAtTime(startRate, now);
+    if (startRate !== endRate) {
+        src.playbackRate.exponentialRampToValueAtTime(endRate, now + glideTime);
+    }
+
+    const env = audioCtx.createGain();
+
+    // Amplitude envelope — matched to each instrument's character
+    if (instrument === 'piano' || instrument === 'sitar') {
+        const peak = 0.55 * vs;
+        env.gain.setValueAtTime(0,    now);
+        env.gain.linearRampToValueAtTime(peak,  now + 0.008);
+        env.gain.exponentialRampToValueAtTime(0.001, now + Math.min(noteDuration * 1.5, 2.2));
+    } else if (instrument === 'flute') {
+        const att = 0.09, rel = 0.07;
+        const sus = Math.max(0.01, noteDuration - att - rel);
+        const peak = 0.50 * vs;
+        env.gain.setValueAtTime(0,    now);
+        env.gain.linearRampToValueAtTime(peak * 0.7, now + att * 0.5);
+        env.gain.linearRampToValueAtTime(peak,       now + att);
+        env.gain.setValueAtTime(peak,                now + att + sus);
+        env.gain.linearRampToValueAtTime(0.001,      now + att + sus + rel);
+    } else {
+        // harmonium, violin — moderate attack, held sustain
+        const att = 0.04, rel = Math.min(0.06, noteDuration * 0.1);
+        const sus = Math.max(0.01, noteDuration - att - rel);
+        const peak = 0.50 * vs;
+        env.gain.setValueAtTime(0,    now);
+        env.gain.linearRampToValueAtTime(peak, now + att);
+        env.gain.setValueAtTime(peak,          now + att + sus);
+        env.gain.linearRampToValueAtTime(0.001, now + att + sus + rel);
+    }
+
+    src.connect(env);
+    env.connect(sampleBus);   // sampleBus → masterBus → compressor → reverb/dry
+    src.start(now);
+    src.stop(now + noteDuration + 0.25);
+    return true;
+}
+
+function updateSampleStatusPill() {
+    const el = document.getElementById('sample-status');
+    if (!el) return;
+    const instruments = Object.keys(SAMPLE_DEFS);
+    const done = instruments.filter(i => SampleLoadState[i] === 'done').length;
+    const loaded = instruments.reduce((n, i) => n + Object.keys(SampleCache)
+        .filter(k => k.startsWith(i + '|')).length, 0);
+    if (done === 0) { el.className = 'osc'; el.textContent = '♪ Synth'; return; }
+    if (done < instruments.length) {
+        el.className = 'loading';
+        el.textContent = `♪ Loading… (${done}/${instruments.length})`;
+    } else {
+        el.className = 'ready';
+        el.textContent = `♪ Samples ✓ (${loaded})`;
+    }
 }
 
 function updateReverbMix() {
@@ -881,6 +1052,7 @@ const InstrumentOscType = {
 
 function setupSynth(instrument) {
     stopSynth();
+    lastPlayedFreq = null;   // reset meend glide state for new instrument
 
     mainGain   = audioCtx.createGain();
     mainGain.gain.setValueAtTime(0, audioCtx.currentTime);
@@ -967,9 +1139,19 @@ function stopSynth() {
 }
 
 function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
+    const vs = (volScale !== undefined) ? volScale : 1.0;
+
+    // ── Sample-based playback (preferred when samples are loaded) ─────────────
+    const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
+    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq)) {
+        lastPlayedFreq = freq;
+        return;   // sample handled it; skip oscillator path
+    }
+    lastPlayedFreq = freq;
+
+    // ── Oscillator fallback (used until samples finish loading) ───────────────
     if (!mainOsc || !mainGain) return;
     const now = audioCtx.currentTime;
-    const vs  = (volScale !== undefined) ? volScale : 1.0;
 
     // ── Frequency (with glide or near-instant snap) ────────────────────────
     for (const h of harmonics) {
@@ -1186,6 +1368,14 @@ function startPlayback() {
 function stopPlayback() {
     if (playbackTimer) { clearTimeout(playbackTimer); playbackTimer = null; }
     stopSynth();
+    // Instantly silence any ringing sampled notes, then restore the bus after
+    // they've all been garbage-collected by the browser
+    if (sampleBus) {
+        sampleBus.gain.cancelScheduledValues(audioCtx.currentTime);
+        sampleBus.gain.setValueAtTime(0, audioCtx.currentTime);
+        setTimeout(() => { if (sampleBus) sampleBus.gain.setValueAtTime(1, audioCtx.currentTime); }, 300);
+    }
+    lastPlayedFreq = null;
     document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
 }
 
