@@ -452,43 +452,47 @@
         </div>
         <div class="control-item">
             <label class="raga-label">Raga Mode</label>
-            <input type="checkbox" id="raga-mode-toggle" style="width:18px;" title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
-        </div>
-        <div class="control-item" id="raga-select-group" style="display:none;">
-            <label class="raga-label">Raga</label>
-            <select id="raga-select" style="width:108px;">
-                <option value="">— choose —</option>
-                <optgroup label="Kalyan Thaat">
-                    <option value="yaman">Yaman</option>
-                    <option value="marwa">Marwa</option>
-                </optgroup>
-                <optgroup label="Bilawal Thaat">
-                    <option value="bilawal">Bilawal</option>
-                    <option value="desh">Desh</option>
-                    <option value="bhoopali">Bhoopali</option>
-                    <option value="durga">Durga</option>
-                </optgroup>
-                <optgroup label="Khamaj Thaat">
-                    <option value="khamaj">Khamaj</option>
-                    <option value="bageshri">Bageshri</option>
-                </optgroup>
-                <optgroup label="Kafi Thaat">
-                    <option value="kafi">Kafi</option>
-                </optgroup>
-                <optgroup label="Asavari Thaat">
-                    <option value="asavari">Asavari</option>
-                </optgroup>
-                <optgroup label="Bhairavi Thaat">
-                    <option value="bhairavi">Bhairavi</option>
-                    <option value="malkauns">Malkauns</option>
-                </optgroup>
-                <optgroup label="Bhairav Thaat">
-                    <option value="bhairav">Bhairav</option>
-                </optgroup>
-                <optgroup label="Todi Thaat">
-                    <option value="todi">Todi</option>
-                </optgroup>
-            </select>
+            <!-- Checkbox + dropdown share one fixed-width item so enabling/disabling
+                 Raga Mode never causes the controls bar to reflow.
+                 The select uses visibility:hidden (not display:none) so its width
+                 is always reserved in the layout. -->
+            <div style="display:flex; align-items:center; gap:5px;">
+                <input type="checkbox" id="raga-mode-toggle" style="width:18px; flex-shrink:0; margin:0;"
+                       title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
+                <select id="raga-select" style="width:108px; visibility:hidden; pointer-events:none;">
+                    <option value="">— choose —</option>
+                    <optgroup label="Kalyan Thaat">
+                        <option value="yaman">Yaman</option>
+                        <option value="marwa">Marwa</option>
+                    </optgroup>
+                    <optgroup label="Bilawal Thaat">
+                        <option value="bilawal">Bilawal</option>
+                        <option value="desh">Desh</option>
+                        <option value="bhoopali">Bhoopali</option>
+                        <option value="durga">Durga</option>
+                    </optgroup>
+                    <optgroup label="Khamaj Thaat">
+                        <option value="khamaj">Khamaj</option>
+                        <option value="bageshri">Bageshri</option>
+                    </optgroup>
+                    <optgroup label="Kafi Thaat">
+                        <option value="kafi">Kafi</option>
+                    </optgroup>
+                    <optgroup label="Asavari Thaat">
+                        <option value="asavari">Asavari</option>
+                    </optgroup>
+                    <optgroup label="Bhairavi Thaat">
+                        <option value="bhairavi">Bhairavi</option>
+                        <option value="malkauns">Malkauns</option>
+                    </optgroup>
+                    <optgroup label="Bhairav Thaat">
+                        <option value="bhairav">Bhairav</option>
+                    </optgroup>
+                    <optgroup label="Todi Thaat">
+                        <option value="todi">Todi</option>
+                    </optgroup>
+                </select>
+            </div>
         </div>
         <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
         <button class="btn-add"  onclick="addLine()">+ Add Line</button>
@@ -1902,8 +1906,9 @@ addLine();
 
 // Raga Mode controls
 document.getElementById('raga-mode-toggle').addEventListener('change', function() {
-    const grp = document.getElementById('raga-select-group');
-    grp.style.display = this.checked ? '' : 'none';
+    const sel = document.getElementById('raga-select');
+    sel.style.visibility  = this.checked ? 'visible' : 'hidden';
+    sel.style.pointerEvents = this.checked ? '' : 'none';
     applyRagaHighlights();
 });
 document.getElementById('raga-select').addEventListener('change', applyRagaHighlights);
