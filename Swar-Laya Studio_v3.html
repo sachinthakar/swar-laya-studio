@@ -230,6 +230,35 @@
             margin-left: 4px; letter-spacing: 0.3px;
         }
 
+        /* ── Raga Mode ── */
+        #raga-info-bar {
+            display: none;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            padding: 7px 16px;
+            background: linear-gradient(to right, #fff8e1, #ede7f6);
+            border-bottom: 1px solid #d0c4e8;
+            font-size: 12px;
+        }
+        #raga-bar-name { font-weight: 900; color: #4a148c; font-size: 14px; }
+        .raga-info-meta { color: #555; }
+        .raga-palette { display: flex; gap: 3px; flex-wrap: wrap; margin-left: 6px; }
+        .raga-swar {
+            padding: 1px 5px; border-radius: 4px; font-weight: bold;
+            font-size: 11px; border: 1.5px solid transparent;
+            min-width: 24px; text-align: center; cursor: default;
+        }
+        .raga-swar-in       { background:#e8f5e9; color:#2e7d32; border-color:#a5d6a7; }
+        .raga-swar-out      { background:#f5f5f5; color:#bdbdbd; border-color:#e0e0e0; text-decoration:line-through; }
+        .raga-swar-vadi     { background:#fff9c4; color:#e65100; border-color:#fbc02d; font-weight:900; }
+        .raga-swar-samvadi  { background:#e3f2fd; color:#1565c0; border-color:#90caf9; font-weight:900; }
+        /* Note-unit raga states */
+        .note-unit.raga-vadi    { outline:2px solid #fbc02d; border-radius:4px; background:#fffde7; }
+        .note-unit.raga-samvadi { outline:2px solid #90caf9; border-radius:4px; background:#e3f2fd; }
+        .note-unit.raga-out     { opacity:0.42; outline:2px solid #ef9a9a; border-radius:4px; }
+        .raga-label { font-size:10px; color:#6a1b9a; font-weight:bold; margin-left:4px; }
+
         /* ── Auth bar ── */
         #auth-bar {
             display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -416,6 +445,46 @@
                 <option value="8">8 Beats</option>
             </select>
         </div>
+        <div class="control-item">
+            <label class="raga-label">Raga Mode</label>
+            <input type="checkbox" id="raga-mode-toggle" style="width:18px;" title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
+        </div>
+        <div class="control-item" id="raga-select-group" style="display:none;">
+            <label class="raga-label">Raga</label>
+            <select id="raga-select" style="width:108px;">
+                <option value="">— choose —</option>
+                <optgroup label="Kalyan Thaat">
+                    <option value="yaman">Yaman</option>
+                    <option value="marwa">Marwa</option>
+                </optgroup>
+                <optgroup label="Bilawal Thaat">
+                    <option value="bilawal">Bilawal</option>
+                    <option value="desh">Desh</option>
+                    <option value="bhoopali">Bhoopali</option>
+                    <option value="durga">Durga</option>
+                </optgroup>
+                <optgroup label="Khamaj Thaat">
+                    <option value="khamaj">Khamaj</option>
+                    <option value="bageshri">Bageshri</option>
+                </optgroup>
+                <optgroup label="Kafi Thaat">
+                    <option value="kafi">Kafi</option>
+                </optgroup>
+                <optgroup label="Asavari Thaat">
+                    <option value="asavari">Asavari</option>
+                </optgroup>
+                <optgroup label="Bhairavi Thaat">
+                    <option value="bhairavi">Bhairavi</option>
+                    <option value="malkauns">Malkauns</option>
+                </optgroup>
+                <optgroup label="Bhairav Thaat">
+                    <option value="bhairav">Bhairav</option>
+                </optgroup>
+                <optgroup label="Todi Thaat">
+                    <option value="todi">Todi</option>
+                </optgroup>
+            </select>
+        </div>
         <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
         <button class="btn-add"  onclick="addLine()">+ Add Line</button>
         <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
@@ -425,6 +494,29 @@
         <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
         <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
         <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
+    </div>
+
+    <!-- Raga info bar (shown when Raga Mode is on) -->
+    <div id="raga-info-bar">
+        <span id="raga-bar-name"></span>
+        <span class="raga-info-meta" id="raga-bar-aroha"></span>
+        <span class="raga-info-meta" id="raga-bar-avaroha"></span>
+        <span class="raga-info-meta">Vadi: <b id="raga-bar-vadi" style="color:#e65100;"></b></span>
+        <span class="raga-info-meta">Samvadi: <b id="raga-bar-samvadi" style="color:#1565c0;"></b></span>
+        <div class="raga-palette">
+            <span class="raga-swar" data-sw="Sa">Sa</span>
+            <span class="raga-swar" data-sw="re">re</span>
+            <span class="raga-swar" data-sw="Re">Re</span>
+            <span class="raga-swar" data-sw="ga">ga</span>
+            <span class="raga-swar" data-sw="Ga">Ga</span>
+            <span class="raga-swar" data-sw="Ma">Ma</span>
+            <span class="raga-swar" data-sw="ma">ma</span>
+            <span class="raga-swar" data-sw="Pa">Pa</span>
+            <span class="raga-swar" data-sw="dha">dha</span>
+            <span class="raga-swar" data-sw="Dha">Dha</span>
+            <span class="raga-swar" data-sw="ni">ni</span>
+            <span class="raga-swar" data-sw="Ni">Ni</span>
+        </div>
     </div>
 
     <div id="song-sheet"></div>
@@ -509,6 +601,26 @@ const TaalKhali = {
     "10":          [5],         // Jhaptaal:  beat 6
     "12_chautaal": [2, 6],      // Chautaal:  beats 3, 7
     "14":          [5],         // Dhamar:    beat 6
+};
+
+// ─── Raga Definitions ────────────────────────────────────────────────────────
+// allowed: swar names that appear in this raga (uppercase = shuddha, lowercase = komal/tivra)
+// vadi: most prominent swara; samvadi: second most prominent
+const RagaData = {
+    "bilawal":  { name:"Bilawal",  allowed:["Sa","Re","Ga","Ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga Ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
+    "yaman":    { name:"Yaman",    allowed:["Sa","Re","Ga","ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa ma Ga Re Sa"   },
+    "bhairav":  { name:"Bhairav",  allowed:["Sa","re","Ga","Ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"Re",  aroha:"Sa re Ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma Ga re Sa"   },
+    "bhairavi": { name:"Bhairavi", allowed:["Sa","re","ga","Ma","Pa","dha","ni"],       vadi:"Ma",  samvadi:"Sa",  aroha:"Sa re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga re Sa"   },
+    "kafi":     { name:"Kafi",     allowed:["Sa","Re","ga","Ma","Pa","Dha","ni"],       vadi:"ga",  samvadi:"ni",  aroha:"Sa Re ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa ni Dha Pa Ma ga Re Sa"   },
+    "khamaj":   { name:"Khamaj",   allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
+    "asavari":  { name:"Asavari",  allowed:["Sa","Re","ga","Ma","Pa","dha","ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga Re Sa"   },
+    "bageshri": { name:"Bageshri", allowed:["Sa","Re","ga","Ma","Pa","dha","Ni"],       vadi:"Ma",  samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma ga Re Sa"   },
+    "bhoopali": { name:"Bhoopali", allowed:["Sa","Re","Ga","Pa","Dha"],                vadi:"Ga",  samvadi:"Dha", aroha:"Sa Re Ga Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ga Re Sa"         },
+    "durga":    { name:"Durga",    allowed:["Sa","Re","Ma","Pa","Dha"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa Re Ma Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ma Re Sa"         },
+    "malkauns": { name:"Malkauns", allowed:["Sa","ga","Ma","dha","ni"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa ga Ma dha ni Ṡa",             avaroha:"Ṡa ni dha Ma ga Sa"         },
+    "todi":     { name:"Todi",     allowed:["Sa","re","ga","ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa re ga ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa ma ga re Sa"   },
+    "desh":     { name:"Desh",     allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ma Pa ni Ṡa",              avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
+    "marwa":    { name:"Marwa",    allowed:["Sa","re","Ga","ma","Dha","Ni"],            vadi:"re",  samvadi:"Dha", aroha:"Sa re Ga ma Dha Ni Ṡa",          avaroha:"Ṡa Ni Dha ma Ga re Sa"      },
 };
 
 // ─── Audio Initialisation ────────────────────────────────────────────────────
@@ -1143,6 +1255,48 @@ function updateTanpura() { if (isTanpuraOn) startTanpura(); }
 
 // ─── Sustain (hold) helpers ───────────────────────────────────────────────────
 
+// ─── Raga Mode ────────────────────────────────────────────────────────────────
+// Apply vadi/samvadi/out-of-raga highlight classes to all note-units in the sheet.
+function applyRagaHighlights() {
+    const toggle  = document.getElementById('raga-mode-toggle');
+    const ragaSel = document.getElementById('raga-select');
+    const ragaKey = ragaSel ? ragaSel.value : '';
+    const modeOn  = toggle && toggle.checked && ragaKey;
+
+    document.querySelectorAll('.note-unit').forEach(unit => {
+        unit.classList.remove('raga-out', 'raga-vadi', 'raga-samvadi');
+        if (!modeOn) return;
+        const sw   = unit.querySelector('.note-select').value;
+        if (sw === '-' || sw === '~') return;
+        const raga = RagaData[ragaKey];
+        if (!raga) return;
+        if (sw === raga.vadi)                unit.classList.add('raga-vadi');
+        else if (sw === raga.samvadi)        unit.classList.add('raga-samvadi');
+        else if (!raga.allowed.includes(sw)) unit.classList.add('raga-out');
+    });
+    updateRagaInfoBar(modeOn ? ragaKey : null);
+}
+
+function updateRagaInfoBar(ragaKey) {
+    const bar = document.getElementById('raga-info-bar');
+    if (!ragaKey || !RagaData[ragaKey]) { bar.style.display = 'none'; return; }
+    const raga = RagaData[ragaKey];
+    bar.style.display = 'flex';
+    document.getElementById('raga-bar-name').textContent    = raga.name;
+    document.getElementById('raga-bar-aroha').textContent   = 'Aroha: '   + raga.aroha;
+    document.getElementById('raga-bar-avaroha').textContent = 'Avaroha: ' + raga.avaroha;
+    document.getElementById('raga-bar-vadi').textContent    = raga.vadi;
+    document.getElementById('raga-bar-samvadi').textContent = raga.samvadi;
+    document.querySelectorAll('.raga-swar').forEach(el => {
+        const sw = el.dataset.sw;
+        el.className = 'raga-swar';
+        if      (sw === raga.vadi)              el.classList.add('raga-swar-vadi');
+        else if (sw === raga.samvadi)           el.classList.add('raga-swar-samvadi');
+        else if (raga.allowed.includes(sw))     el.classList.add('raga-swar-in');
+        else                                    el.classList.add('raga-swar-out');
+    });
+}
+
 // Apply / remove the visual "hold" style on a note-unit based on its current value.
 // Called after creating each unit (on load) and on every user change.
 function applySustainStyle(unit) {
@@ -1310,6 +1464,7 @@ function addLine(data) {
 
     if (adlibVal) line.classList.add('adlib-line');
     sheet.appendChild(line);
+    applyRagaHighlights();
 }
 
 function toggleOctave(btn, val) {
@@ -1397,6 +1552,7 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
 
     if (e.target.classList.contains('note-select')) {
         applySustainStyle(e.target.closest('.note-unit'));
+        applyRagaHighlights();
     }
 
     if (e.target.classList.contains('line-adlib')) {
@@ -1411,6 +1567,14 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
 
 // Initialise with one blank line
 addLine();
+
+// Raga Mode controls
+document.getElementById('raga-mode-toggle').addEventListener('change', function() {
+    const grp = document.getElementById('raga-select-group');
+    grp.style.display = this.checked ? '' : 'none';
+    applyRagaHighlights();
+});
+document.getElementById('raga-select').addEventListener('change', applyRagaHighlights);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
