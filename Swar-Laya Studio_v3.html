@@ -2216,9 +2216,8 @@ document.getElementById('raga-mode-toggle').addEventListener('change', function(
 });
 document.getElementById('raga-select').addEventListener('change', applyRagaHighlights);
 
-// Populate dropdown immediately from built-in data; Firestore will override if available
+// Populate dropdown with empty list immediately; Firestore load below will fill it
 populateRagaDropdown();
-loadRagasFromFirestore();
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
@@ -2242,6 +2241,9 @@ try {
 } catch(e) {
     console.warn('Firebase not configured. Cloud features disabled.', e.message);
 }
+
+// Load ragas from Firestore (must be after db is initialised above)
+loadRagasFromFirestore();
 
 // ── App state ─────────────────────────────────────────────────────────────────
 let currentUser   = null;
