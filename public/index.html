@@ -1814,17 +1814,31 @@ function schedulePakkadNote(freq, inst, startTime, duration) {
 
 // Parse an aroha/avaroha string ("Sa Re Ga ma Pa Dha Ni Ṡa") into
 // [{note, oct}] entries compatible with schedulePakkadNote.
-// Ṡ (U+1E60) = upper Sa; combining dot above (U+0307) = upper; dot below (U+0323) = lower.
+//
+// Handles multiple Unicode encodings used by different data sources:
+//  Upper octave:  Ṡ/ṡ (U+1E60/61 precomposed), combining dot above (U+0307),
+//                 precomposed 'ȧ' (U+0227) e.g. 'Sȧ' = upper Sa
+//  Lower octave:  combining dot below (U+0323), precomposed 'ị' (U+1ECB) e.g. 'Nị',
+//                 modifier low vertical line prefix (U+02CC) e.g. 'ˌNi'
 function parseRagaString(str) {
     if (!str) return [];
     return str.trim().split(/\s+/).map(token => {
         if (!token) return null;
-        // Ṡa or Ṡ (U+1E60) = upper Sa
+        // ── Upper octave markers ──────────────────────────────────────────────
+        // Ṡ/ṡ (U+1E60 / U+1E61) precomposed = upper Sa
         if (/[\u1E60\u1E61]/u.test(token)) return { note: 'Sa', oct: 1 };
-        // Combining dot above (U+0307) = upper octave
+        // Combining dot ABOVE (U+0307) anywhere in token = upper octave
         if (token.includes('\u0307')) return { note: token.replace(/\u0307/g, ''), oct: 1 };
-        // Combining dot below (U+0323) = lower octave
+        // Precomposed 'ȧ' (U+0227, Latin small a with dot above) = upper octave
+        // e.g. 'Sȧ' (batch-research encoding of upper Sa)
+        if (token.includes('\u0227')) return { note: token.replace(/\u0227/g, 'a'), oct: 1 };
+        // ── Lower octave markers ──────────────────────────────────────────────
+        // Combining dot BELOW (U+0323) = lower octave
         if (token.includes('\u0323')) return { note: token.replace(/\u0323/g, ''), oct: -1 };
+        // Precomposed 'ị' (U+1ECB, i with dot below) = lower octave, e.g. 'Nị'
+        if (token.includes('\u1ECB')) return { note: token.replace(/\u1ECB/g, 'i'), oct: -1 };
+        // Modifier letter low vertical line prefix (U+02CC) = lower octave, e.g. 'ˌNi'
+        if (token.startsWith('\u02CC')) return { note: token.slice(1), oct: -1 };
         return { note: token, oct: 0 };
     }).filter(e => e && SwaraMap[e.note] !== undefined && SwaraMap[e.note] !== null);
 }
