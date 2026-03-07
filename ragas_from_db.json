@@ -1,0 +1,781 @@
+{
+  "bhinnashadajkaushikdhwanihindoli": {
+    "name": "Bhinna Shadaj-Kaushik Dhwani-Hindoli",
+    "thaat": "Bilawal",
+    "order": 20,
+    "allowed": [
+      "Sa",
+      "Ga",
+      "Ma",
+      "Dha",
+      "ni"
+    ],
+    "vadi": "Ma",
+    "samvadi": "Sa",
+    "aroha": "Sa Ga Ma Dha ni Sȧ",
+    "avaroha": "Sȧ ni Dha Ma Ga Sa",
+    "pakkad": [
+      [
+        "Sa",
+        1
+      ],
+      [
+        "ni",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "ODAV-ODAV",
+    "time": "Night",
+    "rasa": "Shant",
+    "skippedAaroh": "R P",
+    "skippedAvaroh": "R P"
+  },
+  "bihag": {
+    "name": "Bihag",
+    "thaat": "Bilawal",
+    "order": 30,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Ma",
+      "ma",
+      "Pa",
+      "Dha",
+      "Ni"
+    ],
+    "vadi": "Ga",
+    "samvadi": "Ni",
+    "aroha": "Nị Sa Ga Ma Pa Ni Sȧ",
+    "avaroha": "Sȧ Ni Dha Pa ma Ga Re Sa",
+    "pakkad": [
+      [
+        "Pa",
+        0
+      ],
+      [
+        "ma",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ]
+    ],
+    "jaati": "ODAV-SAMPUNRA",
+    "time": "Night",
+    "rasa": "",
+    "skippedAaroh": "R D",
+    "skippedAvaroh": ""
+  },
+  "bilaval": {
+    "name": "Bilaval",
+    "thaat": "Bilawal",
+    "order": 40,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Ma",
+      "Pa",
+      "Dha",
+      "Ni"
+    ],
+    "vadi": "Dha",
+    "samvadi": "Ga",
+    "aroha": "Sa Re Ga Ma Pa Dha Ni Sȧ",
+    "avaroha": "Sȧ Ni Dha Pa Ma Ga Ma Ga Re Sa",
+    "pakkad": [
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "ni",
+        0
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "ni",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ]
+    ],
+    "jaati": "ODAV-SAMPUNRA",
+    "time": "Early Morning",
+    "rasa": "",
+    "skippedAaroh": "",
+    "skippedAvaroh": ""
+  },
+  "bilawalalhaiya": {
+    "name": "Bilawal-Alhaiya",
+    "thaat": "Bilawal",
+    "order": 10,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Ma",
+      "Pa",
+      "Dha",
+      "ni"
+    ],
+    "vadi": "Dha",
+    "samvadi": "Ga",
+    "aroha": "Sa Ga Re Ga Pa ni Dha ni Sȧ",
+    "avaroha": "Sȧ ni Dha ni Dha Pa Ma Ga Ma Re Sa",
+    "pakkad": [
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "SHADAV-SAMPUNRA",
+    "time": "Late Morning",
+    "rasa": "Shant",
+    "skippedAaroh": "N/A",
+    "skippedAvaroh": "N/A"
+  },
+  "bilawaldevgiri": {
+    "name": "Bilawal-Devgiri",
+    "thaat": "Bilawal",
+    "order": 60,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Ma",
+      "Pa",
+      "Dha",
+      "ni",
+      "Ni"
+    ],
+    "vadi": "Sa",
+    "samvadi": "Pa",
+    "aroha": "Sa Re Ga Pa Dha Ni Sȧ",
+    "avaroha": "Sȧ Ni Dha Pa Dha ni Dha Pa Ma Ga Re Sa Nị",
+    "pakkad": [
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ni",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "SHADAV-SAMPUNRA",
+    "time": "Morning",
+    "rasa": "",
+    "skippedAaroh": "M",
+    "skippedAvaroh": ""
+  },
+  "deshkar": {
+    "name": "Deshkar",
+    "thaat": "Bilawal",
+    "order": 50,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Pa",
+      "Dha"
+    ],
+    "vadi": "Dha",
+    "samvadi": "Ga",
+    "aroha": "Sa Re Ga Pa Dha Sȧ",
+    "avaroha": "Sȧ Dha Pa Ga Pa Ga Re Sa",
+    "pakkad": [
+      [
+        "Sa",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ],
+      [
+        "Dha",
+        -1
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "ODAV-ODAV",
+    "time": "Morning",
+    "rasa": "",
+    "skippedAaroh": "M N",
+    "skippedAvaroh": "M N"
+  },
+  "durga": {
+    "name": "Durga",
+    "thaat": "Bilawal",
+    "order": 70,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ma",
+      "Pa",
+      "Dha"
+    ],
+    "vadi": "Ma",
+    "samvadi": "Sa",
+    "aroha": "Sa Re Ma Pa Dha Sȧ",
+    "avaroha": "Sȧ Dha Ma Pa Dha Ma Re Dhạ Sa",
+    "pakkad": [
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Dha",
+        0
+      ],
+      [
+        "Ma",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Dha",
+        -1
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "ODAV-ODAV",
+    "time": "Night",
+    "rasa": "",
+    "skippedAaroh": "G N",
+    "skippedAvaroh": "G N"
+  },
+  "hamsadhvani": {
+    "name": "Hamsadhvani",
+    "thaat": "Bilawal",
+    "order": 80,
+    "allowed": [
+      "Sa",
+      "Re",
+      "Ga",
+      "Pa",
+      "Ni"
+    ],
+    "vadi": "Pa",
+    "samvadi": "Re",
+    "aroha": "Sa Re Ga Pa Ni Sȧ",
+    "avaroha": "Sȧ Ni Pa Ga Re Sa",
+    "pakkad": [
+      [
+        "Ni",
+        -1
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ni",
+        0
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "Ni",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "Re",
+        0
+      ],
+      [
+        "Sa",
+        0
+      ]
+    ],
+    "jaati": "ODAV-ODAV",
+    "time": "Evening",
+    "rasa": "",
+    "skippedAaroh": "M D",
+    "skippedAvaroh": "M D"
+  },
+  "aabhogi": {
+    "name": "Aabhogi",
+    "thaat": "Kafi",
+    "order": 90,
+    "allowed": [
+      "Sa",
+      "Re",
+      "ga",
+      "Ma",
+      "Dha",
+      "ni"
+    ],
+    "vadi": "Sa",
+    "samvadi": "Ma",
+    "aroha": "Sa Re ga Ma Dha Sȧ",
+    "avaroha": "Sȧ ni Dha Ma ga Re Sa",
+    "pakkad": [],
+    "jaati": "ODAV-SHADAV",
+    "time": "Morning",
+    "rasa": "",
+    "skippedAaroh": "P N",
+    "skippedAvaroh": "P"
+  },
+  "basant": {
+    "name": "Basant",
+    "thaat": "Purvi",
+    "order": 100,
+    "allowed": [
+      "Sa",
+      "re",
+      "Ga",
+      "Ma",
+      "ma",
+      "Pa",
+      "dha",
+      "Ni"
+    ],
+    "vadi": "Sa",
+    "samvadi": "Pa",
+    "aroha": "Sa Ga Ma dha rė Sȧ",
+    "avaroha": "Sȧ Ni dha Pa ma Ga Ga ma Ga re Sa",
+    "pakkad": [
+      [
+        "ma",
+        0
+      ],
+      [
+        "dha",
+        0
+      ],
+      [
+        "re",
+        1
+      ],
+      [
+        "Sa",
+        1
+      ],
+      [
+        "Ni",
+        0
+      ],
+      [
+        "dha",
+        0
+      ],
+      [
+        "Pa",
+        0
+      ],
+      [
+        "ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ],
+      [
+        "ma",
+        0
+      ],
+      [
+        "Ga",
+        0
+      ]
+    ],
+    "jaati": "ODAV-SAMPUNRA",
+    "time": "Morning",
+    "rasa": "",
+    "skippedAaroh": "P N",
+    "skippedAvaroh": ""
+  }
+}

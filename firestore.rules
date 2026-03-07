@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Users ──────────────────────────────────────────────────────────────────
+    // Each user can read/write only their own profile document.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Ragas ──────────────────────────────────────────────────────────────────
+    // Anyone can read ragas (needed for the dropdown even when not logged in).
+    // Only admins (users whose Firestore profile has isAdmin:true) can write.
+    match /ragas/{ragaId} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ── User songs (sub-collection) ────────────────────────────────────────────
+    match /users/{userId}/songs/{songId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
