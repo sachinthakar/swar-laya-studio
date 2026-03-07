@@ -267,6 +267,54 @@
         .note-unit.raga-samvadi { outline:2px solid #90caf9; border-radius:4px; background:#e3f2fd; }
         .note-unit.raga-out     { opacity:0.42; outline:2px solid #ef9a9a; border-radius:4px; }
         .raga-label { font-size:10px; color:#6a1b9a; font-weight:bold; margin-left:4px; }
+        #raga-pakkad-chips { display:flex; gap:3px; flex-wrap:wrap; align-items:center; }
+        .raga-pakkad-chip {
+            padding:1px 5px; border-radius:4px; font-weight:bold;
+            font-size:11px; border:1.5px solid transparent;
+            min-width:24px; text-align:center; cursor:default;
+        }
+        #raga-pakkad-play {
+            padding:2px 9px; font-size:12px; border-radius:4px; cursor:pointer;
+            background:#6a1b9a; color:#fff; border:none; font-weight:bold;
+            transition: background 0.15s;
+        }
+        #raga-pakkad-play:hover { background:#4a148c; }
+        #raga-pakkad-play:disabled { background:#bdbdbd; cursor:default; }
+        /* ── Raga Admin Panel ── */
+        #raga-admin-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-start; justify-content:center; padding-top:40px; overflow-y:auto; }
+        #raga-admin-modal.open { display:flex; }
+        #raga-admin-box {
+            background:#fff; border-radius:10px; width:min(96vw,860px);
+            box-shadow:0 8px 40px rgba(74,20,140,0.18); padding:24px 28px 20px;
+            display:flex; flex-direction:column; gap:16px; margin-bottom:40px;
+        }
+        #raga-admin-box h2 { margin:0; color:#4a148c; font-size:18px; display:flex; align-items:center; gap:12px; }
+        .ra-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+        .ra-toolbar button { padding:5px 13px; border-radius:5px; border:none; cursor:pointer; font-size:12px; font-weight:bold; }
+        .ra-btn-seed  { background:#e8f5e9; color:#2e7d32; }
+        .ra-btn-add   { background:#4a148c; color:#fff; }
+        .ra-btn-export{ background:#e3f2fd; color:#1565c0; }
+        .ra-btn-close { background:#f5f5f5; color:#555; margin-left:auto; }
+        #raga-admin-table { width:100%; border-collapse:collapse; font-size:12px; }
+        #raga-admin-table th { background:#ede7f6; color:#4a148c; padding:6px 8px; text-align:left; font-size:11px; }
+        #raga-admin-table td { padding:5px 8px; border-bottom:1px solid #f0e9fb; vertical-align:middle; }
+        #raga-admin-table tr:hover td { background:#faf5ff; }
+        .ra-edit-btn   { background:#fff9c4; color:#e65100; border:1px solid #fbc02d; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
+        .ra-delete-btn { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
+        /* Raga edit form */
+        #raga-edit-form { display:none; background:#faf5ff; border:1px solid #d0c4e8; border-radius:8px; padding:16px; }
+        #raga-edit-form.open { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+        #raga-edit-form .full { grid-column:1/-1; }
+        #raga-edit-form label { font-size:11px; color:#6a1b9a; font-weight:bold; display:block; margin-bottom:2px; }
+        #raga-edit-form input, #raga-edit-form textarea {
+            width:100%; box-sizing:border-box; padding:5px 8px; border:1px solid #d0c4e8;
+            border-radius:4px; font-size:12px; font-family:inherit;
+        }
+        #raga-edit-form textarea { height:52px; resize:vertical; }
+        .ra-form-actions { display:flex; gap:8px; }
+        .ra-save-btn   { background:#4a148c; color:#fff; border:none; border-radius:5px; padding:6px 18px; cursor:pointer; font-weight:bold; }
+        .ra-cancel-btn { background:#f5f5f5; color:#555; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; }
+        .ra-hint { font-size:10px; color:#888; grid-column:1/-1; margin-top:-6px; }
         /* Sample loading status pill */
         #sample-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:bold; transition:background 0.4s, color 0.4s; }
         #sample-status.loading { background:#fff3e0; color:#e65100; }
@@ -486,36 +534,6 @@
                        title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
                 <select id="raga-select" style="width:108px; visibility:hidden; pointer-events:none;">
                     <option value="">— choose —</option>
-                    <optgroup label="Kalyan Thaat">
-                        <option value="yaman">Yaman</option>
-                        <option value="marwa">Marwa</option>
-                    </optgroup>
-                    <optgroup label="Bilawal Thaat">
-                        <option value="bilawal">Bilawal</option>
-                        <option value="desh">Desh</option>
-                        <option value="bhoopali">Bhoopali</option>
-                        <option value="durga">Durga</option>
-                    </optgroup>
-                    <optgroup label="Khamaj Thaat">
-                        <option value="khamaj">Khamaj</option>
-                        <option value="bageshri">Bageshri</option>
-                    </optgroup>
-                    <optgroup label="Kafi Thaat">
-                        <option value="kafi">Kafi</option>
-                    </optgroup>
-                    <optgroup label="Asavari Thaat">
-                        <option value="asavari">Asavari</option>
-                    </optgroup>
-                    <optgroup label="Bhairavi Thaat">
-                        <option value="bhairavi">Bhairavi</option>
-                        <option value="malkauns">Malkauns</option>
-                    </optgroup>
-                    <optgroup label="Bhairav Thaat">
-                        <option value="bhairav">Bhairav</option>
-                    </optgroup>
-                    <optgroup label="Todi Thaat">
-                        <option value="todi">Todi</option>
-                    </optgroup>
                 </select>
             </div>
         </div>
@@ -539,20 +557,9 @@
         <span class="raga-info-meta" id="raga-bar-avaroha"></span>
         <span class="raga-info-meta">Vadi: <b id="raga-bar-vadi" style="color:#e65100;"></b></span>
         <span class="raga-info-meta">Samvadi: <b id="raga-bar-samvadi" style="color:#1565c0;"></b></span>
-        <div class="raga-palette">
-            <span class="raga-swar" data-sw="Sa">Sa</span>
-            <span class="raga-swar" data-sw="re">re</span>
-            <span class="raga-swar" data-sw="Re">Re</span>
-            <span class="raga-swar" data-sw="ga">ga</span>
-            <span class="raga-swar" data-sw="Ga">Ga</span>
-            <span class="raga-swar" data-sw="Ma">Ma</span>
-            <span class="raga-swar" data-sw="ma">ma</span>
-            <span class="raga-swar" data-sw="Pa">Pa</span>
-            <span class="raga-swar" data-sw="dha">dha</span>
-            <span class="raga-swar" data-sw="Dha">Dha</span>
-            <span class="raga-swar" data-sw="ni">ni</span>
-            <span class="raga-swar" data-sw="Ni">Ni</span>
-        </div>
+        <span class="raga-info-meta" style="white-space:nowrap">Pakkad:</span>
+        <div id="raga-pakkad-chips"></div>
+        <button id="raga-pakkad-play" onclick="playPakkad()">▶ Play</button>
     </div>
 
     <div id="song-sheet"></div>
@@ -660,22 +667,27 @@ const DholakBols = {
 // ─── Raga Definitions ────────────────────────────────────────────────────────
 // allowed: swar names that appear in this raga (uppercase = shuddha, lowercase = komal/tivra)
 // vadi: most prominent swara; samvadi: second most prominent
-const RagaData = {
-    "bilawal":  { name:"Bilawal",  allowed:["Sa","Re","Ga","Ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga Ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
-    "yaman":    { name:"Yaman",    allowed:["Sa","Re","Ga","ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa ma Ga Re Sa"   },
-    "bhairav":  { name:"Bhairav",  allowed:["Sa","re","Ga","Ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"Re",  aroha:"Sa re Ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma Ga re Sa"   },
-    "bhairavi": { name:"Bhairavi", allowed:["Sa","re","ga","Ma","Pa","dha","ni"],       vadi:"Ma",  samvadi:"Sa",  aroha:"Sa re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga re Sa"   },
-    "kafi":     { name:"Kafi",     allowed:["Sa","Re","ga","Ma","Pa","Dha","ni"],       vadi:"ga",  samvadi:"ni",  aroha:"Sa Re ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa ni Dha Pa Ma ga Re Sa"   },
-    "khamaj":   { name:"Khamaj",   allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
-    "asavari":  { name:"Asavari",  allowed:["Sa","Re","ga","Ma","Pa","dha","ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga Re Sa"   },
-    "bageshri": { name:"Bageshri", allowed:["Sa","Re","ga","Ma","Pa","dha","Ni"],       vadi:"Ma",  samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma ga Re Sa"   },
-    "bhoopali": { name:"Bhoopali", allowed:["Sa","Re","Ga","Pa","Dha"],                vadi:"Ga",  samvadi:"Dha", aroha:"Sa Re Ga Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ga Re Sa"         },
-    "durga":    { name:"Durga",    allowed:["Sa","Re","Ma","Pa","Dha"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa Re Ma Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ma Re Sa"         },
-    "malkauns": { name:"Malkauns", allowed:["Sa","ga","Ma","dha","ni"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa ga Ma dha ni Ṡa",             avaroha:"Ṡa ni dha Ma ga Sa"         },
-    "todi":     { name:"Todi",     allowed:["Sa","re","ga","ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa re ga ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa ma ga re Sa"   },
-    "desh":     { name:"Desh",     allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ma Pa ni Ṡa",              avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa"   },
-    "marwa":    { name:"Marwa",    allowed:["Sa","re","Ga","ma","Dha","Ni"],            vadi:"re",  samvadi:"Dha", aroha:"Sa re Ga ma Dha Ni Ṡa",          avaroha:"Ṡa Ni Dha ma Ga re Sa"      },
+// pakkad: [[swarName, octave], ...] — octave: -1=lower, 0=middle, 1=upper
+// thaat: parent thaat name (used to group the dropdown)
+// order: sort order within thaat group
+let RagaData = {
+    "bilawal":  { name:"Bilawal",  thaat:"Bilawal", order:20, allowed:["Sa","Re","Ga","Ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga Ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa",   pakkad:[["Sa",0],["Re",0],["Ga",0],["Ma",0],["Pa",0],["Ga",0],["Ma",0],["Re",0],["Sa",0]]  },
+    "yaman":    { name:"Yaman",    thaat:"Kalyan",  order:10, allowed:["Sa","Re","Ga","ma","Pa","Dha","Ni"],       vadi:"Ga",  samvadi:"Ni",  aroha:"Sa Re Ga ma Pa Dha Ni Ṡa",       avaroha:"Ṡa Ni Dha Pa ma Ga Re Sa",   pakkad:[["Ni",-1],["Re",0],["Ga",0],["ma",0],["Ga",0],["Re",0],["Sa",0]]                  },
+    "bhairav":  { name:"Bhairav",  thaat:"Bhairav", order:70, allowed:["Sa","re","Ga","Ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"Re",  aroha:"Sa re Ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma Ga re Sa",   pakkad:[["Sa",0],["re",0],["Ga",0],["Ma",0],["dha",0],["Pa",0],["Ma",0],["Ga",0],["re",0],["Sa",0]]  },
+    "bhairavi": { name:"Bhairavi", thaat:"Bhairavi",order:60, allowed:["Sa","re","ga","Ma","Pa","dha","ni"],       vadi:"Ma",  samvadi:"Sa",  aroha:"Sa re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga re Sa",   pakkad:[["Sa",0],["re",0],["ga",0],["Ma",0],["Pa",0],["dha",0],["ni",0],["Sa",1]]          },
+    "kafi":     { name:"Kafi",     thaat:"Kafi",    order:40, allowed:["Sa","Re","ga","Ma","Pa","Dha","ni"],       vadi:"ga",  samvadi:"ni",  aroha:"Sa Re ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa ni Dha Pa Ma ga Re Sa",   pakkad:[["Sa",0],["Re",0],["ga",0],["Ma",0],["Pa",0],["Dha",0],["ni",0],["Sa",1]]          },
+    "khamaj":   { name:"Khamaj",   thaat:"Khamaj",  order:30, allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ga Ma Pa Dha ni Ṡa",       avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa",   pakkad:[["Ga",0],["Ma",0],["Pa",0],["Dha",0],["ni",0],["Sa",1],["Ni",0],["Dha",0],["Pa",0],["Ma",0],["Ga",0],["Re",0],["Sa",0]]  },
+    "asavari":  { name:"Asavari",  thaat:"Asavari", order:50, allowed:["Sa","Re","ga","Ma","Pa","dha","ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha ni Ṡa",       avaroha:"Ṡa ni dha Pa Ma ga Re Sa",   pakkad:[["dha",0],["Pa",0],["Ma",0],["ga",0],["Re",0],["Sa",0]]                           },
+    "bageshri": { name:"Bageshri", thaat:"Khamaj",  order:31, allowed:["Sa","Re","ga","Ma","Pa","dha","Ni"],       vadi:"Ma",  samvadi:"ga",  aroha:"Sa Re ga Ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa Ma ga Re Sa",   pakkad:[["Ma",0],["ga",0],["Re",0],["Sa",0],["Re",0],["ga",0],["Ma",0],["Pa",0],["dha",0],["Ni",0],["Sa",1]]  },
+    "bhoopali": { name:"Bhoopali", thaat:"Bilawal", order:21, allowed:["Sa","Re","Ga","Pa","Dha"],                vadi:"Ga",  samvadi:"Dha", aroha:"Sa Re Ga Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ga Re Sa",         pakkad:[["Ga",0],["Re",0],["Sa",0],["Re",0],["Ga",0],["Pa",0],["Dha",0],["Sa",1]]         },
+    "durga":    { name:"Durga",    thaat:"Bilawal", order:22, allowed:["Sa","Re","Ma","Pa","Dha"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa Re Ma Pa Dha Ṡa",             avaroha:"Ṡa Dha Pa Ma Re Sa",         pakkad:[["Re",0],["Ma",0],["Pa",0],["Dha",0],["Pa",0],["Ma",0],["Re",0],["Sa",0]]         },
+    "malkauns": { name:"Malkauns", thaat:"Bhairavi",order:61, allowed:["Sa","ga","Ma","dha","ni"],                vadi:"Ma",  samvadi:"Sa",  aroha:"Sa ga Ma dha ni Ṡa",             avaroha:"Ṡa ni dha Ma ga Sa",         pakkad:[["Sa",0],["ga",0],["Ma",0],["dha",0],["ni",0],["Sa",1],["ni",0],["dha",0],["Ma",0],["ga",0],["Sa",0]]  },
+    "todi":     { name:"Todi",     thaat:"Todi",    order:80, allowed:["Sa","re","ga","ma","Pa","dha","Ni"],       vadi:"dha", samvadi:"ga",  aroha:"Sa re ga ma Pa dha Ni Ṡa",       avaroha:"Ṡa Ni dha Pa ma ga re Sa",   pakkad:[["Sa",0],["re",0],["ga",0],["ma",0],["Pa",0],["dha",0],["Ni",0],["Sa",1]]         },
+    "desh":     { name:"Desh",     thaat:"Bilawal", order:23, allowed:["Sa","Re","Ga","Ma","Pa","Dha","ni","Ni"], vadi:"Ga",  samvadi:"ni",  aroha:"Sa Re Ma Pa ni Ṡa",              avaroha:"Ṡa Ni Dha Pa Ma Ga Re Sa",   pakkad:[["Sa",0],["Re",0],["Ma",0],["Pa",0],["ni",0],["Sa",1],["Ni",0],["Dha",0],["Pa",0],["Ma",0],["Ga",0],["Re",0],["Sa",0]]  },
+    "marwa":    { name:"Marwa",    thaat:"Kalyan",  order:11, allowed:["Sa","re","Ga","ma","Dha","Ni"],            vadi:"re",  samvadi:"Dha", aroha:"Sa re Ga ma Dha Ni Ṡa",          avaroha:"Ṡa Ni Dha ma Ga re Sa",      pakkad:[["re",0],["Ga",0],["ma",0],["Dha",0],["Ni",0],["Sa",1],["Ni",0],["Dha",0],["ma",0],["Ga",0],["re",0],["Sa",0]]  },
 };
+// Snapshot of built-in ragas (used by "Seed from Built-in" in the admin panel)
+const BUILTIN_RAGA_DATA = JSON.parse(JSON.stringify(RagaData));
 
 // ─── Audio Initialisation ────────────────────────────────────────────────────
 function initAudio() {
@@ -1598,6 +1610,56 @@ function updateTanpura() { if (isTanpuraOn) startTanpura(); }
 
 // ─── Sustain (hold) helpers ───────────────────────────────────────────────────
 
+// ─── Raga Dropdown ───────────────────────────────────────────────────────────
+// Rebuild the raga <select> from the current RagaData (called after load/seed).
+function populateRagaDropdown() {
+    const sel = document.getElementById('raga-select');
+    const prev = sel.value;
+    sel.innerHTML = '<option value="">— choose —</option>';
+
+    // Group by thaat, sorted by order
+    const thaatMap = {};
+    Object.entries(RagaData).forEach(([key, r]) => {
+        const t = r.thaat || 'Other';
+        if (!thaatMap[t]) thaatMap[t] = [];
+        thaatMap[t].push({ key, ...r });
+    });
+    // Sort thaats alphabetically, ragas within each thaat by order
+    Object.keys(thaatMap).sort().forEach(thaat => {
+        const grp = document.createElement('optgroup');
+        grp.label = thaat + ' Thaat';
+        thaatMap[thaat]
+            .sort((a, b) => (a.order || 0) - (b.order || 0))
+            .forEach(r => {
+                const opt = document.createElement('option');
+                opt.value = r.key;
+                opt.textContent = r.name;
+                grp.appendChild(opt);
+            });
+        sel.appendChild(grp);
+    });
+    if (prev) sel.value = prev;
+}
+
+// Load ragas from Firestore 'ragas' collection.
+// Falls back to built-in RagaData if collection is empty or unavailable.
+async function loadRagasFromFirestore() {
+    if (!db) { populateRagaDropdown(); return; }
+    try {
+        const snap = await db.collection('ragas').orderBy('order').get();
+        if (!snap.empty) {
+            const loaded = {};
+            snap.forEach(doc => {
+                loaded[doc.id] = doc.data();
+            });
+            RagaData = loaded;
+        }
+    } catch(e) {
+        console.warn('Could not load ragas from Firestore, using built-in data.', e.message);
+    }
+    populateRagaDropdown();
+}
+
 // ─── Raga Mode ────────────────────────────────────────────────────────────────
 // Apply vadi/samvadi/out-of-raga highlight classes to all note-units in the sheet.
 function applyRagaHighlights() {
@@ -1630,14 +1692,81 @@ function updateRagaInfoBar(ragaKey) {
     document.getElementById('raga-bar-avaroha').textContent = 'Avaroha: ' + raga.avaroha;
     document.getElementById('raga-bar-vadi').textContent    = raga.vadi;
     document.getElementById('raga-bar-samvadi').textContent = raga.samvadi;
-    document.querySelectorAll('.raga-swar').forEach(el => {
-        const sw = el.dataset.sw;
-        el.className = 'raga-swar';
-        if      (sw === raga.vadi)              el.classList.add('raga-swar-vadi');
-        else if (sw === raga.samvadi)           el.classList.add('raga-swar-samvadi');
-        else if (raga.allowed.includes(sw))     el.classList.add('raga-swar-in');
-        else                                    el.classList.add('raga-swar-out');
+
+    // Build pakkad chips (replacing the old 12-swar palette)
+    const chips = document.getElementById('raga-pakkad-chips');
+    chips.innerHTML = '';
+    (raga.pakkad || []).forEach(([sw, oct]) => {
+        const chip = document.createElement('span');
+        chip.className = 'raga-pakkad-chip';
+        // Upper octave → combining dot above; lower → combining dot below
+        let label = sw;
+        if (oct === 1)  label = sw + '\u0307';
+        if (oct === -1) label = sw + '\u0323';
+        chip.textContent = label;
+        if      (sw === raga.vadi)          chip.classList.add('raga-swar-vadi');
+        else if (sw === raga.samvadi)       chip.classList.add('raga-swar-samvadi');
+        else if (raga.allowed.includes(sw)) chip.classList.add('raga-swar-in');
+        else                                chip.classList.add('raga-swar-out');
+        chips.appendChild(chip);
     });
+}
+
+// Play the pakkad of the currently selected raga sequentially.
+let pakkadTimers = [];
+function playPakkad() {
+    const ragaKey = document.getElementById('raga-select').value;
+    if (!ragaKey || !RagaData[ragaKey]) return;
+    const raga = RagaData[ragaKey];
+    if (!raga.pakkad || !raga.pakkad.length) return;
+
+    // Cancel any previous pakkad playback
+    pakkadTimers.forEach(t => clearTimeout(t));
+    pakkadTimers = [];
+
+    initAudio();
+    const baseSa = parseFloat(document.getElementById('scale-select').value) * 2;
+    const bpm    = parseInt(document.getElementById('bpm').value) || 90;
+    // Each note lasts 0.75 beats; gap between note starts is 0.8 beats
+    const noteMs = (60000 / bpm) * 0.75;
+    const stepMs = (60000 / bpm) * 0.80;
+
+    // Use the first line's instrument, or harmonium as default
+    const instEl = document.querySelector('.line-instrument select');
+    const inst   = instEl ? instEl.value : 'harmonium';
+
+    // Set up oscillator synth (fallback when samples not yet loaded)
+    setupSynth(inst);
+
+    const btn = document.getElementById('raga-pakkad-play');
+    if (btn) { btn.disabled = true; btn.textContent = '■ Stop'; btn.onclick = stopPakkad; }
+
+    const totalMs = raga.pakkad.length * stepMs + 400;
+    const endTimer = setTimeout(() => {
+        stopSynth();
+        if (btn) { btn.disabled = false; btn.textContent = '▶ Play'; btn.onclick = playPakkad; }
+    }, totalMs);
+    pakkadTimers.push(endTimer);
+
+    raga.pakkad.forEach(([sw, oct], i) => {
+        const t = setTimeout(() => {
+            const ratio = SwaraMap[sw];
+            if (!ratio) return;
+            let freq = baseSa * ratio;
+            if (oct === 1)  freq *= 2;
+            if (oct === -1) freq *= 0.5;
+            triggerNote(freq, inst, 0.012, noteMs / 1000, 1.0);
+        }, i * stepMs);
+        pakkadTimers.push(t);
+    });
+}
+
+function stopPakkad() {
+    pakkadTimers.forEach(t => clearTimeout(t));
+    pakkadTimers = [];
+    stopSynth();
+    const btn = document.getElementById('raga-pakkad-play');
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Play'; btn.onclick = playPakkad; }
 }
 
 // Apply / remove the visual "hold" style on a note-unit based on its current value.
@@ -1939,6 +2068,10 @@ document.getElementById('raga-mode-toggle').addEventListener('change', function(
 });
 document.getElementById('raga-select').addEventListener('change', applyRagaHighlights);
 
+// Populate dropdown immediately from built-in data; Firestore will override if available
+populateRagaDropdown();
+loadRagasFromFirestore();
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1969,6 +2102,7 @@ try {
 // ── App state ─────────────────────────────────────────────────────────────────
 let currentUser   = null;
 let isPremium     = false;
+let isAdmin       = false;
 let currentCompId = null;   // Firestore document ID of the currently loaded composition
 
 const FREE_COMP_LIMIT = 3;  // max compositions for free-tier accounts
@@ -1981,8 +2115,10 @@ if (auth) {
             await ensureUserProfile(user);
             const profile = await db.collection('users').doc(user.uid).get();
             isPremium = profile.exists ? (profile.data().isPremium || false) : false;
+            isAdmin   = profile.exists ? (profile.data().isAdmin   || false) : false;
         } else {
             isPremium = false;
+            isAdmin   = false;
         }
         updateAuthBar(user);
     });
@@ -2000,12 +2136,16 @@ function updateAuthBar(user) {
         const badge   = isPremium
             ? '<span class="premium-badge">⭐ Premium</span>'
             : '<span class="free-badge">Free</span>';
+        const adminBtn = isAdmin
+            ? `<button class="btn-signout" style="background:#4a148c;color:#fff;" onclick="openRagaAdmin()">🎵 Raga Admin</button>`
+            : '';
         bar.innerHTML = `
             ${logo}
             <div class="spacer"></div>
             ${avatar}
             <span class="user-name">${name}</span>
             ${badge}
+            ${adminBtn}
             <button class="btn-signout" onclick="doSignOut()">Sign Out</button>
         `;
     } else {
@@ -2220,6 +2360,174 @@ function showToast(msg) {
     clearTimeout(t._timer);
     t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RAGA ADMIN PANEL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function openRagaAdmin() {
+    if (!isAdmin) return;
+    raAdminRefreshTable();
+    document.getElementById('raga-admin-modal').classList.add('open');
+}
+function closeRagaAdmin() {
+    document.getElementById('raga-admin-modal').classList.remove('open');
+    raAdminCancelEdit();
+}
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+function raAdminRefreshTable() {
+    const tbody = document.getElementById('raga-admin-tbody');
+    tbody.innerHTML = '';
+    Object.entries(RagaData)
+        .sort((a, b) => ((a[1].thaat||'') + (a[1].order||0)).localeCompare((b[1].thaat||'') + (b[1].order||0)))
+        .forEach(([key, r]) => {
+            const pakkadText = (r.pakkad || []).map(([sw, oct]) =>
+                oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw).join(' ');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><code>${key}</code></td>
+                <td><b>${r.name}</b></td>
+                <td>${r.thaat || ''}</td>
+                <td style="color:#e65100;font-weight:bold">${r.vadi}</td>
+                <td style="color:#1565c0;font-weight:bold">${r.samvadi}</td>
+                <td style="font-size:11px;color:#555">${pakkadText}</td>
+                <td>
+                    <button class="ra-edit-btn"   onclick="raAdminEdit('${key}')">Edit</button>
+                    <button class="ra-delete-btn" onclick="raAdminDelete('${key}')">Delete</button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+}
+
+// ── Add / Edit form ───────────────────────────────────────────────────────────
+function raAdminNew() {
+    document.getElementById('ra-edit-key-original').value = '';
+    ['ra-key','ra-name','ra-thaat','ra-order','ra-allowed',
+     'ra-vadi','ra-samvadi','ra-aroha','ra-avaroha','ra-pakkad'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('ra-key').readOnly = false;
+    document.getElementById('raga-edit-form').classList.add('open');
+    document.getElementById('ra-key').focus();
+}
+
+function raAdminEdit(key) {
+    const r = RagaData[key];
+    if (!r) return;
+    document.getElementById('ra-edit-key-original').value = key;
+    document.getElementById('ra-key').value     = key;
+    document.getElementById('ra-key').readOnly  = true;   // key is the doc ID — don't change
+    document.getElementById('ra-name').value    = r.name    || '';
+    document.getElementById('ra-thaat').value   = r.thaat   || '';
+    document.getElementById('ra-order').value   = r.order   || '';
+    document.getElementById('ra-allowed').value = (r.allowed || []).join(' ');
+    document.getElementById('ra-vadi').value    = r.vadi    || '';
+    document.getElementById('ra-samvadi').value = r.samvadi || '';
+    document.getElementById('ra-aroha').value   = r.aroha   || '';
+    document.getElementById('ra-avaroha').value = r.avaroha || '';
+    const pakkadText = (r.pakkad || []).map(([sw, oct]) =>
+        oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw).join(' ');
+    document.getElementById('ra-pakkad').value  = pakkadText;
+    document.getElementById('raga-edit-form').classList.add('open');
+    document.getElementById('ra-name').focus();
+}
+
+function raAdminCancelEdit() {
+    document.getElementById('raga-edit-form').classList.remove('open');
+}
+
+// Parse pakkad text "Ni, Re Ga ma Sa'" → [["Ni",-1],["Re",0],["Ga",0],["ma",0],["Sa",1]]
+function parsePakkadText(text) {
+    return text.trim().split(/\s+/).filter(Boolean).map(token => {
+        if (token.endsWith("'"))  return [token.slice(0,-1), 1];
+        if (token.endsWith(','))  return [token.slice(0,-1), -1];
+        return [token, 0];
+    });
+}
+
+async function raAdminSave() {
+    const keyOrig = document.getElementById('ra-edit-key-original').value;
+    const key     = document.getElementById('ra-key').value.trim().toLowerCase().replace(/\s+/g,'');
+    const name    = document.getElementById('ra-name').value.trim();
+    const thaat   = document.getElementById('ra-thaat').value.trim();
+    const order   = parseInt(document.getElementById('ra-order').value) || 0;
+    const allowed = document.getElementById('ra-allowed').value.trim().split(/\s+/).filter(Boolean);
+    const vadi    = document.getElementById('ra-vadi').value.trim();
+    const samvadi = document.getElementById('ra-samvadi').value.trim();
+    const aroha   = document.getElementById('ra-aroha').value.trim();
+    const avaroha = document.getElementById('ra-avaroha').value.trim();
+    const pakkad  = parsePakkadText(document.getElementById('ra-pakkad').value);
+
+    if (!key || !name) { alert('Key and Name are required.'); return; }
+
+    const ragaDoc = { name, thaat, order, allowed, vadi, samvadi, aroha, avaroha, pakkad };
+
+    // Save to Firestore
+    if (db) {
+        try {
+            await db.collection('ragas').doc(key).set(ragaDoc);
+        } catch(e) {
+            alert('Firestore save failed: ' + e.message); return;
+        }
+    }
+
+    // Update in-memory RagaData and refresh UI
+    RagaData[key] = ragaDoc;
+    populateRagaDropdown();
+    raAdminCancelEdit();
+    raAdminRefreshTable();
+    showToast(`Raga "${name}" saved ✓`);
+}
+
+async function raAdminDelete(key) {
+    const r = RagaData[key];
+    if (!r) return;
+    if (!confirm(`Delete raga "${r.name}"? This cannot be undone.`)) return;
+
+    if (db) {
+        try {
+            await db.collection('ragas').doc(key).delete();
+        } catch(e) {
+            alert('Firestore delete failed: ' + e.message); return;
+        }
+    }
+    delete RagaData[key];
+    populateRagaDropdown();
+    raAdminRefreshTable();
+    showToast(`Raga "${r.name}" deleted`);
+}
+
+// ── Seed built-in data into Firestore ────────────────────────────────────────
+async function raAdminSeed() {
+    if (!db) { alert('Firestore not available.'); return; }
+    if (!confirm('This will write all built-in ragas to Firestore (existing docs will be overwritten). Proceed?')) return;
+
+    let count = 0;
+    for (const [key, raga] of Object.entries(BUILTIN_RAGA_DATA)) {
+        try {
+            await db.collection('ragas').doc(key).set(raga);
+            count++;
+        } catch(e) {
+            console.error('Failed to seed', key, e);
+        }
+    }
+    RagaData = JSON.parse(JSON.stringify(BUILTIN_RAGA_DATA));
+    populateRagaDropdown();
+    raAdminRefreshTable();
+    showToast(`Seeded ${count} ragas to Firestore ✓`);
+}
+
+// ── Export JSON ───────────────────────────────────────────────────────────────
+function raAdminExport() {
+    const json = JSON.stringify(RagaData, null, 2);
+    const blob = new Blob([json], { type:'application/json' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = 'ragas.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
 </script>
 <!-- ── Composition Picker Modal ── -->
 <div id="comp-modal" class="modal-overlay">
@@ -2271,6 +2579,82 @@ function showToast(msg) {
                 onclick="document.getElementById('login-modal').style.display='none'">
             Maybe later
         </button>
+    </div>
+</div>
+
+<!-- ── Raga Admin Panel ── -->
+<div id="raga-admin-modal">
+    <div id="raga-admin-box">
+        <h2>🎵 Raga Database
+            <span style="font-size:12px;font-weight:normal;color:#888;">Admin only</span>
+        </h2>
+        <div class="ra-toolbar">
+            <button class="ra-btn-add"    onclick="raAdminNew()">+ Add Raga</button>
+            <button class="ra-btn-seed"   onclick="raAdminSeed()">⬆ Seed from Built-in</button>
+            <button class="ra-btn-export" onclick="raAdminExport()">⬇ Export JSON</button>
+            <button class="ra-btn-close"  onclick="closeRagaAdmin()">✕ Close</button>
+        </div>
+
+        <!-- Add / Edit form (hidden until triggered) -->
+        <div id="raga-edit-form">
+            <input type="hidden" id="ra-edit-key-original">
+            <div>
+                <label>Key (ID) — e.g. yaman</label>
+                <input type="text" id="ra-key" placeholder="yaman">
+            </div>
+            <div>
+                <label>Display Name</label>
+                <input type="text" id="ra-name" placeholder="Yaman">
+            </div>
+            <div>
+                <label>Thaat</label>
+                <input type="text" id="ra-thaat" placeholder="Kalyan">
+            </div>
+            <div>
+                <label>Sort Order (number)</label>
+                <input type="number" id="ra-order" placeholder="10">
+            </div>
+            <div class="full">
+                <label>Allowed Swaras (space-separated, e.g. Sa Re Ga ma Pa Dha Ni)</label>
+                <input type="text" id="ra-allowed" placeholder="Sa Re Ga ma Pa Dha Ni">
+            </div>
+            <div>
+                <label>Vadi</label>
+                <input type="text" id="ra-vadi" placeholder="Ga">
+            </div>
+            <div>
+                <label>Samvadi</label>
+                <input type="text" id="ra-samvadi" placeholder="Ni">
+            </div>
+            <div class="full">
+                <label>Aroha (space-separated, use Ṡa for upper Sa)</label>
+                <input type="text" id="ra-aroha" placeholder="Sa Re Ga ma Pa Dha Ni Ṡa">
+            </div>
+            <div class="full">
+                <label>Avaroha</label>
+                <input type="text" id="ra-avaroha" placeholder="Ṡa Ni Dha Pa ma Ga Re Sa">
+            </div>
+            <div class="full">
+                <label>Pakkad — use <code>Sa'</code> for upper octave, <code>Sa,</code> for lower</label>
+                <input type="text" id="ra-pakkad" placeholder="Ni, Re Ga ma Ga Re Sa">
+            </div>
+            <p class="ra-hint">Pakkad format: regular note = middle octave · add <b>'</b> after for upper (e.g. <b>Sa'</b>) · add <b>,</b> after for lower (e.g. <b>Ni,</b>)</p>
+            <div class="ra-form-actions full">
+                <button class="ra-save-btn"   onclick="raAdminSave()">💾 Save</button>
+                <button class="ra-cancel-btn" onclick="raAdminCancelEdit()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Raga table -->
+        <table id="raga-admin-table">
+            <thead>
+                <tr>
+                    <th>Key</th><th>Name</th><th>Thaat</th>
+                    <th>Vadi</th><th>Samvadi</th><th>Pakkad notes</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="raga-admin-tbody"></tbody>
+        </table>
     </div>
 </div>
 

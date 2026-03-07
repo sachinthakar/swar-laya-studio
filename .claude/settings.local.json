@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\(''C:/Personal/Swar-Laya Studio/mp3_to_swarlaya.py''\\).read\\(\\)\\); print\\(''Syntax OK''\\)\")",
+      "Bash(python3 -c \":*)",
+      "Bash(dir /b)",
+      "Bash(git init -b main)",
+      "Bash(git add .gitignore .firebaserc firebase.json package.json package-lock.json requirements.txt midi_to_swar_laya.py mp3_to_swarlaya.py metronome.html)",
+      "Bash(git add \"Swar-Laya Studio Marathi.html\" \"Swar-Laya Studio_v1.html\" \"Swar-Laya Studio_v2.html\" \"Swar-Laya Studio_v3.html\")",
+      "Bash(git add public/ .github/)",
+      "Bash(git add sakhi-shejarini.json \"sakhi-shejarani-v2.json\" sakhi-shejarani-v3.json sakhi-auto.json sakhi-auto-v4.json Tarana.json \"Sakhi_Shejarani-Arun_Date.json\")",
+      "Bash(git add \"Sakhi_Shejarani-Arun_Date_Notation.png\" \"Sakhi_Shejarani-Arun_Date_verify.png\")",
+      "Bash(git commit:*)",
+      "Bash(git add \"Swar-Laya Studio_v3.html\" \"public/index.html\")",
+      "Bash(find \"/c/Personal/Swar-Laya Studio/JSP Indian Instrumental Sounds\" -type f -exec ls -lh {} ;)",
+      "Bash(find \"/c/Personal/Swar-Laya Studio/JSP Indian Instrumental Sounds\" -type f -exec ls -lh {} +)",
+      "Bash(find . -type f -exec ls -lh {} +)",
+      "Bash(find . -type f -printf '%p | %s bytes\\\\n')",
+      "Bash(python3:*)",
+      "Bash(pip install librosa -q)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where python3)",
+      "Bash(where python)"
+    ]
+  }
+}
