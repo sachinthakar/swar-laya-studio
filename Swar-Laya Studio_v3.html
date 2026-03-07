@@ -7,6 +7,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- Firebase Hosting reserved URL: auto-initializes Firebase with project config.
+         This keeps the API key out of source code. Only works on Firebase Hosting. -->
+    <script src="/__/firebase/init.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -307,6 +310,10 @@
         #raga-admin-table tr:hover td { background:#faf5ff; }
         .ra-edit-btn   { background:#fff9c4; color:#e65100; border:1px solid #fbc02d; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
         .ra-delete-btn { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
+        .ra-search-bar { display:flex; align-items:center; gap:8px; }
+        .ra-search-bar input { flex:1; padding:6px 10px; border:1px solid #d0c4e8; border-radius:6px; font-size:13px; outline:none; }
+        .ra-search-bar input:focus { border-color:#7e57c2; box-shadow:0 0 0 2px rgba(126,87,194,0.15); }
+        .ra-search-count { font-size:11px; color:#888; white-space:nowrap; }
         /* Raga edit form */
         #raga-edit-form { display:none; background:#faf5ff; border:1px solid #d0c4e8; border-radius:8px; padding:16px; }
         #raga-edit-form.open { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
@@ -1699,7 +1706,10 @@ function updateRagaInfoBar(ragaKey) {
     // Build pakkad chips (replacing the old 12-swar palette)
     const chips = document.getElementById('raga-pakkad-chips');
     chips.innerHTML = '';
-    (raga.pakkad || []).forEach(([sw, oct]) => {
+    (raga.pakkad || []).forEach(entry => {
+        // Support both {note,oct} (Firestore format) and [note,oct] (legacy)
+        const sw  = Array.isArray(entry) ? entry[0] : entry.note;
+        const oct = Array.isArray(entry) ? entry[1] : entry.oct;
         const chip = document.createElement('span');
         chip.className = 'raga-pakkad-chip';
         // Upper octave → combining dot above; lower → combining dot below
@@ -1709,7 +1719,7 @@ function updateRagaInfoBar(ragaKey) {
         chip.textContent = label;
         if      (sw === raga.vadi)          chip.classList.add('raga-swar-vadi');
         else if (sw === raga.samvadi)       chip.classList.add('raga-swar-samvadi');
-        else if (raga.allowed.includes(sw)) chip.classList.add('raga-swar-in');
+        else if ((raga.allowed||[]).includes(sw)) chip.classList.add('raga-swar-in');
         else                                chip.classList.add('raga-swar-out');
         chips.appendChild(chip);
     });
@@ -1802,51 +1812,94 @@ function schedulePakkadNote(freq, inst, startTime, duration) {
     }
 }
 
+// Parse an aroha/avaroha string ("Sa Re Ga ma Pa Dha Ni Ṡa") into
+// [{note, oct}] entries compatible with schedulePakkadNote.
+// Ṡ (U+1E60) = upper Sa; combining dot above (U+0307) = upper; dot below (U+0323) = lower.
+function parseRagaString(str) {
+    if (!str) return [];
+    return str.trim().split(/\s+/).map(token => {
+        if (!token) return null;
+        // Ṡa or Ṡ (U+1E60) = upper Sa
+        if (/[\u1E60\u1E61]/u.test(token)) return { note: 'Sa', oct: 1 };
+        // Combining dot above (U+0307) = upper octave
+        if (token.includes('\u0307')) return { note: token.replace(/\u0307/g, ''), oct: 1 };
+        // Combining dot below (U+0323) = lower octave
+        if (token.includes('\u0323')) return { note: token.replace(/\u0323/g, ''), oct: -1 };
+        return { note: token, oct: 0 };
+    }).filter(e => e && SwaraMap[e.note] !== undefined && SwaraMap[e.note] !== null);
+}
+
 function playPakkad() {
     const ragaKey = document.getElementById('raga-select').value;
     if (!ragaKey || !RagaData[ragaKey]) return;
     const raga = RagaData[ragaKey];
-    if (!raga.pakkad || !raga.pakkad.length) return;
 
     // Cancel any previous pakkad playback
     stopPakkad();
 
     initAudio();
-    const baseSa = parseFloat(document.getElementById('scale-select').value) * 2;
-    const bpm    = parseInt(document.getElementById('bpm').value) || 90;
-    // stepSec  = time between successive note starts (0.85 beats)
-    // noteSec  = individual note duration — slightly *longer* than step so
-    //            consecutive notes overlap a little → seamless, continuous feel
-    const stepSec = (60.0 / bpm) * 0.85;   // gap between note onsets
-    const noteSec = stepSec * 1.25;          // duration > step → slight overlap
+    const baseSa  = parseFloat(document.getElementById('scale-select').value) * 2;
+    const bpm     = parseInt(document.getElementById('bpm').value) || 90;
+    // stepSec  = time between successive note starts
+    // noteSec  = individual note duration — slightly longer so notes overlap → smooth feel
+    const stepSec = (60.0 / bpm) * 0.85;
+    const noteSec = stepSec * 1.25;
+    const gapSec  = (60.0 / bpm) * 1.2;   // ~1 beat silence between sections
 
     // Use the raga-mode instrument selector if present, else first line's, else harmonium
     const instEl = document.getElementById('raga-instrument') ||
                    document.querySelector('.line-instrument select');
     const inst   = instEl ? instEl.value : 'harmonium';
 
-    // Kick off async sample loading for this instrument (non-blocking)
     ensureSamplesLoaded(inst);
 
-    const btn       = document.getElementById('raga-pakkad-play');
+    const btn = document.getElementById('raga-pakkad-play');
     if (btn) { btn.disabled = true; btn.textContent = '■ Stop'; btn.onclick = stopPakkad; }
 
-    // Pre-schedule every note at a precise audioCtx timestamp
-    const t0 = audioCtx.currentTime + 0.05;   // 50 ms look-ahead
-    raga.pakkad.forEach((entry, i) => {
-        // Support both [{note,oct}] (Firestore format) and [[note,oct]] (legacy)
-        const sw  = Array.isArray(entry) ? entry[0] : entry.note;
-        const oct = Array.isArray(entry) ? entry[1] : entry.oct;
-        const ratio = SwaraMap[sw];
+    // Build the three sections
+    const arohaEntries   = parseRagaString(raga.aroha);
+    const avarohaEntries = parseRagaString(raga.avaroha);
+    const pakkadEntries  = (raga.pakkad || []).map(entry =>
+        Array.isArray(entry) ? { note: entry[0], oct: entry[1] } : entry
+    ).filter(e => SwaraMap[e.note] !== undefined && SwaraMap[e.note] !== null);
+
+    const gapSteps = Math.max(1, Math.round(gapSec / stepSec));
+
+    // Helper: schedule a single note at the current index position
+    const t0 = audioCtx.currentTime + 0.05;
+    let idx = 0;
+    function schedNote(note, oct) {
+        const ratio = SwaraMap[note];
         if (!ratio) return;
         let freq = baseSa * ratio;
         if (oct === 1)  freq *= 2;
         if (oct === -1) freq *= 0.5;
-        schedulePakkadNote(freq, inst, t0 + i * stepSec, noteSec);
-    });
+        schedulePakkadNote(freq, inst, t0 + idx * stepSec, noteSec);
+    }
 
-    // Single JS timer only for resetting the UI after all audio finishes
-    const totalMs = (raga.pakkad.length * stepSec + noteSec + 0.15) * 1000;
+    // Schedule Aroha
+    if (arohaEntries.length) {
+        arohaEntries.forEach(e => { schedNote(e.note, e.oct); idx++; });
+        idx += gapSteps;
+    }
+    // Schedule Avaroha
+    if (avarohaEntries.length) {
+        avarohaEntries.forEach(e => { schedNote(e.note, e.oct); idx++; });
+        idx += gapSteps;
+    }
+    // Schedule Pakkad
+    if (pakkadEntries.length) {
+        pakkadEntries.forEach(e => { schedNote(e.note, e.oct); idx++; });
+    }
+
+    if (idx === 0) {
+        // Nothing to play
+        if (btn) { btn.disabled = false; btn.textContent = '▶ Play'; btn.onclick = playPakkad; }
+        return;
+    }
+
+    // Single JS timer for UI reset after all audio finishes
+    const totalMs = (idx * stepSec + noteSec + 0.15) * 1000;
     pakkadEndTimer = setTimeout(() => {
         pakkadSources = [];
         if (btn) { btn.disabled = false; btn.textContent = '▶ Play'; btn.onclick = playPakkad; }
@@ -2171,26 +2224,22 @@ loadRagasFromFirestore();
 // PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
 // ═══════════════════════════════════════════════════════════════════════════════
 //
-// SETUP: Replace the placeholder values below with your Firebase project config.
-// Get them from: Firebase Console → Project Settings → Your apps → Web app
+// Firebase is auto-initialized by /__/firebase/init.js (loaded in <head>)
+// when the app is served from Firebase Hosting. This keeps the API key out
+// of source code entirely. When opening locally (file://), cloud features
+// are simply unavailable — use the hosted URL for full functionality.
 //
-const firebaseConfig = {
-  apiKey: "AIzaSyCsVf2UuPEgexC7WoQSK0ONxuiOUxo0a88",
-  authDomain: "swar-laya-studio.firebaseapp.com",
-  projectId: "swar-laya-studio",
-  storageBucket: "swar-laya-studio.firebasestorage.app",
-  messagingSenderId: "508121720546",
-  appId: "1:508121720546:web:61c8535e222ac0916ae0bb"
-};
 
 // ── Initialise Firebase ───────────────────────────────────────────────────────
 let auth, db;
 try {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db   = firebase.firestore();
+    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+        auth = firebase.auth();
+        db   = firebase.firestore();
+    } else {
+        console.warn('Firebase not auto-initialized — cloud features disabled (local mode).');
+    }
 } catch(e) {
-    // Firebase not configured yet — cloud features will be unavailable
     console.warn('Firebase not configured. Cloud features disabled.', e.message);
 }
 
@@ -2468,15 +2517,24 @@ function openRagaAdmin() {
 function closeRagaAdmin() {
     document.getElementById('raga-admin-modal').classList.remove('open');
     raAdminCancelEdit();
+    const s = document.getElementById('raga-admin-search');
+    if (s) s.value = '';
 }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
 function raAdminRefreshTable() {
     const tbody = document.getElementById('raga-admin-tbody');
     tbody.innerHTML = '';
-    Object.entries(RagaData)
-        .sort((a, b) => ((a[1].thaat||'') + (a[1].order||0)).localeCompare((b[1].thaat||'') + (b[1].order||0)))
-        .forEach(([key, r]) => {
+    const q = (document.getElementById('raga-admin-search')?.value || '').toLowerCase().trim();
+    const allEntries = Object.entries(RagaData)
+        .sort((a, b) => ((a[1].thaat||'') + String(a[1].order||0)).localeCompare((b[1].thaat||'') + String(b[1].order||0)));
+    const filtered = q
+        ? allEntries.filter(([key, r]) =>
+            key.includes(q) ||
+            (r.name  || '').toLowerCase().includes(q) ||
+            (r.thaat || '').toLowerCase().includes(q))
+        : allEntries;
+    filtered.forEach(([key, r]) => {
             const pakkadText = (r.pakkad || []).map(entry => {
                 // Support both {note,oct} (Firestore) and [note,oct] (legacy)
                 const sw  = Array.isArray(entry) ? entry[0] : entry.note;
@@ -2488,8 +2546,8 @@ function raAdminRefreshTable() {
                 <td><code>${key}</code></td>
                 <td><b>${r.name}</b></td>
                 <td>${r.thaat || ''}</td>
-                <td style="color:#e65100;font-weight:bold">${r.vadi}</td>
-                <td style="color:#1565c0;font-weight:bold">${r.samvadi}</td>
+                <td style="color:#e65100;font-weight:bold">${r.vadi || ''}</td>
+                <td style="color:#1565c0;font-weight:bold">${r.samvadi || ''}</td>
                 <td style="font-size:11px;color:#777">${r.jaati || ''}</td>
                 <td style="font-size:11px;color:#555">${r.time || ''}</td>
                 <td style="font-size:11px;color:#555">${pakkadText}</td>
@@ -2499,6 +2557,11 @@ function raAdminRefreshTable() {
                 </td>`;
             tbody.appendChild(tr);
         });
+    const countEl = document.getElementById('raga-admin-count');
+    if (countEl) {
+        const total = allEntries.length;
+        countEl.textContent = q ? `${filtered.length} of ${total} ragas` : `${total} ragas`;
+    }
 }
 
 // ── Add / Edit form ───────────────────────────────────────────────────────────
@@ -2528,8 +2591,11 @@ function raAdminEdit(key) {
     document.getElementById('ra-samvadi').value = r.samvadi || '';
     document.getElementById('ra-aroha').value   = r.aroha   || '';
     document.getElementById('ra-avaroha').value = r.avaroha || '';
-    const pakkadText = (r.pakkad || []).map(([sw, oct]) =>
-        oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw).join(' ');
+    const pakkadText = (r.pakkad || []).map(entry => {
+        const sw  = Array.isArray(entry) ? entry[0] : entry.note;
+        const oct = Array.isArray(entry) ? entry[1] : entry.oct;
+        return oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw;
+    }).join(' ');
     document.getElementById('ra-pakkad').value         = pakkadText;
     document.getElementById('ra-jaati').value          = r.jaati        || '';
     document.getElementById('ra-time').value           = r.time         || '';
@@ -2727,6 +2793,11 @@ function raAdminExport() {
             <button class="ra-btn-seed"   onclick="raAdminSeed()">⬆ Seed from Built-in</button>
             <button class="ra-btn-export" onclick="raAdminExport()">⬇ Export JSON</button>
             <button class="ra-btn-close"  onclick="closeRagaAdmin()">✕ Close</button>
+        </div>
+        <div class="ra-search-bar">
+            <input type="text" id="raga-admin-search" placeholder="🔍 Search by name, key or thaat…"
+                   oninput="raAdminRefreshTable()">
+            <span class="ra-search-count" id="raga-admin-count"></span>
         </div>
 
         <!-- Add / Edit form (hidden until triggered) -->
