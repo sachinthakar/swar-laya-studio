@@ -851,6 +851,23 @@ const CHROMATIC_C2_C5 = (() => {
     return r; // 37 notes
 })();
 
+// Build a chromatic note name array of `count` notes starting from `startNote`
+// e.g. _buildNoteRange('C3', 37) → ['C3','Cs3','D3',…,'C6']
+function _buildNoteRange(startNote, count) {
+    const CHROM = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
+    const m = (startNote || 'C2').match(/^([A-Gs]+)(\d+)$/);
+    if (!m) return CHROMATIC_C2_C5.slice(0, count);
+    let ni = CHROM.indexOf(m[1]);
+    let oc = parseInt(m[2]);
+    if (ni < 0) return CHROMATIC_C2_C5.slice(0, count);
+    const result = [];
+    for (let i = 0; i < count; i++) {
+        result.push(CHROM[ni] + oc);
+        if (++ni >= 12) { ni = 0; oc++; }
+    }
+    return result;
+}
+
 // Preserve original CDN note lists so clearing custom samples can restore them
 const SAMPLE_ORIG_NOTES = {};
 Object.keys(SAMPLE_DEFS).forEach(inst => {
@@ -864,12 +881,13 @@ let   _pendingCustomSamples = []; // IDB records queued before audioCtx exists
 // User-uploaded IDB samples always take priority over these.
 // Add more instruments here as recordings become available.
 const BUNDLED_SAMPLES = {
-    // startOffset: seconds of silence/blank at the very start before C2 begins
-    violin: { path: '/samples/violin-c2c5.mp3', noteDuration: 3, startOffset: 1.5 }
-    // harmonium: { path: '/samples/harmonium-c2c5.mp3', noteDuration: 3, startOffset: 0 },
-    // flute:     { path: '/samples/flute-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
-    // sitar:     { path: '/samples/sitar-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
-    // piano:     { path: '/samples/piano-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
+    // startOffset: seconds of silence/blank at the very start before the first note begins
+    // startNote:   chromatic note name of the first sample in the file (default 'C2')
+    violin: { path: '/samples/violin-c2c5.mp3', noteDuration: 3, startOffset: 1.5, startNote: 'C2' },
+    flute:  { path: '/samples/flute-c2c5.mp3',  noteDuration: 3, startOffset: 0,   startNote: 'C3' },
+    // harmonium: { path: '/samples/harmonium-c2c5.mp3', noteDuration: 3, startOffset: 0, startNote: 'C2' },
+    // sitar:     { path: '/samples/sitar-c2c5.mp3',     noteDuration: 3, startOffset: 0, startNote: 'C2' },
+    // piano:     { path: '/samples/piano-c2c5.mp3',     noteDuration: 3, startOffset: 0, startNote: 'C2' },
 };
 
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
@@ -3104,13 +3122,13 @@ function _openCustomSamplesDB() {
     });
 }
 
-async function _saveCustomSampleToIDB(instrument, arrayBuffer, noteDuration, startOffset = 0) {
+async function _saveCustomSampleToIDB(instrument, arrayBuffer, noteDuration, startOffset = 0, startNote = 'C2') {
     try {
         const db = await _openCustomSamplesDB();
         return new Promise((res, rej) => {
             const req = db.transaction('samples', 'readwrite')
                           .objectStore('samples')
-                          .put({ instrument, buffer: arrayBuffer, noteDuration, startOffset });
+                          .put({ instrument, buffer: arrayBuffer, noteDuration, startOffset, startNote });
             req.onsuccess = () => res();
             req.onerror   = e  => rej(e.target.error);
         });
@@ -3130,23 +3148,83 @@ async function _deleteCustomSampleFromIDB(instrument) {
     } catch(e) { console.warn('[CustomSamples] IDB delete failed:', e); }
 }
 
-// Core: decode one MP3 → slice into 37 note AudioBuffers → populate SampleCache
-// startOffset (seconds): skip this many seconds at the beginning of the file
-//   before the first note (C2). Use this to trim leading silence.
-async function processCustomSampleFile(instrument, arrayBuffer, noteDuration, startOffset = 0) {
+// RMS-based onset detection — finds the sample position of each note start.
+// Uses level-crossing: detects transitions from below-threshold to above-threshold.
+// Returns an array of sample offsets (relative to the start of channelData),
+// or null if too few onsets found (caller falls back to fixed-grid).
+function _detectNoteOnsets(channelData, sr, approxDurSec) {
+    const hopMs      = 10;
+    const hopSamples = Math.round(hopMs / 1000 * sr);
+    const winSamples = hopSamples * 3;              // 30 ms RMS window
+    const totalHops  = Math.floor(channelData.length / hopSamples);
+    const minGapHops = Math.round(approxDurSec * 0.6 * 1000 / hopMs); // 60% of note dur
+
+    // Compute RMS energy per hop
+    const rms = new Float32Array(totalHops);
+    for (let h = 0; h < totalHops; h++) {
+        const s   = h * hopSamples;
+        const end = Math.min(s + winSamples, channelData.length);
+        let sum = 0;
+        for (let i = s; i < end; i++) sum += channelData[i] * channelData[i];
+        rms[h] = Math.sqrt(sum / (end - s));
+    }
+
+    const peakRms   = Math.max(...rms);
+    const threshold = peakRms * 0.20; // 20 % of peak = "note is playing"
+
+    // Level-crossing: low → high transitions with minimum gap enforcement
+    const onsets  = [];
+    let   wasLow   = true;
+    let   lastHop  = -minGapHops;
+    for (let h = 0; h < totalHops; h++) {
+        const isHigh = rms[h] >= threshold;
+        if (isHigh && wasLow && (h - lastHop) >= minGapHops) {
+            onsets.push(h * hopSamples);
+            lastHop = h;
+            wasLow  = false;
+        } else if (!isHigh) {
+            wasLow = true;
+        }
+    }
+    console.log(`[OnsetDetect] ${onsets.length} onsets (threshold ${threshold.toFixed(4)}, approx ${approxDurSec}s/note).`);
+    return onsets.length >= 2 ? onsets : null;
+}
+
+// Core: decode one MP3 → slice into note AudioBuffers → populate SampleCache
+// startOffset (seconds): skip leading silence before the first note starts
+// startNote   (e.g. 'C2', 'C3'): chromatic note name of the first sample in the file
+async function processCustomSampleFile(instrument, arrayBuffer, noteDuration, startOffset = 0, startNote = 'C2') {
     if (!audioCtx) initAudio();
 
     // decodeAudioData() neuters its input ArrayBuffer, so always clone first
-    const decoded      = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
-    const sr           = decoded.sampleRate;
-    const sampPerNote  = Math.round(noteDuration * sr);
-    const offsetSamps  = Math.round(startOffset * sr);
-    let   loadedCount  = 0;
+    const decoded     = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+    const sr          = decoded.sampleRate;
+    const sampPerNote = Math.round(noteDuration * sr);
+    const offsetSamps = Math.round(startOffset * sr);
 
-    CHROMATIC_C2_C5.forEach((noteName, idx) => {
-        const start = offsetSamps + idx * sampPerNote;
-        const len   = Math.min(sampPerNote, decoded.length - start);
-        if (len < Math.round(sr * 0.1)) return; // skip if < 100 ms of audio left
+    // Try onset detection on channel 0 of the post-offset region
+    const ch0    = decoded.getChannelData(0).subarray(offsetSamps);
+    const onsets = _detectNoteOnsets(ch0, sr, noteDuration);
+
+    // How many notes are in this file?
+    const maxByGrid  = Math.min(Math.floor((decoded.length - offsetSamps) / sampPerNote), 48);
+    const totalNotes = onsets ? onsets.length : maxByGrid;
+    const noteRange  = _buildNoteRange(startNote, totalNotes);
+
+    let loadedCount = 0;
+    noteRange.forEach((noteName, idx) => {
+        let start, len;
+        if (onsets) {
+            start = offsetSamps + onsets[idx];
+            const nextStart = idx + 1 < onsets.length
+                ? offsetSamps + onsets[idx + 1]
+                : decoded.length;
+            len = Math.min(sampPerNote, nextStart - start);
+        } else {
+            start = offsetSamps + idx * sampPerNote;
+            len   = Math.min(sampPerNote, decoded.length - start);
+        }
+        if (len < Math.round(sr * 0.1)) return; // skip if < 100 ms audio left
 
         const buf = audioCtx.createBuffer(decoded.numberOfChannels, len, sr);
         for (let ch = 0; ch < decoded.numberOfChannels; ch++) {
@@ -3161,13 +3239,13 @@ async function processCustomSampleFile(instrument, arrayBuffer, noteDuration, st
         }
     });
 
-    // Expand the note lookup list to all 37 so findBestSample() searches them all
+    // Expand the note lookup list to the full loaded range so findBestSample() searches them all
     if (SAMPLE_DEFS[instrument]) {
-        SAMPLE_DEFS[instrument].notes = [...CHROMATIC_C2_C5];
+        SAMPLE_DEFS[instrument].notes = [...noteRange];
     }
     SampleLoadState[instrument]    = 'done';
     CustomSampleLoaded[instrument] = true;
-    console.log(`[CustomSamples] ${instrument}: ${loadedCount}/37 notes sliced from file.`);
+    console.log(`[CustomSamples] ${instrument}: ${loadedCount}/${totalNotes} notes from ${startNote} (${onsets ? 'onset-detected' : 'fixed-grid'}).`);
     return loadedCount;
 }
 
@@ -3177,7 +3255,7 @@ async function _applyPendingCustomSamples() {
     const queue = _pendingCustomSamples.splice(0); // drain
     for (const rec of queue) {
         try {
-            await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0);
+            await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0, rec.startNote || 'C2');
         } catch(e) {
             console.warn('[CustomSamples] Failed to apply pending:', rec.instrument, e);
         }
@@ -3199,7 +3277,7 @@ async function loadCustomSamplesFromIDB() {
         if (!all.length) return;
         if (audioCtx) {
             for (const rec of all) {
-                await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0);
+                await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0, rec.startNote || 'C2');
             }
             updateSampleStatusPill();
         } else {
@@ -3223,8 +3301,8 @@ async function loadBundledSamples() {
                 continue;
             }
             const buf = await res.arrayBuffer();
-            await processCustomSampleFile(instrument, buf, def.noteDuration, def.startOffset || 0);
-            console.log(`[BundledSamples] ${instrument} loaded (${def.noteDuration}s/note, offset ${def.startOffset || 0}s).`);
+            await processCustomSampleFile(instrument, buf, def.noteDuration, def.startOffset || 0, def.startNote || 'C2');
+            console.log(`[BundledSamples] ${instrument} loaded (${def.noteDuration}s/note, startNote ${def.startNote || 'C2'}).`);
         } catch(e) {
             // Non-fatal: CDN fallback still works
             console.warn(`[BundledSamples] ${instrument}: failed —`, e.message);
@@ -3238,8 +3316,11 @@ async function loadBundledSamples() {
 async function clearCustomSample(instrument) {
     _setSampleBadge(instrument, 'loading', '⏳ Clearing…');
     await _deleteCustomSampleFromIDB(instrument);
-    // Remove all custom-sliced notes from cache
-    CHROMATIC_C2_C5.forEach(n => delete SampleCache[`${instrument}|${n}`]);
+    // Remove all custom-sliced notes from cache (may span any range, e.g. C3–C6 for flute)
+    const customNotes = (SAMPLE_DEFS[instrument] && SAMPLE_DEFS[instrument].notes)
+        ? [...SAMPLE_DEFS[instrument].notes]
+        : [...CHROMATIC_C2_C5];
+    customNotes.forEach(n => delete SampleCache[`${instrument}|${n}`]);
     // Restore original CDN note list
     if (SAMPLE_DEFS[instrument] && SAMPLE_ORIG_NOTES[instrument]) {
         SAMPLE_DEFS[instrument].notes = [...SAMPLE_ORIG_NOTES[instrument]];
@@ -3303,10 +3384,19 @@ function openSamplesModal() {
                            value="3" min="1" max="15" step="0.5" placeholder="3">
                 </label>
                 <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;"
-                       title="Seconds of silence/blank before the first note (C2) starts">
+                       title="Seconds of silence/blank before the first note starts">
                     Offset:
                     <input type="number" id="sample-offset-${inst}" class="sample-dur-input"
                            value="0" min="0" max="10" step="0.5" placeholder="0">
+                </label>
+                <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;"
+                       title="Chromatic note of the first sample in the file (e.g. C3 for flute which can't play C2)">
+                    Start:
+                    <select id="sample-start-${inst}" class="sample-dur-input" style="width:58px;padding:3px 2px;">
+                        <option value="C2">C2</option>
+                        <option value="C3">C3</option>
+                        <option value="C4">C4</option>
+                    </select>
                 </label>
                 <input type="file" id="sample-file-${inst}" hidden
                        accept=".mp3,.wav,.ogg,.m4a"
@@ -3341,6 +3431,7 @@ async function handleSampleUpload(instrument, inputEl) {
     const startOffset = parseFloat(
         document.getElementById(`sample-offset-${instrument}`).value || '0'
     );
+    const startNote = document.getElementById(`sample-start-${instrument}`)?.value || 'C2';
     if (!noteDuration || noteDuration < 0.5 || noteDuration > 15) {
         alert('Please enter a note duration between 0.5 and 15 seconds.');
         return;
@@ -3355,10 +3446,10 @@ async function handleSampleUpload(instrument, inputEl) {
     try {
         const rawBuffer  = await file.arrayBuffer();
         const loadedCount = await processCustomSampleFile(
-            instrument, rawBuffer.slice(0), noteDuration, startOffset
+            instrument, rawBuffer.slice(0), noteDuration, startOffset, startNote
         );
         // Save a fresh copy to IDB (processCustomSampleFile nukes its copy)
-        await _saveCustomSampleToIDB(instrument, rawBuffer, noteDuration, startOffset);
+        await _saveCustomSampleToIDB(instrument, rawBuffer, noteDuration, startOffset, startNote);
 
         _setSampleBadge(instrument, 'custom', `✅ Custom (${loadedCount} notes)`);
         const clearBtn = document.getElementById(`sample-clear-${instrument}`);
@@ -3404,9 +3495,10 @@ function raAdminExport() {
 
     <div style="margin-top:14px;padding:10px 14px;background:#e8f5e9;border-radius:8px;font-size:12px;color:#2e7d32;line-height:1.7;">
       <b>Recording guide</b><br>
-      • Chromatic order: C2 C♯2 D2 D♯2 E2 F2 F♯2 G2 G♯2 A2 A♯2 B2 … B4 C5<br>
-      • Same duration for every note (e.g. exactly 5.0 seconds each)<br>
-      • Recording starts at C2 — no silence before the first note<br>
+      • Chromatic order upward from your <b>Start note</b> (e.g. C3 C♯3 D3 … B5 C6 for flute)<br>
+      • Same duration for every note (e.g. exactly 3.0 seconds each)<br>
+      • Use <b>Offset</b> to skip any leading silence before the first note<br>
+      • Auto onset-detection corrects slight timing drift in manual recordings<br>
       • Normalize levels; MP3, WAV, OGG or M4A all accepted
     </div>
   </div>
