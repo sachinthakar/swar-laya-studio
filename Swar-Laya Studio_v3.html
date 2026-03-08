@@ -215,6 +215,36 @@
         .btn-save    { background-color: #4a148c; color: white; }
         .btn-load    { background-color: #37474f; color: white; }
         .btn-ai      { background-color: #6a1b9a; color: white; }
+        .btn-samples { background-color: #00695c; color: white; }
+
+        /* ── Custom Samples Modal rows ── */
+        .sample-row {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 8px;
+            padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px;
+            margin-bottom: 8px; background: #fafafa;
+        }
+        .sample-inst-name { font-weight: 600; font-size: 14px; }
+        .sample-badge {
+            font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+        }
+        .sample-badge.cdn     { background: #e3f2fd; color: #1565c0; }
+        .sample-badge.custom  { background: #e8f5e9; color: #2e7d32; }
+        .sample-badge.loading { background: #fff8e1; color: #e65100; }
+        .sample-badge.error   { background: #ffebee; color: #c62828; }
+        .sample-dur-input {
+            width: 52px; padding: 5px 6px; border: 1px solid #ccc;
+            border-radius: 5px; font-size: 13px; text-align: center;
+        }
+        .btn-upload-sample {
+            background: #1565c0; color: white; border: none; border-radius: 6px;
+            padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: 600;
+        }
+        .btn-upload-sample:disabled { opacity: 0.5; cursor: default; }
+        .btn-clear-sample {
+            background: #c62828; color: white; border: none; border-radius: 6px;
+            padding: 6px 10px; cursor: pointer; font-size: 12px; font-weight: 600;
+        }
         .btn-remove  {
             position: absolute; top: 6px; right: 6px;
             background: #c62828; color: white;
@@ -560,6 +590,7 @@
         <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
         <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
         <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
+        <button id="btn-custom-samples" class="btn-samples" onclick="openSamplesModal()" style="display:none;" title="Upload custom instrument recordings (Premium)">&#127908; Samples</button>
         <span id="sample-status" class="osc" title="Instrument audio mode">♪ Synth</span>
         <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
 
@@ -747,7 +778,10 @@ function initAudio() {
     const el = document.getElementById('sample-status');
     if (el) { el.className = 'loading'; el.textContent = '♪ Loading…'; }
     Promise.allSettled(Object.keys(SAMPLE_DEFS).map(ensureSamplesLoaded))
-        .then(updateSampleStatusPill);
+        .then(() => {
+            updateSampleStatusPill();
+            _applyPendingCustomSamples(); // process any IDB samples queued before audioCtx
+        });
 }
 
 function buildReverb(durationSec, decay) {
@@ -806,6 +840,24 @@ const SAMPLE_DEFS = {
         notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
     }
 };
+
+// All 37 chromatic notes C2→C5 used when slicing a custom sample file
+const CHROMATIC_C2_C5 = (() => {
+    const L = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
+    const r = [];
+    for (let o = 2; o <= 4; o++) L.forEach(l => r.push(l + o));
+    r.push('C5');
+    return r; // 37 notes
+})();
+
+// Preserve original CDN note lists so clearing custom samples can restore them
+const SAMPLE_ORIG_NOTES = {};
+Object.keys(SAMPLE_DEFS).forEach(inst => {
+    SAMPLE_ORIG_NOTES[inst] = [...SAMPLE_DEFS[inst].notes];
+});
+
+const CustomSampleLoaded   = {}; // instrument → true when custom file is active
+let   _pendingCustomSamples = []; // IDB records queued before audioCtx exists
 
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
@@ -2293,6 +2345,9 @@ try {
 // Load ragas from Firestore (must be after db is initialised above)
 loadRagasFromFirestore();
 
+// Load any persisted custom samples from IndexedDB (non-blocking)
+loadCustomSamplesFromIDB();
+
 // ── App state ─────────────────────────────────────────────────────────────────
 let currentUser   = null;
 let isPremium     = false;
@@ -2317,6 +2372,8 @@ if (auth) {
         updateAuthBar(user);
         // Rebuild raga dropdown now that isPremium/isAdmin are known
         populateRagaDropdown();
+        // Show/hide the Samples toolbar button
+        updateSamplesButton();
     });
 }
 
@@ -3013,6 +3070,261 @@ Return only the JSON array.`;
     }
 }
 
+// ── Custom Samples ────────────────────────────────────────────────────────────
+const INST_LABELS = {
+    harmonium: '🎹 Harmonium',
+    flute:     '🪈 Flute',
+    sitar:     '🎸 Sitar',
+    violin:    '🎻 Violin',
+    piano:     '🎹 Piano'
+};
+
+// IndexedDB helpers ──────────────────────────────────────────────────────────
+function _openCustomSamplesDB() {
+    return new Promise((res, rej) => {
+        const req = indexedDB.open('swar-laya-custom-samples', 1);
+        req.onupgradeneeded = e => {
+            e.target.result.createObjectStore('samples', { keyPath: 'instrument' });
+        };
+        req.onsuccess = e => res(e.target.result);
+        req.onerror   = e => rej(e.target.error);
+    });
+}
+
+async function _saveCustomSampleToIDB(instrument, arrayBuffer, noteDuration) {
+    try {
+        const db = await _openCustomSamplesDB();
+        return new Promise((res, rej) => {
+            const req = db.transaction('samples', 'readwrite')
+                          .objectStore('samples')
+                          .put({ instrument, buffer: arrayBuffer, noteDuration });
+            req.onsuccess = () => res();
+            req.onerror   = e  => rej(e.target.error);
+        });
+    } catch(e) { console.warn('[CustomSamples] IDB save failed:', e); }
+}
+
+async function _deleteCustomSampleFromIDB(instrument) {
+    try {
+        const db = await _openCustomSamplesDB();
+        return new Promise((res, rej) => {
+            const req = db.transaction('samples', 'readwrite')
+                          .objectStore('samples')
+                          .delete(instrument);
+            req.onsuccess = () => res();
+            req.onerror   = e  => rej(e.target.error);
+        });
+    } catch(e) { console.warn('[CustomSamples] IDB delete failed:', e); }
+}
+
+// Core: decode one MP3 → slice into 37 note AudioBuffers → populate SampleCache
+async function processCustomSampleFile(instrument, arrayBuffer, noteDuration) {
+    if (!audioCtx) initAudio();
+
+    // decodeAudioData() neuters its input ArrayBuffer, so always clone first
+    const decoded      = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+    const sr           = decoded.sampleRate;
+    const sampPerNote  = Math.round(noteDuration * sr);
+    let   loadedCount  = 0;
+
+    CHROMATIC_C2_C5.forEach((noteName, idx) => {
+        const start = idx * sampPerNote;
+        const len   = Math.min(sampPerNote, decoded.length - start);
+        if (len < Math.round(sr * 0.1)) return; // skip if < 100 ms of audio left
+
+        const buf = audioCtx.createBuffer(decoded.numberOfChannels, len, sr);
+        for (let ch = 0; ch < decoded.numberOfChannels; ch++) {
+            buf.getChannelData(ch).set(
+                decoded.getChannelData(ch).subarray(start, start + len)
+            );
+        }
+        buf.baseHz = noteNameToHz(noteName);
+        if (buf.baseHz) {
+            SampleCache[`${instrument}|${noteName}`] = buf;
+            loadedCount++;
+        }
+    });
+
+    // Expand the note lookup list to all 37 so findBestSample() searches them all
+    if (SAMPLE_DEFS[instrument]) {
+        SAMPLE_DEFS[instrument].notes = [...CHROMATIC_C2_C5];
+    }
+    SampleLoadState[instrument]    = 'done';
+    CustomSampleLoaded[instrument] = true;
+    console.log(`[CustomSamples] ${instrument}: ${loadedCount}/37 notes sliced from file.`);
+    return loadedCount;
+}
+
+// Apply any samples that were loaded from IDB before audioCtx was created
+async function _applyPendingCustomSamples() {
+    if (!audioCtx || !_pendingCustomSamples.length) return;
+    const queue = _pendingCustomSamples.splice(0); // drain
+    for (const rec of queue) {
+        try {
+            await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration);
+        } catch(e) {
+            console.warn('[CustomSamples] Failed to apply pending:', rec.instrument, e);
+        }
+    }
+    updateSampleStatusPill();
+    _updateAllSampleBadges();
+}
+
+// Called at page load — reads IndexedDB and queues/processes persisted samples
+async function loadCustomSamplesFromIDB() {
+    try {
+        const db  = await _openCustomSamplesDB();
+        const all = await new Promise((res, rej) => {
+            const req = db.transaction('samples', 'readonly')
+                          .objectStore('samples').getAll();
+            req.onsuccess = e => res(e.target.result);
+            req.onerror   = e => rej(e.target.error);
+        });
+        if (!all.length) return;
+        if (audioCtx) {
+            for (const rec of all) {
+                await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration);
+            }
+            updateSampleStatusPill();
+        } else {
+            // audioCtx not created yet (requires first user gesture) — queue for later
+            _pendingCustomSamples.push(...all);
+            console.log(`[CustomSamples] ${all.length} sample(s) queued — will load on first play.`);
+        }
+    } catch(e) { console.warn('[CustomSamples] IDB load failed:', e); }
+}
+
+// Revert one instrument back to CDN samples
+async function clearCustomSample(instrument) {
+    _setSampleBadge(instrument, 'loading', '⏳ Clearing…');
+    await _deleteCustomSampleFromIDB(instrument);
+    // Remove all custom-sliced notes from cache
+    CHROMATIC_C2_C5.forEach(n => delete SampleCache[`${instrument}|${n}`]);
+    // Restore original CDN note list
+    if (SAMPLE_DEFS[instrument] && SAMPLE_ORIG_NOTES[instrument]) {
+        SAMPLE_DEFS[instrument].notes = [...SAMPLE_ORIG_NOTES[instrument]];
+    }
+    CustomSampleLoaded[instrument] = false;
+    SampleLoadState[instrument]    = 'pending';
+    await ensureSamplesLoaded(instrument); // reload CDN samples
+    _updateSampleBadge(instrument);
+    updateSampleStatusPill();
+    showToast(`${INST_LABELS[instrument] || instrument} — reverted to CDN samples`);
+}
+
+// Badge helpers ──────────────────────────────────────────────────────────────
+function _setSampleBadge(instrument, cls, text) {
+    const el = document.getElementById(`sample-badge-${instrument}`);
+    if (!el) return;
+    el.className  = `sample-badge ${cls}`;
+    el.textContent = text;
+}
+function _updateSampleBadge(instrument) {
+    const c = CustomSampleLoaded[instrument];
+    _setSampleBadge(instrument, c ? 'custom' : 'cdn', c ? '✅ Custom' : '🌐 CDN');
+    const clearBtn = document.getElementById(`sample-clear-${instrument}`);
+    if (clearBtn) clearBtn.style.display = c ? 'inline-block' : 'none';
+}
+function _updateAllSampleBadges() {
+    Object.keys(SAMPLE_DEFS).forEach(_updateSampleBadge);
+}
+
+// Show/hide the toolbar Samples button — Premium/Admin only
+function updateSamplesButton() {
+    const btn = document.getElementById('btn-custom-samples');
+    if (btn) btn.style.display = (isPremium || isAdmin) ? '' : 'none';
+}
+
+// Modal open/close ────────────────────────────────────────────────────────────
+function openSamplesModal() {
+    if (!isPremium && !isAdmin) {
+        showToast('🔒 Custom Samples is a Premium feature.');
+        return;
+    }
+    // Build instrument rows dynamically each time
+    const container = document.getElementById('samples-inst-list');
+    container.innerHTML = '';
+    Object.keys(SAMPLE_DEFS).forEach(inst => {
+        const isCustom = !!CustomSampleLoaded[inst];
+        const row = document.createElement('div');
+        row.className = 'sample-row';
+        row.id = `sample-row-${inst}`;
+        row.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span class="sample-inst-name">${INST_LABELS[inst] || inst}</span>
+                <span class="sample-badge ${isCustom ? 'custom' : 'cdn'}"
+                      id="sample-badge-${inst}">${isCustom ? '✅ Custom' : '🌐 CDN'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;">
+                    Sec / note:
+                    <input type="number" id="sample-dur-${inst}" class="sample-dur-input"
+                           value="5" min="1" max="15" step="0.5" placeholder="5">
+                </label>
+                <input type="file" id="sample-file-${inst}" hidden
+                       accept=".mp3,.wav,.ogg,.m4a"
+                       onchange="handleSampleUpload('${inst}', this)">
+                <button class="btn-upload-sample"
+                        onclick="document.getElementById('sample-file-${inst}').click()">
+                    📁 Upload
+                </button>
+                <button class="btn-clear-sample" id="sample-clear-${inst}"
+                        onclick="clearCustomSample('${inst}')"
+                        style="display:${isCustom ? 'inline-block' : 'none'};">
+                    ✕ Clear
+                </button>
+            </div>`;
+        container.appendChild(row);
+    });
+    document.getElementById('samples-modal').style.display = 'flex';
+}
+
+function closeSamplesModal() {
+    document.getElementById('samples-modal').style.display = 'none';
+}
+
+// File upload handler ─────────────────────────────────────────────────────────
+async function handleSampleUpload(instrument, inputEl) {
+    const file = inputEl.files[0];
+    if (!file) return;
+
+    const noteDuration = parseFloat(
+        document.getElementById(`sample-dur-${instrument}`).value
+    );
+    if (!noteDuration || noteDuration < 0.5 || noteDuration > 15) {
+        alert('Please enter a note duration between 0.5 and 15 seconds.');
+        return;
+    }
+
+    const uploadBtn = document.querySelector(
+        `#sample-row-${instrument} .btn-upload-sample`
+    );
+    _setSampleBadge(instrument, 'loading', '⏳ Processing…');
+    if (uploadBtn) uploadBtn.disabled = true;
+
+    try {
+        const rawBuffer  = await file.arrayBuffer();
+        const loadedCount = await processCustomSampleFile(
+            instrument, rawBuffer.slice(0), noteDuration
+        );
+        // Save a fresh copy to IDB (processCustomSampleFile nukes its copy)
+        await _saveCustomSampleToIDB(instrument, rawBuffer, noteDuration);
+
+        _setSampleBadge(instrument, 'custom', `✅ Custom (${loadedCount} notes)`);
+        const clearBtn = document.getElementById(`sample-clear-${instrument}`);
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        updateSampleStatusPill();
+        showToast(`${INST_LABELS[instrument] || instrument} — ${loadedCount} notes loaded ✓`);
+    } catch(e) {
+        _setSampleBadge(instrument, 'error', '❌ Failed');
+        console.error('[CustomSamples] Upload error:', e);
+        alert(`Failed to process file:\n${e.message}`);
+    } finally {
+        if (uploadBtn) uploadBtn.disabled = false;
+        inputEl.value = ''; // allow re-uploading same file if needed
+    }
+}
+
 // ── Export JSON ───────────────────────────────────────────────────────────────
 function raAdminExport() {
     const json = JSON.stringify(RagaData, null, 2);
@@ -3024,6 +3336,32 @@ function raAdminExport() {
     URL.revokeObjectURL(a.href);
 }
 </script>
+<!-- ── Custom Samples Modal ── -->
+<div id="samples-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:580px;">
+    <h3>🎼 Custom Instrument Samples
+      <button class="modal-close" onclick="closeSamplesModal()">✕</button>
+    </h3>
+    <p style="font-size:13px;color:#555;margin:0 0 14px;">
+      Upload one audio file per instrument containing all <b>37 chromatic notes C2 → C5</b>
+      played in order, each held for the same duration. Notes are sliced automatically and
+      stored in your browser — no re-upload needed next visit.
+    </p>
+
+    <div id="samples-inst-list">
+      <!-- rows built dynamically by openSamplesModal() -->
+    </div>
+
+    <div style="margin-top:14px;padding:10px 14px;background:#e8f5e9;border-radius:8px;font-size:12px;color:#2e7d32;line-height:1.7;">
+      <b>Recording guide</b><br>
+      • Chromatic order: C2 C♯2 D2 D♯2 E2 F2 F♯2 G2 G♯2 A2 A♯2 B2 … B4 C5<br>
+      • Same duration for every note (e.g. exactly 5.0 seconds each)<br>
+      • Recording starts at C2 — no silence before the first note<br>
+      • Normalize levels; MP3, WAV, OGG or M4A all accepted
+    </div>
+  </div>
+</div>
+
 <!-- ── AI Compose Modal ── -->
 <div id="ai-compose-modal" class="modal-overlay">
   <div class="modal-box" style="max-width:560px;">
