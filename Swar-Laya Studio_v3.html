@@ -3149,15 +3149,18 @@ async function _deleteCustomSampleFromIDB(instrument) {
 }
 
 // RMS-based onset detection — finds the sample position of each note start.
-// Uses level-crossing: detects transitions from below-threshold to above-threshold.
-// Returns an array of sample offsets (relative to the start of channelData),
-// or null if too few onsets found (caller falls back to fixed-grid).
+// Uses DUAL-THRESHOLD hysteresis to avoid false triggers from mid-note
+// amplitude variations (harmonium bellows, flute breath, etc.):
+//   • onset fires when RMS rises above threshHigh (20% of peak)
+//   • wasLow is only reset when RMS drops below threshLow (4% of peak = near silence)
+// A mid-note dip won't reset the detector unless it reaches true inter-note silence.
+// Returns array of sample offsets, or null → caller falls back to fixed-grid.
 function _detectNoteOnsets(channelData, sr, approxDurSec) {
     const hopMs      = 10;
     const hopSamples = Math.round(hopMs / 1000 * sr);
     const winSamples = hopSamples * 3;              // 30 ms RMS window
     const totalHops  = Math.floor(channelData.length / hopSamples);
-    const minGapHops = Math.round(approxDurSec * 0.6 * 1000 / hopMs); // 60% of note dur
+    const minGapHops = Math.round(approxDurSec * 0.70 * 1000 / hopMs); // 70% of note dur
 
     // Compute RMS energy per hop
     const rms = new Float32Array(totalHops);
@@ -3169,25 +3172,36 @@ function _detectNoteOnsets(channelData, sr, approxDurSec) {
         rms[h] = Math.sqrt(sum / (end - s));
     }
 
-    const peakRms   = Math.max(...rms);
-    const threshold = peakRms * 0.20; // 20 % of peak = "note is playing"
+    const peakRms    = Math.max(...rms);
+    const threshHigh = peakRms * 0.20; // onset: rising above 20% of peak
+    const threshLow  = peakRms * 0.04; // silence: only drops below 4% reset the detector
 
-    // Level-crossing: low → high transitions with minimum gap enforcement
-    const onsets  = [];
-    let   wasLow   = true;
-    let   lastHop  = -minGapHops;
+    // Dual-threshold level-crossing with minimum gap
+    const onsets = [];
+    let wasLow   = true;
+    let lastHop  = -minGapHops;
     for (let h = 0; h < totalHops; h++) {
-        const isHigh = rms[h] >= threshold;
-        if (isHigh && wasLow && (h - lastHop) >= minGapHops) {
+        if (rms[h] >= threshHigh && wasLow && (h - lastHop) >= minGapHops) {
             onsets.push(h * hopSamples);
             lastHop = h;
             wasLow  = false;
-        } else if (!isHigh) {
+        } else if (rms[h] < threshLow) {
+            // Only reset to "low" state in true inter-note silence
             wasLow = true;
         }
+        // (if mid-note and neither condition: wasLow unchanged — no spurious re-trigger)
     }
-    console.log(`[OnsetDetect] ${onsets.length} onsets (threshold ${threshold.toFixed(4)}, approx ${approxDurSec}s/note).`);
-    return onsets.length >= 2 ? onsets : null;
+
+    // Sanity check: estimate expected note count from file duration
+    const totalSec  = channelData.length / sr;
+    const expected  = Math.round(totalSec / approxDurSec);
+    const tolerance = Math.max(3, Math.round(expected * 0.20)); // ±20% or ±3 notes
+    if (onsets.length < 2 || Math.abs(onsets.length - expected) > tolerance) {
+        console.warn(`[OnsetDetect] ${onsets.length} onsets vs expected ~${expected} — falling back to fixed-grid.`);
+        return null;
+    }
+    console.log(`[OnsetDetect] ${onsets.length} onsets (expected ~${expected}).`);
+    return onsets;
 }
 
 // Core: decode one MP3 → slice into note AudioBuffers → populate SampleCache
