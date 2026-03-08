@@ -2794,6 +2794,11 @@ function closeAICompose() {
     document.getElementById('ai-compose-modal').style.display = 'none';
 }
 
+function toggleAILyricsOptions() {
+    const show = document.getElementById('ai-gen-lyrics').checked;
+    document.getElementById('ai-lyrics-options').style.display = show ? 'block' : 'none';
+}
+
 async function doAICompose() {
     const ragaKey   = document.getElementById('ai-raga-select').value;
     const taalKey   = document.getElementById('ai-taal-select').value;
@@ -2909,10 +2914,92 @@ Critical rules:
         if (!Array.isArray(lines) || lines.length === 0)
             throw new Error('AI returned no lines. Try again.');
 
-        // Load each line into the song sheet
+        // ── Optional: generate lyrics via a second LLM call ──────────────────
+        const genLyrics = document.getElementById('ai-gen-lyrics').checked;
+        if (genLyrics) {
+            statusEl.innerHTML = '✅ Notation ready — ✍️ Generating lyrics…';
+            const lang = document.querySelector('input[name="ai-lyrics-lang"]:checked')?.value || 'Hindi';
+
+            const sections = lines.map((l, i) => l.section || (i < 2 ? 'Sthayi' : 'Antara'));
+            const sectionDesc = sections.map((s, i) => `Line ${i+1}: ${s}`).join(', ');
+
+            const lyricsPrompt = `You are a poet and lyricist specializing in Indian classical music.
+
+Write ${lang} song lyrics for a composition in Raga ${raga.name}.
+Theme / Intention: ${emotion || 'devotional and melodic, capturing the essence of the raga'}
+Structure: ${lines.length} lines — ${sectionDesc}
+Each line has exactly ${beats} beat positions.
+
+Rules:
+- Return ONLY a valid JSON array (no markdown, no explanation)
+- The array has exactly ${lines.length} inner arrays
+- Each inner array has exactly ${beats} strings — one syllable or short word per beat
+- Use "${lang}" language and script
+- Sthayi lines (1-2): the main refrain/chorus — repeated, memorable phrase
+- Antara lines (3-4): the verse — elaborates the theme, slightly elevated emotion
+- Sanchari lines (5+): free exploration of the theme
+- Use "-" for any beat that is a silent rest or held sustain
+- Make syllables singable — prefer open vowel sounds (अ, आ, ए, ओ) on long notes
+- Lyrics must be poetic, emotionally resonant, and feel natural when sung
+- Avoid forced rhyme; prioritise melodic flow and meaning
+
+Example output format for ${beats}-beat lines:
+[["शब्द", "शब्द", ...], ["शब्द", ...]]
+
+Return only the JSON array.`;
+
+            try {
+                const lyrRes = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: lyricsPrompt }] }],
+                            generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
+                        })
+                    }
+                );
+                if (lyrRes.ok) {
+                    const lyrData = await lyrRes.json();
+                    let lyrText = (lyrData.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+                    lyrText = lyrText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+
+                    let lyrArr;
+                    try { lyrArr = JSON.parse(lyrText); }
+                    catch(e) {
+                        const m = lyrText.match(/\[[\s\S]*\]/);
+                        if (m) lyrArr = JSON.parse(m[0]);
+                    }
+
+                    if (Array.isArray(lyrArr)) {
+                        lines.forEach((line, i) => {
+                            if (Array.isArray(lyrArr[i])) {
+                                // Ensure exact beat count — trim or pad with "-"
+                                const raw = lyrArr[i].map(s => (typeof s === 'string' && s.trim()) ? s.trim() : '-');
+                                line.lyrics = raw.slice(0, beats);
+                                while (line.lyrics.length < beats) line.lyrics.push('-');
+                            }
+                        });
+                        statusEl.innerHTML = '✅ Notation + Lyrics ready — loading into song sheet…';
+                    } else {
+                        console.warn('Lyrics parse failed — keeping "-" placeholders');
+                    }
+                } else {
+                    console.warn('Lyrics API call failed — keeping "-" placeholders');
+                }
+            } catch(lyricErr) {
+                // Non-fatal: notation still loads, just without lyrics
+                console.warn('Lyrics generation error (non-fatal):', lyricErr);
+            }
+        }
+
+        // Load each line into the song sheet (lyrics included if generated)
         lines.forEach(line => addLine(line));
 
-        statusEl.innerHTML = `✅ Added ${lines.length} lines to the song sheet!`;
+        statusEl.innerHTML = genLyrics
+            ? `✅ Added ${lines.length} lines with notation + lyrics!`
+            : `✅ Added ${lines.length} lines to the song sheet!`;
         setTimeout(() => closeAICompose(), 1800);
 
     } catch(e) {
@@ -2997,6 +3084,34 @@ function raAdminExport() {
       <textarea id="ai-emotion" rows="2"
         placeholder="e.g. 'Morning devotion', 'Longing for rain', 'Peaceful evening', 'Romantic yearning'…"
         style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <!-- Lyrics generation option -->
+    <div style="margin-bottom:12px;padding:12px;background:#f3e5f5;border-radius:8px;border:1px solid #ce93d8;">
+      <label style="font-size:13px;color:#4a148c;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="ai-gen-lyrics" onchange="toggleAILyricsOptions()" style="width:16px;height:16px;accent-color:#6a1b9a;cursor:pointer;">
+        ✍️ Also generate lyrics with AI
+      </label>
+      <div id="ai-lyrics-options" style="display:none;margin-top:10px;">
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Lyrics Language</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Hindi" checked style="accent-color:#6a1b9a;">
+            Hindi <span style="font-size:11px;color:#888;">(हिंदी)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Marathi" style="accent-color:#6a1b9a;">
+            Marathi <span style="font-size:11px;color:#888;">(मराठी)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Sanskrit" style="accent-color:#6a1b9a;">
+            Sanskrit <span style="font-size:11px;color:#888;">(संस्कृत)</span>
+          </label>
+        </div>
+        <p style="font-size:11px;color:#777;margin:6px 0 0 0;">
+          Lyrics will be generated to match the notation's beat structure and emotion.
+        </p>
+      </div>
     </div>
 
     <div style="margin-bottom:16px;">
