@@ -73,6 +73,10 @@ node_modules/
 *.mid
 *.wav
 *.docx
+# Exception: bundled instrument samples in the public folder are part of the app
+!public/samples/*.mp3
+!public/samples/*.wav
+!public/samples/*.ogg
 *.xlsx
 docx_text.txt
 

@@ -778,9 +778,10 @@ function initAudio() {
     const el = document.getElementById('sample-status');
     if (el) { el.className = 'loading'; el.textContent = '♪ Loading…'; }
     Promise.allSettled(Object.keys(SAMPLE_DEFS).map(ensureSamplesLoaded))
-        .then(() => {
+        .then(async () => {
             updateSampleStatusPill();
-            _applyPendingCustomSamples(); // process any IDB samples queued before audioCtx
+            await _applyPendingCustomSamples(); // IDB user-uploaded samples (highest priority)
+            await loadBundledSamples();         // server-bundled samples (second priority)
         });
 }
 
@@ -858,6 +859,18 @@ Object.keys(SAMPLE_DEFS).forEach(inst => {
 
 const CustomSampleLoaded   = {}; // instrument → true when custom file is active
 let   _pendingCustomSamples = []; // IDB records queued before audioCtx exists
+
+// Bundled high-quality samples hosted at /samples/ on Firebase Hosting.
+// User-uploaded IDB samples always take priority over these.
+// Add more instruments here as recordings become available.
+const BUNDLED_SAMPLES = {
+    // startOffset: seconds of silence/blank at the very start before C2 begins
+    violin: { path: '/samples/violin-c2c5.mp3', noteDuration: 3, startOffset: 1.5 }
+    // harmonium: { path: '/samples/harmonium-c2c5.mp3', noteDuration: 3, startOffset: 0 },
+    // flute:     { path: '/samples/flute-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
+    // sitar:     { path: '/samples/sitar-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
+    // piano:     { path: '/samples/piano-c2c5.mp3',     noteDuration: 3, startOffset: 0 },
+};
 
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
@@ -3091,13 +3104,13 @@ function _openCustomSamplesDB() {
     });
 }
 
-async function _saveCustomSampleToIDB(instrument, arrayBuffer, noteDuration) {
+async function _saveCustomSampleToIDB(instrument, arrayBuffer, noteDuration, startOffset = 0) {
     try {
         const db = await _openCustomSamplesDB();
         return new Promise((res, rej) => {
             const req = db.transaction('samples', 'readwrite')
                           .objectStore('samples')
-                          .put({ instrument, buffer: arrayBuffer, noteDuration });
+                          .put({ instrument, buffer: arrayBuffer, noteDuration, startOffset });
             req.onsuccess = () => res();
             req.onerror   = e  => rej(e.target.error);
         });
@@ -3118,17 +3131,20 @@ async function _deleteCustomSampleFromIDB(instrument) {
 }
 
 // Core: decode one MP3 → slice into 37 note AudioBuffers → populate SampleCache
-async function processCustomSampleFile(instrument, arrayBuffer, noteDuration) {
+// startOffset (seconds): skip this many seconds at the beginning of the file
+//   before the first note (C2). Use this to trim leading silence.
+async function processCustomSampleFile(instrument, arrayBuffer, noteDuration, startOffset = 0) {
     if (!audioCtx) initAudio();
 
     // decodeAudioData() neuters its input ArrayBuffer, so always clone first
     const decoded      = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
     const sr           = decoded.sampleRate;
     const sampPerNote  = Math.round(noteDuration * sr);
+    const offsetSamps  = Math.round(startOffset * sr);
     let   loadedCount  = 0;
 
     CHROMATIC_C2_C5.forEach((noteName, idx) => {
-        const start = idx * sampPerNote;
+        const start = offsetSamps + idx * sampPerNote;
         const len   = Math.min(sampPerNote, decoded.length - start);
         if (len < Math.round(sr * 0.1)) return; // skip if < 100 ms of audio left
 
@@ -3161,7 +3177,7 @@ async function _applyPendingCustomSamples() {
     const queue = _pendingCustomSamples.splice(0); // drain
     for (const rec of queue) {
         try {
-            await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration);
+            await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0);
         } catch(e) {
             console.warn('[CustomSamples] Failed to apply pending:', rec.instrument, e);
         }
@@ -3183,7 +3199,7 @@ async function loadCustomSamplesFromIDB() {
         if (!all.length) return;
         if (audioCtx) {
             for (const rec of all) {
-                await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration);
+                await processCustomSampleFile(rec.instrument, rec.buffer, rec.noteDuration, rec.startOffset || 0);
             }
             updateSampleStatusPill();
         } else {
@@ -3192,6 +3208,30 @@ async function loadCustomSamplesFromIDB() {
             console.log(`[CustomSamples] ${all.length} sample(s) queued — will load on first play.`);
         }
     } catch(e) { console.warn('[CustomSamples] IDB load failed:', e); }
+}
+
+// Fetch and process bundled samples from /samples/ on Firebase Hosting.
+// Only loads if no user-uploaded (IDB) sample exists for that instrument.
+// Called from initAudio() after audioCtx is created.
+async function loadBundledSamples() {
+    for (const [instrument, def] of Object.entries(BUNDLED_SAMPLES)) {
+        if (CustomSampleLoaded[instrument]) continue; // user's own file takes priority
+        try {
+            const res = await fetch(def.path);
+            if (!res.ok) {
+                console.warn(`[BundledSamples] ${instrument}: fetch ${res.status} — skipping.`);
+                continue;
+            }
+            const buf = await res.arrayBuffer();
+            await processCustomSampleFile(instrument, buf, def.noteDuration, def.startOffset || 0);
+            console.log(`[BundledSamples] ${instrument} loaded (${def.noteDuration}s/note, offset ${def.startOffset || 0}s).`);
+        } catch(e) {
+            // Non-fatal: CDN fallback still works
+            console.warn(`[BundledSamples] ${instrument}: failed —`, e.message);
+        }
+    }
+    updateSampleStatusPill();
+    _updateAllSampleBadges();
 }
 
 // Revert one instrument back to CDN samples
@@ -3256,10 +3296,17 @@ function openSamplesModal() {
                       id="sample-badge-${inst}">${isCustom ? '✅ Custom' : '🌐 CDN'}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;">
-                    Sec / note:
+                <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;"
+                       title="Duration of each note in your recording">
+                    Sec/note:
                     <input type="number" id="sample-dur-${inst}" class="sample-dur-input"
-                           value="5" min="1" max="15" step="0.5" placeholder="5">
+                           value="3" min="1" max="15" step="0.5" placeholder="3">
+                </label>
+                <label style="font-size:12px;color:#555;display:flex;align-items:center;gap:4px;"
+                       title="Seconds of silence/blank before the first note (C2) starts">
+                    Offset:
+                    <input type="number" id="sample-offset-${inst}" class="sample-dur-input"
+                           value="0" min="0" max="10" step="0.5" placeholder="0">
                 </label>
                 <input type="file" id="sample-file-${inst}" hidden
                        accept=".mp3,.wav,.ogg,.m4a"
@@ -3291,6 +3338,9 @@ async function handleSampleUpload(instrument, inputEl) {
     const noteDuration = parseFloat(
         document.getElementById(`sample-dur-${instrument}`).value
     );
+    const startOffset = parseFloat(
+        document.getElementById(`sample-offset-${instrument}`).value || '0'
+    );
     if (!noteDuration || noteDuration < 0.5 || noteDuration > 15) {
         alert('Please enter a note duration between 0.5 and 15 seconds.');
         return;
@@ -3305,10 +3355,10 @@ async function handleSampleUpload(instrument, inputEl) {
     try {
         const rawBuffer  = await file.arrayBuffer();
         const loadedCount = await processCustomSampleFile(
-            instrument, rawBuffer.slice(0), noteDuration
+            instrument, rawBuffer.slice(0), noteDuration, startOffset
         );
         // Save a fresh copy to IDB (processCustomSampleFile nukes its copy)
-        await _saveCustomSampleToIDB(instrument, rawBuffer, noteDuration);
+        await _saveCustomSampleToIDB(instrument, rawBuffer, noteDuration, startOffset);
 
         _setSampleBadge(instrument, 'custom', `✅ Custom (${loadedCount} notes)`);
         const clearBtn = document.getElementById(`sample-clear-${instrument}`);
