@@ -214,6 +214,7 @@
         .btn-add     { background-color: #2e7d32; color: white; }
         .btn-save    { background-color: #4a148c; color: white; }
         .btn-load    { background-color: #37474f; color: white; }
+        .btn-ai      { background-color: #6a1b9a; color: white; }
         .btn-remove  {
             position: absolute; top: 6px; right: 6px;
             background: #c62828; color: white;
@@ -358,15 +359,15 @@
         }
         .btn-google {
             background: white; color: #333; border: none; border-radius: 6px;
-            padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px;
+            padding: 8px 15px; cursor: pointer; font-weight: 600; font-size: 13px;
         }
         .btn-email-login {
             background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px;
+            border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 13px;
         }
         .btn-cloud {
             background: #0288d1; color: white; border: none; border-radius: 6px;
-            padding: 6px 12px; cursor: pointer; font-weight: 600; font-size: 12px;
+            cursor: pointer; font-weight: 600;
         }
         .btn-signout {
             background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.3);
@@ -537,6 +538,7 @@
 
         <!-- ── Group 4: Composition Tools ─────────────────────────────────── -->
         <button class="btn-add" onclick="addLine()">+ Add Line</button>
+        <button class="btn-ai"  onclick="openAICompose()">✨ AI Compose</button>
         <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
         <div class="control-item">
             <label class="raga-label">Raga Mode</label>
@@ -1622,27 +1624,50 @@ function populateRagaDropdown() {
     const prev = sel.value;
     sel.innerHTML = '<option value="">— choose —</option>';
 
-    // Group by thaat, sorted by order
-    const thaatMap = {};
-    Object.entries(RagaData).forEach(([key, r]) => {
-        const t = r.thaat || 'Other';
-        if (!thaatMap[t]) thaatMap[t] = [];
-        thaatMap[t].push({ key, ...r });
-    });
-    // Sort thaats alphabetically, ragas within each thaat by order
-    Object.keys(thaatMap).sort().forEach(thaat => {
-        const grp = document.createElement('optgroup');
-        grp.label = thaat + ' Thaat';
-        thaatMap[thaat]
+    if (isPremium || isAdmin) {
+        // Premium / Admin: show all ragas grouped by thaat
+        const thaatMap = {};
+        Object.entries(RagaData).forEach(([key, r]) => {
+            const t = r.thaat || 'Other';
+            if (!thaatMap[t]) thaatMap[t] = [];
+            thaatMap[t].push({ key, ...r });
+        });
+        // Sort thaats alphabetically, ragas within each thaat by order
+        Object.keys(thaatMap).sort().forEach(thaat => {
+            const grp = document.createElement('optgroup');
+            grp.label = thaat + ' Thaat';
+            thaatMap[thaat]
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .forEach(r => {
+                    const opt = document.createElement('option');
+                    opt.value = r.key;
+                    opt.textContent = r.name;
+                    grp.appendChild(opt);
+                });
+            sel.appendChild(grp);
+        });
+    } else {
+        // Free user: show only top 10 ragas (lowest order values)
+        const top10 = Object.entries(RagaData)
+            .map(([key, r]) => ({ key, ...r }))
             .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .forEach(r => {
-                const opt = document.createElement('option');
-                opt.value = r.key;
-                opt.textContent = r.name;
-                grp.appendChild(opt);
-            });
+            .slice(0, 10);
+        const grp = document.createElement('optgroup');
+        grp.label = '⭐ Popular Ragas';
+        top10.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.key;
+            opt.textContent = r.name;
+            grp.appendChild(opt);
+        });
         sel.appendChild(grp);
-    });
+        // Upgrade prompt
+        const lockOpt = document.createElement('option');
+        lockOpt.disabled = true;
+        lockOpt.textContent = `🔒 Upgrade for all ${Object.keys(RagaData).length}+ ragas`;
+        sel.appendChild(lockOpt);
+    }
+
     if (prev) sel.value = prev;
 }
 
@@ -2734,6 +2759,151 @@ async function raAdminSeed() {
     showToast(msg);
 }
 
+// ── AI Compose ────────────────────────────────────────────────────────────────
+function openAICompose() {
+    // Populate raga list (all ragas, sorted by order)
+    const sel = document.getElementById('ai-raga-select');
+    sel.innerHTML = '<option value="">— choose raga —</option>';
+    Object.entries(RagaData)
+        .sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
+        .forEach(([key, r]) => {
+            const o = document.createElement('option');
+            o.value = key;
+            o.textContent = r.name;
+            sel.appendChild(o);
+        });
+    // Pre-select current raga if one is active
+    const cur = document.getElementById('raga-select').value;
+    if (cur) sel.value = cur;
+    // Restore saved API key
+    const saved = localStorage.getItem('gemini_api_key');
+    if (saved) document.getElementById('ai-api-key').value = saved;
+    document.getElementById('ai-status').textContent = '';
+    document.getElementById('ai-generate-btn').disabled = false;
+    document.getElementById('ai-compose-modal').style.display = 'flex';
+}
+
+function closeAICompose() {
+    document.getElementById('ai-compose-modal').style.display = 'none';
+}
+
+async function doAICompose() {
+    const ragaKey   = document.getElementById('ai-raga-select').value;
+    const taalKey   = document.getElementById('ai-taal-select').value;
+    const lineCount = parseInt(document.getElementById('ai-lines-count').value);
+    const instr     = document.getElementById('ai-instrument').value;
+    const emotion   = document.getElementById('ai-emotion').value.trim();
+    const apiKey    = document.getElementById('ai-api-key').value.trim();
+
+    if (!ragaKey) { alert('Please choose a Raga.'); return; }
+    if (!apiKey)  { alert('Please enter your Gemini API key.\n\nGet a free key at: https://aistudio.google.com/app/apikey'); return; }
+
+    if (document.getElementById('ai-save-key').checked)
+        localStorage.setItem('gemini_api_key', apiKey);
+
+    const raga     = RagaData[ragaKey];
+    const beats    = TaalBeats[taalKey] || parseInt(taalKey) || 8;
+    const taalName = { '8':'Keherwa', '16':'Teentaal', '12':'Ektaal', '6':'Dadra',
+                       '7':'Rupak', '8_bhajani':'Bhajani', '10':'Jhaptaal', '14':'Dhamar' }[taalKey] || taalKey;
+    const allowed  = (raga.allowed || ['Sa','Re','Ga','ma','Pa','Dha','Ni']).join(' ');
+    const emotionLine = emotion ? `\nEmotion / Intention: "${emotion}"` : '';
+
+    const prompt = `You are an expert in Indian classical music composition. Generate a melodic instrumental composition in Raga ${raga.name} (${raga.thaat || ''} Thaat).
+
+Raga details:
+- Aroha: ${raga.aroha || 'Sa Re Ga ma Pa Dha Ni Sa'}
+- Avaroha: ${raga.avaroha || 'Sa Ni Dha Pa ma Ga Re Sa'}
+- Allowed notes: ${allowed}
+- Vadi: ${raga.vadi || 'Sa'}, Samvadi: ${raga.samvadi || 'Pa'}${emotionLine}
+
+Taal: ${taalName} (${beats} beats per line). Generate exactly ${lineCount} lines.
+
+Return ONLY a valid JSON array (no markdown fences, no explanation) of exactly ${lineCount} objects.
+Each object must have this exact structure:
+{
+  "section": "Sthayi",
+  "taal_key": "${taalKey}",
+  "line_instrument": "${instr}",
+  "line_volume": 1.0,
+  "lyrics": ["-", "-", ...],
+  "notes": [["Sa"], ["Re"], ...],
+  "octaves": [[0], [0], ...],
+  "meend": [[false], [false], ...]
+}
+
+Critical rules:
+- "lyrics" must have exactly ${beats} elements, all "-"
+- "notes", "octaves", "meend" must each have exactly ${beats} elements
+- Each element of notes/octaves/meend is an array with exactly 1 item
+- notes[i][0] must be one of: Sa Re Ga ga ma Ma Pa Dha dha Ni ni
+- Only use notes from the raga's allowed list: ${allowed}
+- octaves: 0=middle octave, 1=upper octave, -1=lower octave
+- Use octave 1 for upper Sa and notes reached by ascending beyond Pa
+- Use octave -1 for notes below middle Sa
+- Lines 1-2: Sthayi (stay in middle/lower octave, around Sa to Pa)
+- Lines 3-4: Antara (ascend to upper octave, reach upper Sa)
+- Lines 5+: Sanchari (explore full range)
+- Follow raga grammar: respect characteristic phrases, avoid forbidden notes
+- Add meend:true on 2-3 ascending steps per line for expressiveness
+- Create musically coherent, singable melodic phrases`;
+
+    const statusEl = document.getElementById('ai-status');
+    const btn      = document.getElementById('ai-generate-btn');
+    statusEl.innerHTML = '⏳ Composing… (may take 10–20 seconds)';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.75, maxOutputTokens: 4096 }
+                })
+            }
+        );
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error?.message || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        let text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+        // Strip markdown code fences if Gemini added them
+        text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+
+        let lines;
+        try {
+            lines = JSON.parse(text);
+        } catch(e) {
+            // Try to extract the JSON array if surrounded by extra text
+            const match = text.match(/\[[\s\S]*\]/);
+            if (match) {
+                lines = JSON.parse(match[0]);
+            } else {
+                console.error('Raw Gemini response:', text);
+                throw new Error('Could not parse JSON from AI response. Try again.');
+            }
+        }
+
+        if (!Array.isArray(lines) || lines.length === 0)
+            throw new Error('AI returned no lines. Try again.');
+
+        // Load each line into the song sheet
+        lines.forEach(line => addLine(line));
+
+        statusEl.innerHTML = `✅ Added ${lines.length} lines to the song sheet!`;
+        setTimeout(() => closeAICompose(), 1800);
+
+    } catch(e) {
+        statusEl.innerHTML = `❌ Error: ${e.message}`;
+        console.error('AI Compose error:', e);
+        btn.disabled = false;
+    }
+}
+
 // ── Export JSON ───────────────────────────────────────────────────────────────
 function raAdminExport() {
     const json = JSON.stringify(RagaData, null, 2);
@@ -2745,6 +2915,83 @@ function raAdminExport() {
     URL.revokeObjectURL(a.href);
 }
 </script>
+<!-- ── AI Compose Modal ── -->
+<div id="ai-compose-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:560px;">
+    <h3>✨ AI Composition
+      <button class="modal-close" onclick="closeAICompose()">✕</button>
+    </h3>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Raga</label>
+        <select id="ai-raga-select" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="">— choose raga —</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Taal</label>
+        <select id="ai-taal-select" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="8">Keherwa (8 beats)</option>
+          <option value="16">Teentaal (16 beats)</option>
+          <option value="12">Ektaal (12 beats)</option>
+          <option value="6">Dadra (6 beats)</option>
+          <option value="7">Rupak (7 beats)</option>
+          <option value="8_bhajani">Bhajani (8 beats)</option>
+          <option value="10">Jhaptaal (10 beats)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Lines to generate</label>
+        <select id="ai-lines-count" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="2">2 lines (Sthayi)</option>
+          <option value="4" selected>4 lines (Sthayi + Antara)</option>
+          <option value="6">6 lines</option>
+          <option value="8">8 lines</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Instrument</label>
+        <select id="ai-instrument" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="harmonium">Harmonium</option>
+          <option value="flute">Flute</option>
+          <option value="sitar">Sitar</option>
+          <option value="violin">Violin</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Emotion / Subject / Intention (optional)</label>
+      <textarea id="ai-emotion" rows="2"
+        placeholder="e.g. 'Morning devotion', 'Longing for rain', 'Peaceful evening', 'Romantic yearning'…"
+        style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">
+        Gemini API Key
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#6a1b9a;font-size:11px;margin-left:6px;">Get free key ↗</a>
+      </label>
+      <input type="password" id="ai-api-key" placeholder="AIza…"
+        style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;box-sizing:border-box;">
+      <label style="font-size:11px;color:#888;margin-top:4px;display:block;">
+        <input type="checkbox" id="ai-save-key" checked style="vertical-align:middle;margin-right:4px;">
+        Remember on this device
+      </label>
+    </div>
+
+    <button id="ai-generate-btn" onclick="doAICompose()"
+      style="width:100%;padding:11px;background:#6a1b9a;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+      ✨ Generate Composition
+    </button>
+    <div id="ai-status" style="margin-top:10px;font-size:13px;color:#555;min-height:20px;text-align:center;"></div>
+  </div>
+</div>
+
 <!-- ── Composition Picker Modal ── -->
 <div id="comp-modal" class="modal-overlay">
     <div class="modal-box">
