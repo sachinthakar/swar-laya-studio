@@ -779,24 +779,28 @@ function buildNoiseBuffer(sec) {
 // a sample for that instrument is not yet loaded.
 
 const SAMPLE_DEFS = {
-    // nbrosowsky/tonejs-instruments (GitHub Pages, CORS-enabled, MIT)
+    // nbrosowsky/tonejs-instruments — file lists verified against GitHub repo contents
     harmonium: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/harmonium/',
-        notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5']
+        // Repo uses sharp notation; Fs4 and Ds5 do NOT exist — removed
+        notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','A4','C5']
     },
     flute: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
-        notes: ['A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+        // Flute repo has NATURAL NOTES ONLY (C, E, A), octaves 4–6; no sharps, no A3
+        notes: ['C4','E4','A4','C5','E5','A5','C6']
     },
     sitar: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/',
-        notes: ['As2','E3','A3','Cs4','E4','A4']
+        // As2 does NOT exist (only As5 available); using verified sharp-notation files
+        notes: ['E2','A2','D3','E3','A3','Cs4','E4','Fs4','A4']
     },
     violin: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/violin/',
-        notes: ['A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+        // Violin repo has NATURAL NOTES ONLY (A, C, E, G), octaves 3–6; no sharps
+        notes: ['A3','C4','E4','G4','A4','C5','E5','G5']
     },
-    // Salamander Grand Piano (tonejs.github.io, verified CORS-enabled)
+    // Salamander Grand Piano (tonejs.github.io, verified CORS-enabled, sharp notation)
     piano: {
         base: 'https://tonejs.github.io/audio/salamander/',
         notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
@@ -806,7 +810,7 @@ const SAMPLE_DEFS = {
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
 const SampleLoadState = {};  // instrument → 'pending'|'loading'|'done'
-const CACHE_NAME = 'swar-laya-samples-v1';  // bump version to force re-download
+const CACHE_NAME = 'swar-laya-samples-v2';  // bump version to force re-download
 
 // Fetch a sample MP3 — checks the browser's persistent Cache API first,
 // so after the first visit the files load from disk with zero network traffic.
@@ -2867,7 +2871,7 @@ Critical rules:
 
     try {
         const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2950,7 +2954,7 @@ Return only the JSON array.`;
 
             try {
                 const lyrRes = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+                    `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
