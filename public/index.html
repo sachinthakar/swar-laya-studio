@@ -2255,8 +2255,9 @@ document.getElementById('raga-mode-toggle').addEventListener('change', function(
 });
 document.getElementById('raga-select').addEventListener('change', applyRagaHighlights);
 
-// Populate dropdown with empty list immediately; Firestore load below will fill it
-populateRagaDropdown();
+// NOTE: populateRagaDropdown() is NOT called here — it is called by
+// loadRagasFromFirestore() after Firebase init, so that isPremium/isAdmin
+// are already declared (avoids Temporal Dead Zone ReferenceError).
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PHASE 1 — CLOUD FEATURES (Firebase Auth + Firestore)
