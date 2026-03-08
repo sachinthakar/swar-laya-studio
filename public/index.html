@@ -1647,11 +1647,15 @@ function populateRagaDropdown() {
             sel.appendChild(grp);
         });
     } else {
-        // Free user: show only top 10 ragas (lowest order values)
-        const top10 = Object.entries(RagaData)
-            .map(([key, r]) => ({ key, ...r }))
-            .sort((a, b) => (a.order || 0) - (b.order || 0))
-            .slice(0, 10);
+        // Free user: show only the curated top 10 popular ragas (matched by name)
+        const FREE_RAGA_NAMES = [
+            'Bhoopali', 'Bihag', 'Durga', 'Yaman', 'Sarang',
+            'Bhairav', 'Bhairavi', 'Malkauns', 'Puriya', 'Asawari'
+        ];
+        const allRagas = Object.entries(RagaData).map(([key, r]) => ({ key, ...r }));
+        const top10 = FREE_RAGA_NAMES
+            .map(name => allRagas.find(r => r.name.toLowerCase() === name.toLowerCase()))
+            .filter(Boolean);  // skip any not found in the current DB
         const grp = document.createElement('optgroup');
         grp.label = '⭐ Popular Ragas';
         top10.forEach(r => {
@@ -2307,6 +2311,8 @@ if (auth) {
             isAdmin   = false;
         }
         updateAuthBar(user);
+        // Rebuild raga dropdown now that isPremium/isAdmin are known
+        populateRagaDropdown();
     });
 }
 
@@ -2793,6 +2799,7 @@ async function doAICompose() {
     const taalKey   = document.getElementById('ai-taal-select').value;
     const lineCount = parseInt(document.getElementById('ai-lines-count').value);
     const instr     = document.getElementById('ai-instrument').value;
+    const model     = document.getElementById('ai-model').value;
     const emotion   = document.getElementById('ai-emotion').value.trim();
     const apiKey    = document.getElementById('ai-api-key').value.trim();
 
@@ -2855,7 +2862,7 @@ Critical rules:
 
     try {
         const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2867,7 +2874,17 @@ Critical rules:
         );
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            throw new Error(err.error?.message || `HTTP ${res.status}`);
+            const msg = err.error?.message || `HTTP ${res.status}`;
+            if (res.status === 429 || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
+                throw new Error(
+                    `Quota exceeded for model "${model}".\n\n` +
+                    `Try switching to a different model in the AI Model dropdown ` +
+                    `(gemini-1.5-flash is recommended for free tier).\n\n` +
+                    `If all models fail, your API key's Google Cloud project may need ` +
+                    `Gemini API quota enabled at: https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com`
+                );
+            }
+            throw new Error(msg);
         }
         const data = await res.json();
         let text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
@@ -2963,6 +2980,16 @@ function raAdminExport() {
           <option value="violin">Violin</option>
         </select>
       </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">AI Model</label>
+      <select id="ai-model" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+        <option value="gemini-1.5-flash">gemini-1.5-flash (recommended — free tier)</option>
+        <option value="gemini-2.0-flash">gemini-2.0-flash (newer, may need billing)</option>
+        <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b (fastest / lightest)</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro (best quality, slower)</option>
+      </select>
     </div>
 
     <div style="margin-bottom:12px;">
