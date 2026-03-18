@@ -780,32 +780,26 @@ function buildNoiseBuffer(sec) {
 // triggerNote() prefers samples; falls back to oscillator synthesis when
 // a sample for that instrument is not yet loaded.
 
-// All 37 chromatic notes C2→C5
-const CHROM37 = (() => {
-    const L = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
-    const r = [];
-    for (let o = 2; o <= 4; o++) L.forEach(l => r.push(l + o));
-    r.push('C5');
-    return r;
-})();
-// All 37 chromatic notes C3→C6 (flute range)
-const CHROM37_C3 = (() => {
-    const L = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
-    const r = [];
-    for (let o = 3; o <= 5; o++) L.forEach(l => r.push(l + o));
-    r.push('C6');
-    return r;
-})();
-
 const SAMPLE_DEFS = {
-    // Locally-hosted individual note files (split offline, served from Firebase Hosting)
-    harmonium: { base: '/samples/harmonium/', notes: [...CHROM37] },
-    flute:     { base: '/samples/flute/',     notes: [...CHROM37_C3] },
-    violin:    { base: '/samples/violin/',    notes: [...CHROM37] },
-    // CDN fallback for instruments not yet recorded locally
+    // Locally-hosted individual note files served from Firebase Hosting.
+    // Notes list = exactly the files present in public/samples/{instrument}/.
+    // Add instruments here as recordings become available; CDN used as fallback until then.
+    harmonium: {
+        base: '/samples/harmonium/',
+        notes: ['A2','C3','Ds3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5','A5']
+    },
+    // CDN fallback until local recordings are ready
+    flute: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
+        notes: ['C4','E4','A4','C5','E5','A5','C6']
+    },
     sitar: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/',
         notes: ['E2','A2','D3','E3','A3','Cs4','E4','Fs4','A4']
+    },
+    violin: {
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/violin/',
+        notes: ['A3','C4','E4','G4','A4','C5','E5','G5']
     },
     piano: {
         base: 'https://tonejs.github.io/audio/salamander/',
@@ -816,7 +810,7 @@ const SAMPLE_DEFS = {
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
 const SampleLoadState = {};  // instrument → 'pending'|'loading'|'done'
-const CACHE_NAME = 'swar-laya-samples-v2';  // bump version to force re-download
+const CACHE_NAME = 'swar-laya-samples-v3';  // bump version to force re-download
 
 // Fetch a sample MP3 — checks the browser's persistent Cache API first,
 // so after the first visit the files load from disk with zero network traffic.
