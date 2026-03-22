@@ -30,12 +30,17 @@
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             background-color: #fdfdfd;
             padding: 16px;
-            border-radius: 10px;
+            border-radius: 0;
             align-items: flex-end;
-            border: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            /* Stick to top of viewport */
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
         }
         .control-item {
             display: flex;
@@ -66,6 +71,8 @@
             background-color: #fff;
             overflow-x: auto;
             position: relative;
+            /* Leave room for sticky toolbar when scrolled into view */
+            scroll-margin-top: 120px;
         }
         .line-settings {
             display: flex;
@@ -635,7 +642,7 @@
         <button id="raga-pakkad-play" onclick="playPakkad()">▶ Play</button>
     </div>
 
-    <div id="song-sheet"></div>
+    <div id="song-sheet" style="padding-top:16px;"></div>
 </div>
 
 <script>
@@ -643,6 +650,7 @@
 let audioCtx       = null;
 let playbackTimer  = null;
 let tanpuraTimer   = null;
+let lastPlayingLine = null;   // tracks which line is playing for auto-scroll
 let tanpuraNodes   = [];
 let isTanpuraOn    = false;
 
@@ -1534,6 +1542,13 @@ function startPlayback() {
             const beatEl = targetLine.querySelector(`.beat-num[data-beat-idx="${localIdx}"]`);
             if (beatEl) beatEl.classList.add('playing');
 
+            // Auto-scroll: when playback moves to a new line, smoothly bring it into view.
+            // scroll-margin-top on .line-container ensures it lands below the sticky toolbar.
+            if (targetLine !== lastPlayingLine) {
+                lastPlayingLine = targetLine;
+                targetLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
             const inst    = targetLine.querySelector('.line-inst-select').value;
             // Adlib lines always silence percussion regardless of the dropdown
             const isAdlib  = targetLine.querySelector('.line-adlib') &&
@@ -1625,7 +1640,8 @@ function stopPlayback() {
         sampleBus.gain.setValueAtTime(0, audioCtx.currentTime);
         setTimeout(() => { if (sampleBus) sampleBus.gain.setValueAtTime(1, audioCtx.currentTime); }, 300);
     }
-    lastPlayedFreq = null;
+    lastPlayedFreq  = null;
+    lastPlayingLine = null;
     document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
 }
 
