@@ -1552,23 +1552,25 @@ function startPlayback() {
             if (lineBpm > 0) beatMs = (60 / lineBpm) * 1000;
         }
 
-        // ── Clear previous beat highlight in the shared ruler ──
+        // ── Clear previous highlights (ruler + note cells) ──
         document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
+        document.querySelectorAll('.grid-row[data-row="notes"] .cell.playing').forEach(el => el.classList.remove('playing'));
 
         if (targetLine) {
             // Auto-scroll + ruler update when playback enters a new line
             if (targetLine !== lastPlayingLine) {
                 lastPlayingLine = targetLine;
-                // Update ruler to match this line's taal and percussion type
                 const lineTaal = targetLine.getAttribute('data-taal');
                 const linePerc = targetLine.querySelector('.line-perc-sel')?.value || 'tabla';
                 renderTaalRuler(lineTaal, linePerc);
                 targetLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
-            // Highlight the current beat in the ruler
+            // Highlight current beat in the ruler and in the note cell
             const beatEl = document.querySelector(`#taal-ruler .beat-num[data-beat-idx="${localIdx}"]`);
             if (beatEl) beatEl.classList.add('playing');
+            const noteCell = targetLine.querySelector(`.grid-row[data-row="notes"] .cell[data-beat-idx="${localIdx}"]`);
+            if (noteCell) noteCell.classList.add('playing');
 
             const inst    = targetLine.querySelector('.line-inst-select').value;
             // Adlib lines always silence percussion regardless of the dropdown
@@ -1664,7 +1666,7 @@ function stopPlayback() {
     lastPlayedFreq  = null;
     lastPlayingLine = null;
     document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
-    // Restore ruler to the toolbar's selected taal
+    document.querySelectorAll('.grid-row[data-row="notes"] .cell.playing').forEach(el => el.classList.remove('playing'));
     renderTaalRuler(document.getElementById('taal-select').value, 'tabla');
 }
 
@@ -2257,6 +2259,7 @@ function addLine(data, insertBeforeEl) {
     for (let i = 0; i < beats; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
+        cell.dataset.beatIdx = i;
         const sub = document.createElement('div');
         sub.className = 'sub-cell-container';
 
