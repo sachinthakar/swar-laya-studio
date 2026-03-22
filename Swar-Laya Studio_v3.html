@@ -236,6 +236,13 @@
             background: #c62828; color: white;
             padding: 2px 8px; font-size: 11px; border-radius: 4px;
         }
+        .btn-insert-before {
+            position: absolute; top: 6px; right: 44px;
+            font-size: 11px; padding: 2px 7px; border-radius: 4px;
+            background: #f3f4f6; border: 1px solid #ccc; cursor: pointer;
+            color: #555;
+        }
+        .btn-insert-before:hover { background: #e8f4fd; border-color: #90caf9; color: #1565c0; }
         .line-badge {
             position: absolute; top: 7px; left: 10px;
             font-size: 10px; color: #999; font-weight: bold;
@@ -2074,7 +2081,20 @@ function removeSubNote(btn) {
 }
 
 // ─── Line Builder ─────────────────────────────────────────────────────────────
-function addLine(data) {
+
+/** Re-label every line badge: "Line 1", "Line 2", … */
+function renumberLines() {
+    document.querySelectorAll('.line-badge').forEach((b, i) => {
+        b.textContent = `Line ${i + 1}`;
+    });
+}
+
+/**
+ * addLine(data, insertBeforeEl)
+ *   data           — JSON line object (null = blank line using toolbar taal)
+ *   insertBeforeEl — optional .line-container to insert before (null = append)
+ */
+function addLine(data, insertBeforeEl) {
     const taalKey = data ? data.taal_key : document.getElementById('taal-select').value;
     const beats   = TaalBeats[taalKey] || parseInt(taalKey) || 8;
 
@@ -2211,14 +2231,27 @@ function addLine(data) {
     line.appendChild(rowN);
     line.appendChild(rowB);
 
+    // "Insert Before" button (top-right, just left of the remove button)
+    const insBtn = document.createElement('button');
+    insBtn.className   = 'btn-insert-before';
+    insBtn.title       = 'Insert a blank line before this one';
+    insBtn.textContent = '⤴ Insert Before';
+    insBtn.addEventListener('click', () => addLine(null, line));
+    line.appendChild(insBtn);
+
     const rem = document.createElement('button');
     rem.className   = 'btn-remove';
     rem.textContent = '×';
-    rem.onclick = () => line.remove();
+    rem.onclick = () => { line.remove(); renumberLines(); };
     line.appendChild(rem);
 
     if (adlibVal) line.classList.add('adlib-line');
-    sheet.appendChild(line);
+    if (insertBeforeEl) {
+        sheet.insertBefore(line, insertBeforeEl);
+    } else {
+        sheet.appendChild(line);
+    }
+    renumberLines();
     applyRagaHighlights();
 }
 
@@ -2227,6 +2260,28 @@ function toggleOctave(btn, val) {
     const wasActive = btn.classList.contains('active');
     parent.querySelectorAll('.octave-btn').forEach(b => b.classList.remove('active'));
     if (!wasActive) btn.classList.add('active');
+}
+
+// ─── Settings Persistence (localStorage) ─────────────────────────────────────
+
+/** Save taal, BPM and scale to localStorage so they survive a page reload. */
+function saveSettings() {
+    localStorage.setItem('sl_taal',  document.getElementById('taal-select').value);
+    localStorage.setItem('sl_bpm',   document.getElementById('bpm').value);
+    localStorage.setItem('sl_scale', document.getElementById('scale-select').value);
+}
+
+/**
+ * Restore taal, BPM and scale from localStorage.
+ * Called once at startup, before the initial addLine().
+ */
+function restoreSettings() {
+    const taal  = localStorage.getItem('sl_taal');
+    const bpm   = localStorage.getItem('sl_bpm');
+    const scale = localStorage.getItem('sl_scale');
+    if (taal)  document.getElementById('taal-select').value  = taal;
+    if (bpm)   document.getElementById('bpm').value          = bpm;
+    if (scale) document.getElementById('scale-select').value = scale;
 }
 
 // ─── Save / Load ──────────────────────────────────────────────────────────────
@@ -2334,8 +2389,14 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
     }
 });
 
-// Initialise with one blank line
+// Restore taal / BPM / scale from the last session, then open one blank line
+restoreSettings();
 addLine();
+
+// Persist toolbar settings whenever the user changes them
+document.getElementById('taal-select').addEventListener('change', saveSettings);
+document.getElementById('bpm').addEventListener('change', saveSettings);
+document.getElementById('scale-select').addEventListener('change', saveSettings);
 
 // Raga Mode controls
 document.getElementById('raga-mode-toggle').addEventListener('change', function() {
