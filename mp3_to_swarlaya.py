@@ -46,12 +46,21 @@ Arguments:
     --max-lines N             Maximum lines in JSON (default: 50)
     --dedup                   Merge consecutive identical cycles into one line
     --auto-meend              Enable heuristic meend (glide) detection.
-                              Off by default — auto-meend sounds bad on most songs;
+                              Off by default -- auto-meend sounds bad on most songs;
                               set meend manually per note in the studio after listening.
     --fmin   HZ               Minimum pitch frequency for the HPS detector.
-                              Auto-computed as base_sa * 0.52 when --scale is given
-                              (excludes the tanpura drone octave).  Override only if
-                              the auto value cuts real melody notes.
+                              Auto-computed as base_sa * 0.45 when --scale is given.
+                              Override only if the auto value cuts real melody notes.
+    --song-start NOTE         Lowest swara expected in the metered song section.
+                              Auto-computes the main HPS fmin as just below that swara.
+                              More musical than --fmin HZ.  Requires --scale or --sa.
+                              Example: --song-start Ga  (voice never goes below Ga)
+    --intro-fmin HZ           Minimum pitch for the intro/alaap HPS re-analysis (Hz).
+                              Used to suppress tanpura drone during soft alaap.
+    --intro-start NOTE        Lowest swara expected in the intro/alaap.
+                              Auto-computes intro fmin as just below that swara.
+                              More musical than --intro-fmin HZ.
+                              Example: --intro-start Pa  (alaap starts around Pa)
     --verbose                 Print cycle-by-cycle breakdown
 """
 
@@ -418,7 +427,7 @@ def extract_beats(times, pitches, base_sa, bpm, total_duration, t_start=0.0):
                 dom_o = 0
         return dom, dom_o
 
-    # Phase search — only over the metered region [t_start, total_duration]
+    # Phase search -- only over the metered region [t_start, total_duration]
     best_ph, best_sc = t_start, -1.0
     for k in range(16):
         ph = t_start + k * beat_sec / 16
@@ -464,7 +473,8 @@ def beats_to_cycles(beats, bpc):
 # ===========================================================================
 
 def extract_free_section(times_a, pitches, base_sa, t_start, t_end,
-                         win_sec=0.12, hop_sec=0.04, min_dur_sec=0.10):
+                         win_sec=0.08, hop_sec=0.02, min_dur_sec=0.15,
+                         min_octave=-1):
     """
     Pitch analysis for free-tempo sections (alaap intro).
 
@@ -472,15 +482,24 @@ def extract_free_section(times_a, pitches, base_sa, t_start, t_end,
     every hop_sec seconds over [t_start, t_end], finds the dominant swara in
     each window, then removes consecutive duplicates that are shorter than
     min_dur_sec.  The result is a list of (swara, octave) pairs, one per
-    distinct sustained note event — independent of any BPM assumption.
+    distinct sustained note event -- independent of any BPM assumption.
 
     Parameters
     ----------
-    win_sec     Width of each analysis window (default 120 ms).
-    hop_sec     Step between windows (default 40 ms).
+    win_sec     Width of each analysis window (default 80 ms).
+                Shorter than the metered-section window to capture the rapid,
+                subtle ornaments (meend, gamak) of flute and sitar alaap.
+    hop_sec     Step between windows (default 20 ms).
     min_dur_sec Minimum duration a note must be sustained to survive
-                the dedup pass (default 100 ms).  Filters out glide
-                transitions and noise blips.
+                the dedup pass (default 150 ms).  Stricter than the
+                metered-section gate to suppress tanpura hum and breath-noise
+                blips that lack a true sustain.
+    min_octave  Lowest octave that may appear in the output (default -1).
+                Rejects ghosting from the tanpura drone or room resonance,
+                which can fool the HPS detector into returning octave -2
+                when fmin is set just above the tanpura fundamental.
+                Use -2 to allow very-low mandra notes; use 0 for alaap
+                that stays in the middle/upper octave only.
     """
     note_seq = []   # [(swara, octave, window_start_time), ...]
     t = t_start
@@ -489,7 +508,8 @@ def extract_free_section(times_a, pitches, base_sa, t_start, t_end,
         wp   = [pitches[i] for i in np.where(mask)[0] if pitches[i] is not None]
         if wp:
             sw_oc = [freq_to_swara(p, base_sa) for p in wp]
-            valid = [(s, o) for s, o in sw_oc if s != '-']
+            # Filter: skip silent frames, and enforce the octave floor
+            valid = [(s, o) for s, o in sw_oc if s != '-' and o >= min_octave]
             if valid:
                 dom    = Counter(s for s, o in valid).most_common(1)[0][0]
                 dom_oc = Counter(o for s, o in valid if s == dom).most_common(1)[0][0]
@@ -733,11 +753,11 @@ def build_json(cycles, title, scale_str, bpm,
 # ===========================================================================
 
 # ===========================================================================
-# VERIFY MODE  —  compare an existing JSON against the source MP3
+# VERIFY MODE  --  compare an existing JSON against the source MP3
 # ===========================================================================
 
 def _semitone_distance(note_a, note_b):
-    """Return the smallest semitone distance between two swara names (0–6)."""
+    """Return the smallest semitone distance between two swara names (0-6)."""
     ia = SWARA_IDX.get(note_a, -1)
     ib = SWARA_IDX.get(note_b, -1)
     if ia < 0 or ib < 0:
@@ -750,11 +770,11 @@ def _plot_verification(times_a, pitches, results, beat_sec, base_sa, title, json
     """Save a two-panel PNG: (1) pitch contour + JSON dots, (2) beat accuracy bar."""
     try:
         import matplotlib
-        matplotlib.use('Agg')          # headless — works without a display
+        matplotlib.use('Agg')          # headless -- works without a display
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
     except ImportError:
-        print("  [plot skipped — matplotlib not installed:  pip install matplotlib]")
+        print("  [plot skipped -- matplotlib not installed:  pip install matplotlib]")
         return
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 8),
@@ -762,7 +782,7 @@ def _plot_verification(times_a, pitches, results, beat_sec, base_sa, title, json
     fig.subplots_adjust(hspace=0.35)
 
     # ── Panel 1: MP3 pitch contour + JSON note dots ──────────────────────
-    ax1.set_title(f"Pitch comparison — {title}", fontsize=12, pad=6)
+    ax1.set_title(f"Pitch comparison -- {title}", fontsize=12, pad=6)
 
     mp3_t, mp3_s = [], []
     for t, p in zip(times_a, pitches):
@@ -845,7 +865,7 @@ def _plot_verification(times_a, pitches, results, beat_sec, base_sa, title, json
     plot_path = os.path.splitext(json_path)[0] + '_verify.png'
     plt.savefig(plot_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
-    print(f"  Plot saved → {plot_path}")
+    print(f"  Plot saved -> {plot_path}")
 
 
 def run_verify(args):
@@ -854,16 +874,16 @@ def run_verify(args):
 
     Algorithm
     ---------
-    1. Load JSON  →  extract base_sa, bpm, and the per-beat note sequence
+    1. Load JSON  ->  extract base_sa, bpm, and the per-beat note sequence
        with estimated timestamps (beat 0 of line 0 = t=0, each subsequent
        beat advances by beat_sec = 60/bpm).
     2. Run HPS pitch detection on the MP3 (same fmin heuristic as generation).
     3. For each JSON beat at time t, sample the MP3 pitch in the window
        [t − 0.25·beat, t + 0.75·beat].  Take the median of confident frames.
     4. Compare JSON note to detected MP3 note:
-         exact  — same swara name
-         close  — within ±1 semitone  (e.g. komal/shuddha confusion)
-         wrong  — ≥ 2 semitones away
+         exact  -- same swara name
+         close  -- within ±1 semitone  (e.g. komal/shuddha confusion)
+         wrong  -- ≥ 2 semitones away
     5. Print a per-beat table and overall/per-section accuracy.
     6. Optionally save a matplotlib PNG (--plot).
 
@@ -1038,10 +1058,10 @@ def run_verify(args):
     print("  Legend:  ✓ exact   ~ close (±1 semitone)   ✗ wrong   · rest")
     print()
     print("  Interpretation guide:")
-    print("  • Exact > 70%  →  JSON is good for the metered section")
-    print("  • Exact < 40%  →  likely a wrong --scale or --bpm")
+    print("  • Exact > 70%  ->  JSON is good for the metered section")
+    print("  • Exact < 40%  ->  likely a wrong --scale or --bpm")
     print("  • Intro always lower (free-tempo alaap has timing uncertainty)")
-    print("  • Many '~' (close)  →  komal/shuddha swara confusion; check scale")
+    print("  • Many '~' (close)  ->  komal/shuddha swara confusion; check scale")
     print(sep)
 
     # 7. Optional plot ────────────────────────────────────────────────────
@@ -1094,7 +1114,7 @@ Examples:
                          'All pitches in the MP3 are interpreted relative to this tonic. '
                          'Use the note the tanpura is tuned to.')
     sg.add_argument('--sa',    metavar='HZ', type=float,
-                    help='Assumed Sa (tonic) in Hz — alternative to --scale '
+                    help='Assumed Sa (tonic) in Hz -- alternative to --scale '
                          '(e.g. --sa 415.3 is the same as --scale G#)')
 
     # Taal / tempo
@@ -1127,9 +1147,47 @@ Examples:
                         help='Force exactly N cycles to be labelled as Intro '
                              '(overrides auto-detection). Use when the program '
                              'labels too many or too few cycles as Intro.')
+    parser.add_argument('--intro-win-ms', metavar='MS', type=float, default=80.0,
+                        help='Analysis window size for the free-tempo intro in ms '
+                             '(default: 80). Shorter = captures faster ornaments.')
+    parser.add_argument('--intro-hop-ms', metavar='MS', type=float, default=20.0,
+                        help='Window hop for the free-tempo intro in ms '
+                             '(default: 20). Smaller = finer resolution.')
+    parser.add_argument('--intro-min-dur-ms', metavar='MS', type=float, default=150.0,
+                        help='Minimum note sustain to survive the intro dedup pass '
+                             '(default: 150 ms). Increase to suppress noise blips.')
+    parser.add_argument('--intro-min-octave', metavar='N', type=int, default=-1,
+                        help='Lowest octave allowed in intro output (default: -1). '
+                             'Rejects tanpura/room-noise ghost notes at octave -2. '
+                             'Use -2 to allow very-low mandra notes.')
+    parser.add_argument('--intro-fmin', metavar='HZ', type=float,
+                        help='Minimum pitch frequency for the intro-specific HPS re-analysis '
+                             '(Hz). The intro region is re-analysed independently of the '
+                             'main song so that a higher fmin can suppress the tanpura drone '
+                             '(which sits at base_sa/2 and drowns out soft flute/sitar). '
+                             'Default: base_sa * 0.55 (just above the tanpura fundamental). '
+                             'Increase to e.g. 400 when the alaap starts on Pa (middle) or '
+                             'higher and tanpura interference is severe. '
+                             'Overridden by --intro-start if both are given.')
+    parser.add_argument('--intro-start', metavar='NOTE',
+                        help='Lowest swara expected in the intro/alaap (e.g. Pa, Ni, Sa). '
+                             'Automatically computes the intro HPS fmin as one quarter-tone '
+                             'below that swara\'s frequency, suppressing the tanpura drone '
+                             'without requiring you to know the Hz value. '
+                             'Valid values: ' + ' '.join(SWARA_NAMES) + '. '
+                             'Overrides --intro-fmin when both are given. '
+                             'Example: --intro-start Pa  (alaap opens on Pa, middle octave)')
+    parser.add_argument('--song-start', metavar='NOTE',
+                        help='Lowest swara expected in the metered song section (e.g. Ga, Ma). '
+                             'Automatically computes the main HPS fmin as one quarter-tone '
+                             'below that swara\'s frequency -- more musical than --fmin HZ. '
+                             'Requires --scale or --sa to be effective (needs base_sa). '
+                             'Valid values: ' + ' '.join(SWARA_NAMES) + '. '
+                             'Overrides --fmin when both are given. '
+                             'Example: --song-start Ga  (singer never goes below Ga)')
     parser.add_argument('--auto-meend', action='store_true',
                         help='Auto-detect meend (glide) on ascending stepwise intervals. '
-                             'Off by default — set meend manually in the studio after listening.')
+                             'Off by default -- set meend manually in the studio after listening.')
     parser.add_argument('--fmin',      metavar='HZ', type=float,
                         help='Minimum pitch frequency for HPS detector (Hz). '
                              'Auto-computed from --scale when not given '
@@ -1162,6 +1220,32 @@ Examples:
 
     title    = args.title  or os.path.splitext(os.path.basename(args.mp3_file))[0]
     out_path = args.output or os.path.splitext(args.mp3_file)[0] + '.json'
+
+    # ------------------------------------------------------------------
+    # Early warnings for common mistakes with new note-name arguments
+    # ------------------------------------------------------------------
+    _intro_start = getattr(args, 'intro_start', None)
+    _song_start  = getattr(args, 'song_start',  None)
+
+    if _intro_start and not args.intro_cycles:
+        print()
+        print("  *** WARNING: --intro-start given but --intro-cycles is missing. ***")
+        print(f"      --intro-start '{_intro_start}' only takes effect when --intro-cycles N")
+        print("      is also specified.  Without --intro-cycles the free-tempo alaap")
+        print("      analysis is skipped entirely and --intro-start is a no-op.")
+        print()
+        print("      Add --intro-cycles N where N = number of taal cycles in the alaap.")
+        print("      Example: for a 13-second intro at 158 BPM Rupak (7 beats):")
+        print("               13s / (7 * 60/158 s) = 5 cycles  ->  --intro-cycles 5")
+        print()
+
+    if _song_start and not (args.scale or args.sa):
+        print()
+        print("  *** WARNING: --song-start given but --scale / --sa is missing. ***")
+        print(f"      --song-start '{_song_start}' needs base_sa (Hz) to compute fmin.")
+        print("      Without --scale or --sa the argument falls back to 150 Hz default.")
+        print("      Add --scale NOTE (e.g. --scale D#) for this to work correctly.")
+        print()
 
     # Resolve taal
     taal_key, bpc = '8', 8     # defaults
@@ -1221,13 +1305,28 @@ Examples:
         print("      (Use --scale <note> for best accuracy, e.g. --scale G#)")
 
     # ------------------------------------------------------------------
-    # Compute fmin for HPS:
-    #   If Sa is known: fmin = base_sa * 0.52  (excludes lower tanpura Sa)
-    #   Otherwise: 150 Hz safe default
+    # Compute fmin for HPS.
+    # Priority: --fmin HZ  >  --song-start NOTE  >  base_sa * 0.45  >  150 Hz
+    #   base_sa * 0.45 admits melody in lower octave; tanpura rejected by
+    #   the 5.5x confidence threshold.
+    #   --song-start sets fmin just below the named swara so notes below the
+    #   alaap/voice range are excluded at the detector level.
     # ------------------------------------------------------------------
     if args.fmin:
         pitch_fmin = args.fmin
         print(f"      fmin = {pitch_fmin:.1f} Hz  [user-specified via --fmin]")
+    elif getattr(args, 'song_start', None) and base_sa_early is not None:
+        _ss_note = args.song_start.strip()
+        if _ss_note not in SWARA_IDX:
+            sys.exit(f"Error: --song-start: unknown swara '{_ss_note}'. "
+                     f"Valid values: {' '.join(SWARA_NAMES)}")
+        _ss_hz     = base_sa_early * (2 ** (SWARA_IDX[_ss_note] / 12.0))
+        pitch_fmin = _ss_hz * (2 ** (-0.5 / 12.0))   # one quarter-tone below
+        print(f"      fmin = {pitch_fmin:.1f} Hz  "
+              f"(just below {_ss_note} = {_ss_hz:.1f} Hz)  [from --song-start {_ss_note}]")
+    elif getattr(args, 'song_start', None) and base_sa_early is None:
+        pitch_fmin = 150.0
+        print(f"      fmin = {pitch_fmin:.1f} Hz  (default - --song-start requires --scale or --sa)")
     elif base_sa_early is not None:
         pitch_fmin = base_sa_early * 0.45
         print(f"      fmin = {pitch_fmin:.1f} Hz  (base_sa x 0.45 - admits melody in lower octave; "
@@ -1289,7 +1388,7 @@ Examples:
     #   is extracted separately with a sliding-window + dedup approach that
     #   does NOT assume a beat grid.  The metered section starts at
     #   intro_end_time and is analysed with the normal beat-synchronous
-    #   method — but now the phase search is restricted to the metered
+    #   method -- but now the phase search is restricted to the metered
     #   region only, giving much cleaner alignment.
     # ------------------------------------------------------------------
     print("[5/6] Extracting beats and grouping into cycles...")
@@ -1298,21 +1397,58 @@ Examples:
 
     if args.intro_cycles:
         intro_end_time = args.intro_cycles * bpc * beat_sec
-        print(f"      Intro region : 0 – {intro_end_time:.1f}s "
+        print(f"      Intro region : 0 - {intro_end_time:.1f}s "
               f"({args.intro_cycles} cycle(s), free-tempo analysis)")
+        print(f"      Intro params : win={args.intro_win_ms:.0f}ms  "
+              f"hop={args.intro_hop_ms:.0f}ms  "
+              f"min_dur={args.intro_min_dur_ms:.0f}ms  "
+              f"min_octave={args.intro_min_octave}")
         print(f"      Metered start: {intro_end_time:.1f}s "
               f"(beat-synchronous analysis)")
 
-        intro_notes  = extract_free_section(times_a, pitches, base_sa,
-                                            0.0, intro_end_time)
+        # Re-analyse ONLY the intro slice with a higher fmin so that the
+        # tanpura drone (at base_sa/2) does not drown out the soft
+        # flute/sitar alaap.  The main `pitches` array (low fmin) is kept
+        # for the beat-synchronous metered section.
+        #
+        # Priority: --intro-start NOTE  >  --intro-fmin HZ  >  base_sa * 0.55
+        _intro_start = getattr(args, 'intro_start', None)
+        if _intro_start:
+            _is_note = _intro_start.strip()
+            if _is_note not in SWARA_IDX:
+                sys.exit(f"Error: --intro-start: unknown swara '{_is_note}'. "
+                         f"Valid values: {' '.join(SWARA_NAMES)}")
+            _is_hz        = base_sa * (2 ** (SWARA_IDX[_is_note] / 12.0))
+            intro_fmin_hz = _is_hz * (2 ** (-0.5 / 12.0))   # one quarter-tone below
+            _fmin_source  = f"just below {_is_note} = {_is_hz:.1f} Hz  [--intro-start {_is_note}]"
+        elif args.intro_fmin:
+            intro_fmin_hz = args.intro_fmin
+            _fmin_source  = f"[--intro-fmin {intro_fmin_hz:.1f}]"
+        else:
+            intro_fmin_hz = base_sa * 0.55
+            _fmin_source  = "default (base_sa x 0.55)"
+        print(f"      Intro fmin   : {intro_fmin_hz:.1f} Hz  {_fmin_source}  "
+              f"(tanpura drone at {base_sa/2:.1f} Hz suppressed)")
+        end_sample = min(int((intro_end_time + 1.0) * sr), len(audio))
+        i_times_raw, i_pitches_raw = compute_pitch_frames(
+            audio[:end_sample], sr,
+            hop_ms=20, frame_ms=40, fmin=intro_fmin_hz)
+        i_times_a = np.array(i_times_raw)
+
+        intro_notes  = extract_free_section(i_times_a, i_pitches_raw, base_sa,
+                                            0.0, intro_end_time,
+                                            win_sec    = args.intro_win_ms     / 1000.0,
+                                            hop_sec    = args.intro_hop_ms     / 1000.0,
+                                            min_dur_sec= args.intro_min_dur_ms / 1000.0,
+                                            min_octave = args.intro_min_octave)
         intro_cycles_list = notes_to_cycles(intro_notes, bpc)
-        print(f"      Intro: {len(intro_notes)} note events → "
+        print(f"      Intro: {len(intro_notes)} note events -> "
               f"{len(intro_cycles_list)} cycle(s)")
 
         beats  = extract_beats(times, pitches, base_sa, bpm, duration,
                                t_start=intro_end_time)
         metered_cycles = beats_to_cycles(beats, bpc)
-        print(f"      Metered: {len(beats)} beats → {len(metered_cycles)} cycle(s)")
+        print(f"      Metered: {len(beats)} beats -> {len(metered_cycles)} cycle(s)")
 
         cycles = intro_cycles_list + metered_cycles
     else:

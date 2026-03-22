@@ -141,6 +141,22 @@
             color: white;
             border-color: #6a1b9a;
         }
+        .add-sub-btn {
+            font-size: 11px; padding: 1px 5px; border-radius: 3px;
+            background: #e3f2fd; border: 1px solid #90caf9; cursor: pointer;
+            color: #1565c0; margin-top: 2px; display: block; align-self: flex-start;
+        }
+        .add-sub-btn:hover { background: #bbdefb; }
+        .rem-sub-btn {
+            font-size: 10px; padding: 0 3px; border-radius: 2px;
+            background: transparent; border: none; cursor: pointer;
+            color: #bbb; line-height: 1; flex-shrink: 0;
+        }
+        .rem-sub-btn:hover { color: #e53935; }
+        /* Gamak indicator: cells with 2+ sub-notes get a subtle pink tint */
+        .sub-cell-container:has(.note-unit + .note-unit) {
+            background: #fce4ec; border-radius: 3px; padding: 2px;
+        }
         select { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
         input[type="number"], input[type="text"] { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
         input[type="range"] { border: none; cursor: pointer; }
@@ -786,7 +802,16 @@ const SAMPLE_DEFS = {
     // Add instruments here as recordings become available; CDN used as fallback until then.
     harmonium: {
         base: '/samples/harmonium/',
-        notes: ['A2','C3','Ds3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5','A5']
+        // Full chromatic range G2→C6 (42 notes, no pitch shifting needed when all present).
+        // Missing files are silently skipped; app falls back to nearest loaded sample.
+        // Currently recorded: A2, C3, Ds3, A3, C4, Ds4, Fs4, A4, C5, Ds5, Fs5, A5
+        notes: [
+            'G2','Gs2','A2','As2','B2',
+            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
+            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
+            'C5','Cs5','D5','Ds5','E5','F5','Fs5','G5','Gs5','A5','As5','B5',
+            'C6'
+        ]
     },
     // CDN fallback until local recordings are ready
     flute: {
@@ -1515,10 +1540,18 @@ function startPlayback() {
                             // Meend: glide over 88% of sub-beat. Normal: 8 ms snap.
                             const glide   = isMeend ? (subMs / 1000) * 0.88 : 0.008;
 
-                            // Look ahead for "~" hold beats; extend noteDuration so the
-                            // envelope covers all sustained beats without re-attacking.
+                            // Duration = cover trailing '-'/'~' sub-beats in THIS cell
+                            // (subDur) PLUS any full hold-beats that follow (holdBeats).
+                            // This fixes the bug where a single note in a 4-sub cell
+                            // rings for only beatMs/4 instead of the full beat.
+                            let subDur = 1;
+                            for (let k = si + 1; k < units.length; k++) {
+                                const sv = units[k].querySelector('.note-select').value;
+                                if (sv === '-' || sv === '~') subDur++;
+                                else break;
+                            }
                             const holdBeats    = (si === 0) ? countSustains(targetLine, localIdx) : 0;
-                            const noteDuration = (subMs / 1000) * (1 + holdBeats);
+                            const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
                             if (ratio) {
                                 let freq = baseSa * ratio;
@@ -1995,16 +2028,58 @@ function countSustains(targetLine, fromBeatIdx) {
     return n;
 }
 
+// ─── Sub-note helpers ─────────────────────────────────────────────────────────
+
+/**
+ * Build one note-unit <div> (a single sub-beat slot inside a beat cell).
+ * showRemove: show the "×" remove button (true when the beat has ≥2 sub-notes).
+ */
+function _makeNoteUnit(nv, ov, mv, allOpts, showRemove) {
+    // Replace the pre-built allOpts with a version that selects the right note
+    const opts = allOpts.replace(
+        `<option>${nv}</option>`,
+        `<option selected>${nv}</option>`
+    );
+    const unit = document.createElement('div');
+    unit.className = 'note-unit';
+    unit.innerHTML =
+        `<select class="note-select">${opts}</select>` +
+        `<span class="octave-controls">` +
+        `<button class="octave-btn${ov===1?' active':''}" data-oct="1"  onclick="toggleOctave(this,1)"  title="Taar (upper octave)">&#730;</button>` +
+        `<button class="octave-btn${ov===-1?' active':''}" data-oct="-1" onclick="toggleOctave(this,-1)" title="Mandra (lower octave)">&#x2022;</button>` +
+        `</span>` +
+        `<button class="meend-btn${mv?' active':''}" onclick="this.classList.toggle('active')" title="Meend (glide to this note)">m</button>` +
+        `<button class="rem-sub-btn" onclick="removeSubNote(this)" title="Remove sub-note" ` +
+        `style="visibility:${showRemove?'visible':'hidden'}">&#x2715;</button>`;
+    applySustainStyle(unit);
+    return unit;
+}
+
+/**
+ * Remove a sub-note unit.  Only removes when ≥2 units exist; hides the
+ * remove button on the last remaining unit.
+ */
+function removeSubNote(btn) {
+    const unit = btn.closest('.note-unit');
+    const sub  = unit.parentElement;   // .sub-cell-container
+    const all  = sub.querySelectorAll('.note-unit');
+    if (all.length <= 1) return;      // never remove the last note-unit
+    sub.removeChild(unit);
+    // If only 1 left, hide its remove button
+    if (sub.querySelectorAll('.note-unit').length === 1) {
+        const rem = sub.querySelector('.rem-sub-btn');
+        if (rem) rem.style.visibility = 'hidden';
+    }
+    applyRagaHighlights();
+}
+
 // ─── Line Builder ─────────────────────────────────────────────────────────────
 function addLine(data) {
     const taalKey = data ? data.taal_key : document.getElementById('taal-select').value;
     const beats   = TaalBeats[taalKey] || parseInt(taalKey) || 8;
 
-    // Support variable sub-beats: use max across all beat arrays
-    let maxSubs = 1;
-    if (data && data.notes) {
-        data.notes.forEach(nb => { if (nb && nb.length > maxSubs) maxSubs = nb.length; });
-    }
+    // Per-beat sub-note counts are handled individually in the notes-row loop below.
+    // (Global maxSubs removed: each beat now shows only as many columns as it has notes.)
 
     const instVal    = data ? (data.line_instrument || 'harmonium') : 'harmonium';
     // New JSON uses percussion:'tabla'|'dholak'|'mute'; old JSON used tabla_mute:bool
@@ -2069,41 +2144,49 @@ function addLine(data) {
         rowL.innerHTML += `<div class="cell"><input type="text" class="lyr-input lyr" value="${lv}"></div>`;
     }
 
-    // Notes row (variable sub-beats per cell)
+    // Notes row — each beat gets exactly as many note-unit rows as it has sub-notes.
+    // Gamak beats (e.g. GaPaGaDha in one beat) have multiple stacked note-units;
+    // single-note beats have just one.  The "+" button adds a sub-note for gamak
+    // entry; "×" on each unit removes it (hidden when only 1 sub-note remains).
     const rowN = document.createElement('div');
     rowN.className = 'grid-row';
     rowN.setAttribute('data-row', 'notes');
     rowN.innerHTML = `<div class="row-label">Notes</div>`;
+
+    // Pre-build option string once (shared by all selects)
+    let _allOpts = '';
+    for (const sw in SwaraMap) _allOpts += `<option>${sw}</option>`;
+
     for (let i = 0; i < beats; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
         const sub = document.createElement('div');
         sub.className = 'sub-cell-container';
 
-        for (let s = 0; s < maxSubs; s++) {
-            const nv  = data && data.notes   && data.notes[i]   ? (data.notes[i][s]   || '-') : '-';
-            const ov  = data && data.octaves && data.octaves[i] ? (data.octaves[i][s] ||  0 ) :  0;
-            const mv  = data && data.meend   && data.meend[i]   ? (data.meend[i][s]   || false) : false;
+        // How many sub-notes for THIS beat (default 1)
+        const beatSubs = (data && data.notes && data.notes[i] && data.notes[i].length > 0)
+                         ? data.notes[i].length : 1;
 
-            const unit = document.createElement('div');
-            unit.className = 'note-unit';
-
-            let opts = '';
-            for (const sw in SwaraMap) {
-                opts += `<option${sw === nv ? ' selected' : ''}>${sw}</option>`;
-            }
-
-            unit.innerHTML =
-                `<select class="note-select">${opts}</select>` +
-                `<span class="octave-controls">` +
-                `<button class="octave-btn${ov===1?' active':''}" data-oct="1"  onclick="toggleOctave(this,1)"  title="Taar (upper octave)">&#730;</button>` +
-                `<button class="octave-btn${ov===-1?' active':''}" data-oct="-1" onclick="toggleOctave(this,-1)" title="Mandra (lower octave)">&#x2022;</button>` +
-                `</span>` +
-                `<button class="meend-btn${mv?' active':''}" onclick="this.classList.toggle('active')" title="Meend (glide to this note)">m</button>`;
-            applySustainStyle(unit);   // dim octave/meend controls when value is "~"
-            sub.appendChild(unit);
+        for (let s = 0; s < beatSubs; s++) {
+            const nv = data && data.notes   && data.notes[i]   ? (data.notes[i][s]   ?? '-')    : '-';
+            const ov = data && data.octaves && data.octaves[i] ? (data.octaves[i][s] ??  0 )    :  0;
+            const mv = data && data.meend   && data.meend[i]   ? (data.meend[i][s]   ?? false)  : false;
+            sub.appendChild(_makeNoteUnit(nv, ov, mv, _allOpts, beatSubs > 1));
         }
+
+        // "+" add-sub-note button (always present, small)
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-sub-btn';
+        addBtn.title = 'Add sub-note (gamak / taan)';
+        addBtn.textContent = '+';
+        addBtn.addEventListener('click', () => {
+            sub.appendChild(_makeNoteUnit('-', 0, false, _allOpts, true));
+            // Show remove buttons on all units now that there are 2+
+            sub.querySelectorAll('.rem-sub-btn').forEach(b => b.style.visibility = '');
+        });
+
         cell.appendChild(sub);
+        cell.appendChild(addBtn);
         rowN.appendChild(cell);
     }
 
@@ -2165,7 +2248,7 @@ function buildCompositionData() {
             units.forEach(unit => {
                 nRow.push(unit.querySelector('.note-select').value);
                 const ao = unit.querySelector('.octave-btn.active');
-                oRow.push(ao ? (ao.textContent.trim() === '˙' ? 1 : -1) : 0);
+                oRow.push(ao ? parseInt(ao.dataset.oct) : 0);
                 mRow.push(unit.querySelector('.meend-btn').classList.contains('active'));
             });
             notes.push(nRow); octaves.push(oRow); meend.push(mRow);
