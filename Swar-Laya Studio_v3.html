@@ -26,6 +26,13 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         h2 { margin: 0 0 16px 0; color: #1a237e; font-size: 20px; }
+        #sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: #fdfdfd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+        }
         .controls {
             display: flex;
             flex-wrap: wrap;
@@ -36,12 +43,18 @@
             border-radius: 0;
             align-items: flex-end;
             border-bottom: 1px solid #ddd;
-            /* Stick to top of viewport */
-            position: sticky;
-            top: 0;
-            z-index: 200;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
         }
+        /* Taal ruler — shows beat structure once for the whole sheet */
+        #taal-ruler {
+            display: none;
+            align-items: center;
+            overflow-x: auto;
+            background: #f0f4f8;
+            border-bottom: 2px solid #b0bec5;
+            padding: 4px 16px;
+            gap: 0;
+        }
+        #taal-ruler.visible { display: flex; }
         .control-item {
             display: flex;
             flex-direction: column;
@@ -521,6 +534,7 @@
 
     <h2>🎵 Swar-Laya Studio v3 &mdash; Professional Suite</h2>
 
+    <div id="sticky-header">
     <div class="controls">
 
         <!-- ── Group 1: Song Identity ─────────────────────────────────────── -->
@@ -641,6 +655,11 @@
         <div id="raga-pakkad-chips"></div>
         <button id="raga-pakkad-play" onclick="playPakkad()">▶ Play</button>
     </div>
+
+    <!-- Taal ruler — shared beat strip, shown once for the whole sheet -->
+    <div id="taal-ruler"></div>
+
+    </div><!-- /#sticky-header -->
 
     <div id="song-sheet" style="padding-top:16px;"></div>
 </div>
@@ -1535,19 +1554,23 @@ function startPlayback() {
             if (lineBpm > 0) beatMs = (60 / lineBpm) * 1000;
         }
 
-        // ── Clear previous beat highlight ──
-        document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
+        // ── Clear previous beat highlight in the shared ruler ──
+        document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
 
         if (targetLine) {
-            const beatEl = targetLine.querySelector(`.beat-num[data-beat-idx="${localIdx}"]`);
-            if (beatEl) beatEl.classList.add('playing');
-
-            // Auto-scroll: when playback moves to a new line, smoothly bring it into view.
-            // scroll-margin-top on .line-container ensures it lands below the sticky toolbar.
+            // Auto-scroll + ruler update when playback enters a new line
             if (targetLine !== lastPlayingLine) {
                 lastPlayingLine = targetLine;
+                // Update ruler to match this line's taal and percussion type
+                const lineTaal = targetLine.getAttribute('data-taal');
+                const linePerc = targetLine.querySelector('.line-perc-sel')?.value || 'tabla';
+                renderTaalRuler(lineTaal, linePerc);
                 targetLine.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
+
+            // Highlight the current beat in the ruler
+            const beatEl = document.querySelector(`#taal-ruler .beat-num[data-beat-idx="${localIdx}"]`);
+            if (beatEl) beatEl.classList.add('playing');
 
             const inst    = targetLine.querySelector('.line-inst-select').value;
             // Adlib lines always silence percussion regardless of the dropdown
@@ -1642,7 +1665,9 @@ function stopPlayback() {
     }
     lastPlayedFreq  = null;
     lastPlayingLine = null;
-    document.querySelectorAll('.beat-num').forEach(el => el.classList.remove('playing'));
+    document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
+    // Restore ruler to the toolbar's selected taal
+    renderTaalRuler(document.getElementById('taal-select').value, 'tabla');
 }
 
 // ─── Tanpura (Cycling String Drone) ──────────────────────────────────────────
@@ -2264,26 +2289,8 @@ function addLine(data, insertBeforeEl) {
         rowN.appendChild(cell);
     }
 
-    // Beat/bol row
-    const rowB = document.createElement('div');
-    rowB.className = 'grid-row';
-    rowB.setAttribute('data-row', 'beats');
-    rowB.innerHTML = `<div class="row-label">Beat</div>`;
-    const bols   = (percVal === 'dholak' ? DholakBols[taalKey] : TaalBols[taalKey]) || [];
-    const khalis = TaalKhali[taalKey] || [];
-    for (let i = 0; i < beats; i++) {
-        const isSam   = i === 0;
-        const isKhali = !isSam && khalis.includes(i);
-        const marker  = isSam ? 'X' : (isKhali ? '0' : '');
-        rowB.innerHTML +=
-            `<div class="cell beat-num${isSam?' sam':''}${isKhali?' khali':''}" data-beat-idx="${i}">` +
-            `<div class="bol-text">${bols[i]||''}</div>` +
-            `<div class="taal-marker">${marker}</div>${i+1}</div>`;
-    }
-
     line.appendChild(rowL);
     line.appendChild(rowN);
-    line.appendChild(rowB);
 
     // "Insert Before" button (top-right, just left of the remove button)
     const insBtn = document.createElement('button');
@@ -2307,6 +2314,7 @@ function addLine(data, insertBeforeEl) {
     }
     renumberLines();
     applyRagaHighlights();
+    updateScrollMargin();
 }
 
 function toggleOctave(btn, val) {
@@ -2336,6 +2344,45 @@ function restoreSettings() {
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
     if (scale) document.getElementById('scale-select').value = scale;
+    // Render ruler for restored taal (if any)
+    if (taal) renderTaalRuler(taal, 'tabla');
+}
+
+// ─── Taal Ruler ───────────────────────────────────────────────────────────────
+
+/**
+ * Render (or update) the shared sticky taal ruler above the song sheet.
+ * Called on taal change, on restore, and each time playback enters a new line.
+ */
+function renderTaalRuler(taalKey, percType) {
+    const ruler = document.getElementById('taal-ruler');
+    if (!taalKey) { ruler.className = ''; ruler.innerHTML = ''; updateScrollMargin(); return; }
+
+    const beats  = TaalBeats[taalKey] || parseInt(taalKey) || 0;
+    const bols   = ((percType === 'dholak') ? DholakBols[taalKey] : TaalBols[taalKey]) || [];
+    const khalis = TaalKhali[taalKey] || [];
+
+    let html = '<div class="row-label">Beat</div>';
+    for (let i = 0; i < beats; i++) {
+        const isSam   = i === 0;
+        const isKhali = !isSam && khalis.includes(i);
+        const marker  = isSam ? 'X' : (isKhali ? '0' : '');
+        html +=
+            `<div class="cell beat-num${isSam?' sam':''}${isKhali?' khali':''}" data-beat-idx="${i}">` +
+            `<div class="bol-text">${bols[i] || ''}</div>` +
+            `<div class="taal-marker">${marker}</div>${i + 1}</div>`;
+    }
+    ruler.innerHTML = html;
+    ruler.className = 'visible';
+    updateScrollMargin();
+}
+
+/** Keep .line-container scroll-margin-top in sync with the sticky header height. */
+function updateScrollMargin() {
+    const h = (document.getElementById('sticky-header')?.offsetHeight || 80) + 12;
+    document.querySelectorAll('.line-container').forEach(el => {
+        el.style.scrollMarginTop = h + 'px';
+    });
 }
 
 // ─── Full Screen ──────────────────────────────────────────────────────────────
@@ -2460,14 +2507,17 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
     }
 });
 
+// Keep scroll-margin-top on all lines in sync whenever the sticky header resizes
+// (toolbar can wrap to 2 rows; raga bar can appear/disappear; ruler changes taal)
+new ResizeObserver(updateScrollMargin).observe(document.getElementById('sticky-header'));
+
 // Restore taal / BPM / scale from the last session (no auto-add line on reload)
 restoreSettings();
 
-// Persist toolbar settings whenever the user changes them
-document.getElementById('taal-select').addEventListener('change', saveSettings);
-
-// Auto-add the first line when the user selects a taal and the sheet is empty
+// Persist toolbar settings, refresh ruler, and auto-add first line on taal change
 document.getElementById('taal-select').addEventListener('change', function() {
+    saveSettings();
+    renderTaalRuler(this.value, 'tabla');
     if (document.getElementById('song-sheet').children.length === 0) {
         addLine();
     }
