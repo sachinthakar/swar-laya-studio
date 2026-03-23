@@ -293,7 +293,7 @@
             background: #1b5e20; color: white; cursor: pointer; border: none;
         }
         .btn-play-line:hover  { background: #2e7d32; }
-        .btn-play-line.active { background: #e65100; }   /* orange while this line loops */
+        .btn-play-line.active { background: #e65100; }   /* orange while this line is playing */
         .btn-insert-before {
             position: absolute; top: 6px; right: 44px;
             font-size: 11px; padding: 2px 7px; border-radius: 4px;
@@ -635,6 +635,10 @@
         </div>
         <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
         <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
+        <div class="control-item" title="Loop: repeat continuously. Off = play once and stop.">
+            <label>Loop</label>
+            <input type="checkbox" id="loop-toggle" style="width:16px; cursor:pointer;">
+        </div>
 
         <span class="ctrl-sep"></span>
 
@@ -1587,7 +1591,14 @@ function startPlayback(singleLineEl = null) {
             return;
         }
 
-        if (globalBeat >= totalBeats) globalBeat = 0;
+        if (globalBeat >= totalBeats) {
+            if (document.getElementById('loop-toggle')?.checked) {
+                globalBeat = 0;   // loop: wrap around to start
+            } else {
+                stopPlayback();   // play-once: stop cleanly
+                return;
+            }
+        }
 
         // ── Find which line owns this beat ──
         let accumulated = 0, targetLine = null, localIdx = 0;
@@ -2377,7 +2388,7 @@ function addLine(data, insertBeforeEl) {
     // ▶ Play this line only (loops until Stop is pressed)
     const playBtn = document.createElement('button');
     playBtn.className   = 'btn-play-line';
-    playBtn.title       = 'Play this line only — loops until Stop';
+    playBtn.title       = 'Play this line only (once, or loops if Loop is checked)';
     playBtn.textContent = '▶ Line';
     playBtn.addEventListener('click', () => {
         if (playBtn.classList.contains('active')) {
