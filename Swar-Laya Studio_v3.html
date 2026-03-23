@@ -1318,6 +1318,16 @@ const InstrumentHarmonics = {
         {ratio: 3.006, gainFactor: 0.10, detuneCents:  0},
         {ratio: 4.015, gainFactor: 0.06, detuneCents:  0},
         {ratio: 5.030, gainFactor: 0.03, detuneCents:  0}
+    ],
+    // Bellpad: inharmonic bell partials (carillon-like) + shimmer layers for pad warmth
+    bellpad: [
+        {ratio: 1.000, gainFactor: 0.32, detuneCents:  0},   // fundamental
+        {ratio: 2.000, gainFactor: 0.20, detuneCents:  0},   // octave
+        {ratio: 3.000, gainFactor: 0.14, detuneCents:  0},   // 5th of 2nd octave
+        {ratio: 4.170, gainFactor: 0.09, detuneCents:  0},   // bell minor 3rd partial
+        {ratio: 5.400, gainFactor: 0.05, detuneCents:  0},   // upper bell partial
+        {ratio: 1.000, gainFactor: 0.06, detuneCents: +7},   // shimmer layer
+        {ratio: 2.000, gainFactor: 0.04, detuneCents: -6}    // shimmer octave
     ]
 };
 
@@ -1326,7 +1336,8 @@ const InstrumentFilter = {
     flute:     {type: 'lowpass',  freq: 3500, Q: 0.6},  // airy, open
     sitar:     {type: 'highpass', freq:  180, Q: 0.7},  // remove low mud
     violin:    {type: 'lowpass',  freq: 3200, Q: 1.2},  // slight nasal peak
-    piano:     {type: 'lowpass',  freq: 4500, Q: 0.5}   // bright, clear
+    piano:     {type: 'lowpass',  freq: 4500, Q: 0.5},  // bright, clear
+    bellpad:   {type: 'lowpass',  freq: 5000, Q: 0.4}   // open, crystalline
 };
 
 // All instruments: pure sine per oscillator — correct additive synthesis.
@@ -1336,7 +1347,8 @@ const InstrumentOscType = {
     flute:     'sine',
     sitar:     'sine',
     violin:    'sine',
-    piano:     'sine'
+    piano:     'sine',
+    bellpad:   'sine'
 };
 
 function setupSynth(instrument) {
@@ -1465,6 +1477,18 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
         mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
         mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
 
+    } else if (instrument === 'bellpad') {
+        // Bell strike + pad sustain: fast attack, bell-like initial decay to a
+        // warm pad level, then clean release at note end.
+        const bellDecay = Math.min(noteDuration * 0.45, 1.2);
+        const padLevel  = peakGain * 0.28;
+        const rel       = Math.min(0.10, noteDuration * 0.12);
+        const sus       = Math.max(0.01, noteDuration - bellDecay - rel);
+        mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.012);
+        mainGain.gain.exponentialRampToValueAtTime(padLevel, now + bellDecay);
+        mainGain.gain.setValueAtTime(padLevel,           now + bellDecay + sus);
+        mainGain.gain.linearRampToValueAtTime(0.0001,    now + bellDecay + sus + rel);
+
     } else if (instrument === 'flute') {
         // Bansuri: slow breath attack, sustain, gentle release
         const att = 0.090;
@@ -1520,6 +1544,12 @@ function silenceNote() {
 function startPlayback(singleLineEl = null) {
     initAudio();
     stopPlayback();
+    // stopPlayback() silences sampleBus for 300 ms (to let ringing notes die).
+    // Cancel that timer and restore immediately so the very first note is audible.
+    if (sampleBus) {
+        sampleBus.gain.cancelScheduledValues(audioCtx.currentTime);
+        sampleBus.gain.setValueAtTime(1, audioCtx.currentTime);
+    }
 
     const allLines = Array.from(document.querySelectorAll('.line-container'));
     if (!allLines.length) return;
@@ -2246,6 +2276,7 @@ function addLine(data, insertBeforeEl) {
             <option value="sitar"     ${instVal==='sitar'    ?'selected':''}>Sitar</option>
             <option value="violin"    ${instVal==='violin'   ?'selected':''}>Violin</option>
             <option value="piano"     ${instVal==='piano'    ?'selected':''}>Piano</option>
+            <option value="bellpad"   ${instVal==='bellpad'  ?'selected':''}>Bellpad</option>
         </select>
         <label>Percussion:</label>
         <select class="line-perc-sel" style="width:82px;">
@@ -3469,6 +3500,7 @@ function raAdminExport() {
           <option value="flute">Flute</option>
           <option value="sitar">Sitar</option>
           <option value="violin">Violin</option>
+          <option value="bellpad">Bellpad</option>
         </select>
       </div>
     </div>
