@@ -1036,9 +1036,11 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
         env.gain.setValueAtTime(peak,                now + att + sus);
         env.gain.linearRampToValueAtTime(0.001,      now + att + sus + rel);
     } else {
-        // harmonium, violin — moderate attack, held sustain
-        const att = 0.04, rel = Math.min(0.06, noteDuration * 0.1);
-        const sus = Math.max(0.01, noteDuration - att - rel);
+        // harmonium, violin — attack and release scale with note length so that
+        // fast sub-notes (e.g. 4 per beat) sound just as full as slow ones.
+        const att = Math.min(0.040, noteDuration * 0.18);
+        const rel = Math.min(0.040, noteDuration * 0.12);
+        const sus = Math.max(0.01,  noteDuration - att - rel);
         const peak = 0.50 * vs;
         env.gain.setValueAtTime(0,    now);
         env.gain.linearRampToValueAtTime(peak, now + att);
@@ -1520,10 +1522,11 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
         }
 
     } else {
-        // Harmonium / violin: medium attack, sustain, scheduled release
-        const att = 0.045;
-        const rel = Math.min(0.065, noteDuration * 0.10);
-        const sus = Math.max(0.01, noteDuration - att - rel);
+        // Harmonium / violin: attack and release scale with note length so that
+        // fast sub-notes sound just as full as slow single-beat notes.
+        const att = Math.min(0.045, noteDuration * 0.18);
+        const rel = Math.min(0.045, noteDuration * 0.12);
+        const sus = Math.max(0.01,  noteDuration - att - rel);
         mainGain.gain.linearRampToValueAtTime(peakGain, now + att);
         mainGain.gain.setValueAtTime(peakGain,          now + att + sus);
         mainGain.gain.linearRampToValueAtTime(0.0001,   now + att + sus + rel);
@@ -1700,7 +1703,10 @@ function startPlayback(singleLineEl = null) {
                                 if (sv === '-' || sv === '~') subDur++;
                                 else break;
                             }
-                            const holdBeats    = (si === 0) ? countSustains(targetLine, localIdx) : 0;
+                            // Hold (~) extends the LAST subnote of the beat, not the first.
+                            // e.g. [Sa, Ga] ~ → Sa plays subMs, Ga plays subMs + beatMs.
+                            const isLastSub    = (si === units.length - 1);
+                            const holdBeats    = isLastSub ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
                             if (ratio) {
