@@ -323,6 +323,26 @@
             font-size: 10px; color: #ef6c00; font-weight: bold;
             margin-left: 4px; letter-spacing: 0.3px;
         }
+        .adlib-beat-controls {
+            display: flex; align-items: center; gap: 8px;
+            background: #fff3e0; border: 1px solid #ef6c00; border-radius: 5px;
+            padding: 4px 10px; margin-bottom: 6px;
+            font-size: 12px; color: #bf360c;
+        }
+        .adlib-beat-controls-label {
+            font-weight: 600; letter-spacing: 0.2px;
+        }
+        .btn-add-beat, .btn-rem-beat {
+            font-size: 13px; padding: 2px 10px; cursor: pointer;
+            background: #ef6c00; border: none; border-radius: 4px;
+            color: #fff; font-weight: bold;
+        }
+        .btn-add-beat:hover { background: #e65100; }
+        .btn-rem-beat:hover { background: #e65100; }
+        .adlib-beat-count {
+            font-size: 12px; color: #bf360c; font-style: italic;
+            min-width: 50px; font-weight: 600;
+        }
 
         /* ── Raga Mode ── */
         #raga-info-bar {
@@ -2187,7 +2207,10 @@ function addLine(data, insertBeforeEl) {
         alert('Please choose a Taal first using the Taal dropdown in the toolbar.');
         return;
     }
-    const beats = TaalBeats[taalKey] || parseInt(taalKey) || 8;
+    // Adlib lines loaded from JSON may have more beats than the taal — honour that.
+    const beats = (data && data.adlib && data.beats)
+                  ? parseInt(data.beats)
+                  : (TaalBeats[taalKey] || parseInt(taalKey) || 8);
 
     // Per-beat sub-note counts are handled individually in the notes-row loop below.
     // (Global maxSubs removed: each beat now shows only as many columns as it has notes.)
@@ -2244,6 +2267,19 @@ function addLine(data, insertBeforeEl) {
                title="Per-line tempo override. Leave blank to use the master BPM. Set a slow value (e.g. 30–50) for Alap lines.">
     `;
     line.appendChild(settings);
+
+    // Adlib beat-controls strip — shown only when adlib is ON
+    const beatStrip = document.createElement('div');
+    beatStrip.className = 'adlib-beat-controls';
+    beatStrip.style.display = adlibVal ? 'flex' : 'none';
+    beatStrip.innerHTML = `
+        <span class="adlib-beat-controls-label">&#127925; Adlib beats:</span>
+        <button class="btn-rem-beat" title="Remove last beat column (min 1)">&#8722; Beat</button>
+        <span class="adlib-beat-count">${beats} beats</span>
+        <button class="btn-add-beat" title="Add a beat column to this adlib line">+ Beat</button>
+        <span style="font-size:11px; color:#888; margin-left:8px;">Use Line BPM to control note speed</span>
+    `;
+    line.appendChild(beatStrip);
 
     // Lyrics row
     const rowL = document.createElement('div');
@@ -2519,6 +2555,9 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
         // but switching the UI makes the state visible and consistent).
         const percSel = lineEl.querySelector('.line-perc-sel');
         if (isAdlib && percSel) percSel.value = 'mute';
+        // Show or hide the + Beat / − Beat strip
+        const beatCtrl = lineEl.querySelector('.adlib-beat-controls');
+        if (beatCtrl) beatCtrl.style.display = isAdlib ? 'flex' : 'none';
     }
 
     // When the user switches the per-line Percussion dropdown, live-update the
@@ -2533,6 +2572,68 @@ document.getElementById('song-sheet').addEventListener('change', function(e) {
             el.textContent = newBols[i] || '';
         });
     }
+});
+
+// ── Adlib + Beat / − Beat buttons ────────────────────────────────────────────
+// These appear only on adlib lines; they add/remove a complete beat column
+// (lyrics cell + notes cell) so the user can have any number of beats.
+document.getElementById('song-sheet').addEventListener('click', function(e) {
+    const isAdd = e.target.classList.contains('btn-add-beat');
+    const isRem = e.target.classList.contains('btn-rem-beat');
+    if (!isAdd && !isRem) return;
+
+    const lineEl = e.target.closest('.line-container');
+    const rowL   = lineEl.querySelector('[data-row="lyrics"]');
+    const rowN   = lineEl.querySelector('[data-row="notes"]');
+    let   beats  = parseInt(lineEl.getAttribute('data-beats')) || 1;
+
+    if (isAdd) {
+        // ── Lyrics cell ──
+        const lCell = document.createElement('div');
+        lCell.className = 'cell';
+        lCell.innerHTML = `<input type="text" class="lyr-input lyr" value="">`;
+        rowL.appendChild(lCell);
+
+        // ── Notes cell ──
+        let _allOpts = '';
+        for (const sw in SwaraMap) _allOpts += `<option>${sw}</option>`;
+
+        const nCell = document.createElement('div');
+        nCell.className = 'cell';
+        nCell.dataset.beatIdx = beats;          // new index
+
+        const sub = document.createElement('div');
+        sub.className = 'sub-cell-container';
+        sub.appendChild(_makeNoteUnit('-', 0, false, _allOpts, false));
+
+        const addSubBtn = document.createElement('button');
+        addSubBtn.className   = 'add-sub-btn';
+        addSubBtn.title       = 'Add sub-note (gamak / taan)';
+        addSubBtn.textContent = '+';
+        addSubBtn.addEventListener('click', () => {
+            sub.appendChild(_makeNoteUnit('-', 0, false, _allOpts, true));
+            sub.querySelectorAll('.rem-sub-btn').forEach(b => b.style.visibility = '');
+        });
+
+        nCell.appendChild(sub);
+        nCell.appendChild(addSubBtn);
+        rowN.appendChild(nCell);
+
+        beats += 1;
+
+    } else {
+        // ── Remove last beat column (min 1) ──
+        if (beats <= 1) return;
+        const lCells = rowL.querySelectorAll('.cell');
+        const nCells = rowN.querySelectorAll('.cell');
+        if (lCells.length) lCells[lCells.length - 1].remove();
+        if (nCells.length) nCells[nCells.length - 1].remove();
+        beats -= 1;
+    }
+
+    lineEl.setAttribute('data-beats', beats);
+    const counter = lineEl.querySelector('.adlib-beat-count');
+    if (counter) counter.textContent = beats + ' beats';
 });
 
 // Keep scroll-margin-top on all lines in sync whenever the sticky header resizes

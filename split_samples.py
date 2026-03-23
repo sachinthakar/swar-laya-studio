@@ -39,10 +39,15 @@ INSTRUMENTS = {
         'startNote':    'C3',  # flute can't play C2; recording starts at C3
     },
     'harmonium': {
-        'file':         os.path.join(BASE_DIR, 'Sound Samples', 'Harmonium-SamplesC2-C5.mp3'),
+        # Target range: G2→C6 (42 chromatic notes, zero pitch shifting in app)
+        # If recording all notes individually, record G2, Gs2, A2, As2, B2,
+        # then C3 through C6 chromatically (37 more notes) = 42 files total.
+        # If using a master file that starts at C2, set startNote='C2'; notes
+        # below C2 (G2–B2) must be recorded individually and placed manually.
+        'file':         os.path.join(BASE_DIR, 'Sound Samples', 'Harmonium-SamplesG2-C6.mp3'),
         'noteDuration': 3.0,
         'startOffset':  0.0,
-        'startNote':    'C2',
+        'startNote':    'G2',
     },
 }
 

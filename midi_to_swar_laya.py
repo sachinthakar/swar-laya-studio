@@ -162,7 +162,8 @@ def select_track(pm: "pretty_midi.PrettyMIDI", track_index=None):
 
 # ─── Core conversion ──────────────────────────────────────────────────────────
 
-def quantize_notes(notes_raw, bpm: int, max_sub_beats: int = 4) -> dict:
+def quantize_notes(notes_raw, bpm: int, max_sub_beats: int = 4,
+                   start_time: float = 0.0) -> dict:
     """
     Assign each MIDI note to a beat index and sub-beat slot.
 
@@ -178,8 +179,11 @@ def quantize_notes(notes_raw, bpm: int, max_sub_beats: int = 4) -> dict:
     raw_buckets = defaultdict(list)  # beat_idx → [(start, swar, octave, vel)]
 
     for (start, end, pitch, vel, swar, octave) in notes_raw:
-        beat_idx = int(start / beat_dur)
-        raw_buckets[beat_idx].append((start, swar, octave, vel))
+        adjusted = start - start_time
+        if adjusted < 0:
+            continue   # skip notes before the start time
+        beat_idx = int(adjusted / beat_dur)
+        raw_buckets[beat_idx].append((adjusted, swar, octave, vel))
 
     result = {}
     for beat_idx, items in raw_buckets.items():
@@ -259,7 +263,7 @@ def build_lines(beat_dict: dict, bpm: int, beats_per_line: int,
 def convert(midi_path: str, sa_midi: int, beats_per_line: int,
             taal_key: str, title: str, scale: str, instrument: str,
             track_index=None, max_sub_beats: int = 1,
-            bpm_override: int = None) -> dict:
+            bpm_override: int = None, start_time: float = 0.0) -> dict:
     """
     Full pipeline: MIDI file → Swar-Laya Studio JSON dict.
     """
@@ -267,20 +271,20 @@ def convert(midi_path: str, sa_midi: int, beats_per_line: int,
 
     # ── Report what's in the file ──────────────────────────────────────────
     bpm = bpm_override if bpm_override else get_bpm(pm)
-    print(f"\n{'─'*50}")
+    print(f"\n{'-'*50}")
     print(f"  MIDI file : {midi_path}")
     print(f"  Duration  : {pm.get_end_time():.2f} s")
     print(f"  BPM       : {bpm}  {'(from MIDI)' if not bpm_override else '(overridden)'}")
-    print(f"  Sa        : MIDI {sa_midi}  →  {midi_to_swar(sa_midi, sa_midi)[0]}")
+    print(f"  Sa        : MIDI {sa_midi}  = {midi_to_swar(sa_midi, sa_midi)[0]}")
     print(f"\n  Tracks in file:")
     for i, inst in enumerate(pm.instruments):
-        tag = " ← auto-selected" if (not inst.is_drum and len(inst.notes) > 0 and
+        tag = " <- auto-selected" if (not inst.is_drum and len(inst.notes) > 0 and
               inst == max((x for x in pm.instruments
                            if not x.is_drum and x.notes), key=lambda x: len(x.notes),
                           default=None)) else ""
-        print(f"    [{i}] '{inst.name or 'unnamed'}' — {len(inst.notes)} notes"
+        print(f"    [{i}] '{inst.name or 'unnamed'}' - {len(inst.notes)} notes"
               f"{'  (drum)' if inst.is_drum else ''}{tag}")
-    print(f"{'─'*50}\n")
+    print(f"{'-'*50}\n")
 
     # ── Select track ───────────────────────────────────────────────────────
     selected = select_track(pm, track_index)
@@ -297,7 +301,9 @@ def convert(midi_path: str, sa_midi: int, beats_per_line: int,
                            note.velocity, swar, octave))
 
     # ── Quantize to beat grid ──────────────────────────────────────────────
-    beat_dict = quantize_notes(notes_raw, bpm, max_sub_beats)
+    if start_time > 0:
+        print(f"Start time offset: {start_time:.2f} s (notes before this are skipped)")
+    beat_dict = quantize_notes(notes_raw, bpm, max_sub_beats, start_time=start_time)
 
     # ── Build JSON lines ───────────────────────────────────────────────────
     lines = build_lines(beat_dict, bpm, beats_per_line, taal_key, instrument)
@@ -319,9 +325,9 @@ def print_first_line_preview(result: dict):
     first = result["lines"][0]
     print("\nFirst line preview:")
     print(f"  {'Beat':<6}  {'Notes':<20}  {'Octaves'}")
-    print(f"  {'────':<6}  {'─────':<20}  {'───────'}")
+    print(f"  {'----':<6}  {'-----':<20}  {'-------'}")
     for i, (notes, octs) in enumerate(zip(first["notes"], first["octaves"])):
-        oct_labels = ["↑" if o == 1 else "↓" if o == -1 else " " for o in octs]
+        oct_labels = ["^" if o == 1 else "v" if o == -1 else " " for o in octs]
         note_str   = "  ".join(f"{n}{l}" for n, l in zip(notes, oct_labels))
         print(f"  {i+1:<6}  {note_str}")
 
@@ -392,6 +398,13 @@ def main():
         metavar="N",
         help="Override BPM from MIDI (useful if tempo detection is wrong)")
 
+    parser.add_argument("--start-time",
+        type=float, default=0.0,
+        metavar="SEC",
+        help="Skip notes before this time (seconds). Beat grid starts here. "
+             "Use this to align the taal grid with the first beat of the melody. "
+             "Example: --start-time 15.15 for a song where singing starts at 15s.")
+
     args = parser.parse_args()
 
     # ── Parse Sa ──────────────────────────────────────────────────────────
@@ -413,6 +426,7 @@ def main():
         track_index    = args.track,
         max_sub_beats  = args.max_sub_beats,
         bpm_override   = args.bpm,
+        start_time     = args.start_time,
     )
 
     if not result:
@@ -433,21 +447,21 @@ def main():
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
-    print(f"\n✓  Saved  : {out_path}")
-    print(f"   Title  : {result['title']}")
-    print(f"   BPM    : {result['bpm']}")
-    print(f"   Lines  : {len(result['lines'])}")
+    print(f"\nSaved  : {out_path}")
+    print(f"Title  : {result['title']}")
+    print(f"BPM    : {result['bpm']}")
+    print(f"Lines  : {len(result['lines'])}")
 
     print_first_line_preview(result)
 
-    print("\n⚠  NEXT STEPS (manual corrections needed):")
+    print("\nNEXT STEPS (manual corrections needed):")
     print("   1. Load JSON in Swar-Laya Studio")
     print("   2. Play alongside the original MP3")
     print("   3. Fix wrong notes beat by beat")
     print("   4. Replace lyric placeholders with actual lyrics")
     print("   5. Add meend (glide) where needed")
     print("   6. Set correct section names (Mukhda / Antara)")
-    print("   7. Adjust octave markers (↑↓) where notes are in wrong octave")
+    print("   7. Adjust octave markers (up/down) where notes are in wrong octave")
 
 
 if __name__ == "__main__":
