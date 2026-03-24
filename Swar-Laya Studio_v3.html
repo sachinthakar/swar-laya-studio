@@ -2615,10 +2615,11 @@ function buildCompositionData() {
     });
 
     return {
-        title: document.getElementById('song-title').value || 'Untitled',
-        scale: document.getElementById('scale-select').value,
-        bpm:   parseInt(document.getElementById('bpm').value) || 90,
-        lines: lineArray
+        title:    document.getElementById('song-title').value || 'Untitled',
+        scale:    document.getElementById('scale-select').value,
+        bpm:      parseInt(document.getElementById('bpm').value) || 90,
+        pre_roll: parseInt(document.getElementById('pre-roll-select').value) || 0,
+        lines:    lineArray
     };
 }
 
@@ -2636,9 +2637,11 @@ function loadJsonFile(e) {
     const reader = new FileReader();
     reader.onload = ev => {
         const d = JSON.parse(ev.target.result);
-        if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) document.getElementById('scale-select').value = d.scale;
-        if (d.bpm)   document.getElementById('bpm').value = d.bpm;
+        if (d.title)    document.getElementById('song-title').value = d.title;
+        if (d.scale)    document.getElementById('scale-select').value = d.scale;
+        if (d.bpm)      document.getElementById('bpm').value = d.bpm;
+        if (d.pre_roll !== undefined)
+                        document.getElementById('pre-roll-select').value = d.pre_roll;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));
     };
