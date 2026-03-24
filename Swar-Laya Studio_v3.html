@@ -146,6 +146,13 @@
             color: white;
             border-color: #37474f;
         }
+        /* Taar+1 (oct=2) gets a distinct amber colour so it is visually different
+           from the standard Taar (dark grey) at a glance. */
+        .octave-btn[data-oct="2"].active {
+            background-color: #e65100;
+            border-color: #e65100;
+            color: white;
+        }
         .meend-btn {
             cursor: pointer;
             border: 1px solid #8e24aa;
@@ -1712,7 +1719,7 @@ function startPlayback(singleLineEl = null) {
                             if (ratio) {
                                 let freq = baseSa * ratio;
                                 const octBtn = unit.querySelector('.octave-btn.active');
-                                if (octBtn) freq *= (octBtn.dataset.oct === '1' ? 2 : 0.5);
+                                if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
                                 triggerNote(freq, inst, glide, noteDuration, lineVol);
                             } else {
                                 silenceNote();
@@ -1941,8 +1948,9 @@ function updateRagaInfoBar(ragaKey) {
         chip.className = 'raga-pakkad-chip';
         // Upper octave → combining dot above; lower → combining dot below
         let label = sw;
-        if (oct === 1)  label = sw + '\u0307';
-        if (oct === -1) label = sw + '\u0323';
+        if (oct === 2)  label = sw + '\u0307\u0307'; // two dots above = Taar+1
+        if (oct === 1)  label = sw + '\u0307';        // dot above = Taar
+        if (oct === -1) label = sw + '\u0323';        // dot below = Mandra
         chip.textContent = label;
         if      (sw === raga.vadi)          chip.classList.add('raga-swar-vadi');
         else if (sw === raga.samvadi)       chip.classList.add('raga-swar-samvadi');
@@ -2113,8 +2121,7 @@ function playPakkad() {
         const ratio = SwaraMap[note];
         if (!ratio) return;
         let freq = baseSa * ratio;
-        if (oct === 1)  freq *= 2;
-        if (oct === -1) freq *= 0.5;
+        if (oct) freq *= Math.pow(2, oct);   // oct: -1=Mandra, 1=Taar, 2=Taar+1
         schedulePakkadNote(freq, inst, t0 + idx * stepSec, noteSec);
     }
 
@@ -2206,6 +2213,7 @@ function _makeNoteUnit(nv, ov, mv, allOpts, showRemove) {
     unit.innerHTML =
         `<select class="note-select">${opts}</select>` +
         `<span class="octave-controls">` +
+        `<button class="octave-btn${ov===2?' active':''}" data-oct="2"  onclick="toggleOctave(this,2)"  title="Taar+1 (2nd upper octave)">&#730;&#730;</button>` +
         `<button class="octave-btn${ov===1?' active':''}" data-oct="1"  onclick="toggleOctave(this,1)"  title="Taar (upper octave)">&#730;</button>` +
         `<button class="octave-btn${ov===-1?' active':''}" data-oct="-1" onclick="toggleOctave(this,-1)" title="Mandra (lower octave)">&#x2022;</button>` +
         `</span>` +
@@ -3039,7 +3047,7 @@ function raAdminRefreshTable() {
                 // Support both {note,oct} (Firestore) and [note,oct] (legacy)
                 const sw  = Array.isArray(entry) ? entry[0] : entry.note;
                 const oct = Array.isArray(entry) ? entry[1] : entry.oct;
-                return oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw;
+                return oct === 2 ? sw+"''" : oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw;
             }).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
