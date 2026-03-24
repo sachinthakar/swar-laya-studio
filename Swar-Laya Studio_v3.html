@@ -1573,7 +1573,8 @@ function startPlayback(singleLineEl = null) {
     const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
     // Single-line mode always starts from beat 0 of that line
     const startBeat = singleLineEl ? 0 : (parseInt(document.getElementById('start-beat').value) || 1) - 1;
-    const preRoll   = parseInt(document.getElementById('pre-roll-select').value) || 0;
+    // Pre-roll is meaningful only for full-song playback; skip it for single-line play.
+    const preRoll   = singleLineEl ? 0 : (parseInt(document.getElementById('pre-roll-select').value) || 0);
 
     // Total beats across the active lines
     let totalBeats = 0;
