@@ -731,6 +731,7 @@ let compressor     = null;
 let noiseBuffer    = null;   // short noise buffer (tabla transients)
 let breathBuffer   = null;   // longer loopable noise buffer (flute breath)
 let lastPlayedFreq = null;   // tracks prev note freq for meend glide with samples
+let legatoEnv      = null;   // last sample env in legato mode — faded out on next note
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
 // Equal-temperament semitone ratios (12th root of 2)
@@ -1027,12 +1028,36 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
 
     const env = audioCtx.createGain();
 
+    // Legato handoff: fade out the previous note quickly so it doesn't ring
+    // under the new one.  Each sampled note has its own independent GainNode,
+    // so without this step both notes play simultaneously.
+    if (legato && legatoEnv) {
+        legatoEnv.gain.cancelScheduledValues(now);
+        legatoEnv.gain.setTargetAtTime(0, now, 0.006);   // ~6 ms exponential fade
+    }
+    if (legato) legatoEnv = env;
+
     // Amplitude envelope — matched to each instrument's character
     if (instrument === 'piano' || instrument === 'sitar') {
         const peak = 0.55 * vs;
-        env.gain.setValueAtTime(0,    now);
-        env.gain.linearRampToValueAtTime(peak,  now + 0.008);
-        env.gain.exponentialRampToValueAtTime(0.001, now + Math.min(noteDuration * 1.5, 2.2));
+        if (legato && instrument === 'sitar') {
+            // Legato sitar: pluck attack → quick decay to a resonance sustain level
+            // → short release at note end (or cut by next note's handoff above).
+            const resonance = peak * 0.28;
+            const decayTime = Math.min(0.14, noteDuration * 0.35);
+            const rel       = 0.010;
+            const sus       = Math.max(0.001, noteDuration - decayTime - rel);
+            env.gain.setValueAtTime(0,          now);
+            env.gain.linearRampToValueAtTime(peak,      now + 0.008);
+            env.gain.exponentialRampToValueAtTime(resonance, now + decayTime);
+            env.gain.setValueAtTime(resonance,  now + decayTime + sus);
+            env.gain.linearRampToValueAtTime(0.001, now + noteDuration);
+        } else {
+            // Non-legato: natural percussive decay to silence
+            env.gain.setValueAtTime(0,    now);
+            env.gain.linearRampToValueAtTime(peak,  now + 0.008);
+            env.gain.exponentialRampToValueAtTime(0.001, now + Math.min(noteDuration * 1.5, 2.2));
+        }
     } else if (instrument === 'flute') {
         const att = 0.09, rel = 0.07;
         const sus = Math.max(0.01, noteDuration - att - rel);
@@ -1487,10 +1512,22 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato
     const peakGain = 0.18 * vs;
 
     if (instrument === 'piano' || instrument === 'sitar') {
-        // Percussive: sharp attack, natural exponential decay
-        const decayEnd = Math.min(noteDuration * 1.4, 1.6);
-        mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
-        mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
+        if (legato && instrument === 'sitar') {
+            // Legato sitar (synth fallback): pluck → resonance sustain → release
+            const resonance = peakGain * 0.28;
+            const decayTime = Math.min(0.14, noteDuration * 0.35);
+            const rel       = 0.010;
+            const sus       = Math.max(0.001, noteDuration - decayTime - rel);
+            mainGain.gain.linearRampToValueAtTime(peakGain,   now + 0.010);
+            mainGain.gain.exponentialRampToValueAtTime(resonance, now + decayTime);
+            mainGain.gain.setValueAtTime(resonance,           now + decayTime + sus);
+            mainGain.gain.linearRampToValueAtTime(0.0001,     now + noteDuration);
+        } else {
+            // Non-legato: sharp attack, natural exponential decay
+            const decayEnd = Math.min(noteDuration * 1.4, 1.6);
+            mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
+            mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
+        }
 
     } else if (instrument === 'bellpad') {
         // Bell strike + pad sustain: fast attack, bell-like initial decay to a
@@ -1758,6 +1795,7 @@ function stopPlayback() {
     }
     lastPlayedFreq  = null;
     lastPlayingLine = null;
+    legatoEnv       = null;
     document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
     document.querySelectorAll('.grid-row[data-row="notes"] .cell.playing').forEach(el => el.classList.remove('playing'));
     // Clear the orange "active" state on all per-line play buttons
