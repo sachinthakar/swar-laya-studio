@@ -1009,7 +1009,7 @@ function findBestSample(instrument, targetHz) {
 }
 
 // Play one note from a sample; returns true if a sample was found and played
-function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq) {
+function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
     const buf = findBestSample(instrument, freq);
     if (!buf || !sampleBus) return false;
     const now = audioCtx.currentTime;
@@ -1045,9 +1045,11 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
     } else {
         // harmonium, violin — attack and release scale with note length so that
         // fast sub-notes (e.g. 4 per beat) sound just as full as slow ones.
-        const att = Math.min(0.040, noteDuration * 0.18);
-        const rel = Math.min(0.040, noteDuration * 0.12);
-        const sus = Math.max(0.01,  noteDuration - att - rel);
+        // In legato mode use an 8 ms snap-on / 8 ms snap-off so notes connect
+        // without audible gaps while still landing precisely on the beat.
+        const att = legato ? 0.008 : Math.min(0.040, noteDuration * 0.18);
+        const rel = legato ? 0.008 : Math.min(0.040, noteDuration * 0.12);
+        const sus = Math.max(0.001, noteDuration - att - rel);
         const peak = 0.50 * vs;
         env.gain.setValueAtTime(0,    now);
         env.gain.linearRampToValueAtTime(peak, now + att);
@@ -1452,12 +1454,12 @@ function stopSynth() {
     if (mainGain) { mainGain.disconnect(); mainGain = null; }
 }
 
-function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
+function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false) {
     const vs = (volScale !== undefined) ? volScale : 1.0;
 
     // ── Sample-based playback (preferred when samples are loaded) ─────────────
     const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
-    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq)) {
+    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato)) {
         lastPlayedFreq = freq;
         return;   // sample handled it; skip oscillator path
     }
@@ -1531,9 +1533,10 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
     } else {
         // Harmonium / violin: attack and release scale with note length so that
         // fast sub-notes sound just as full as slow single-beat notes.
-        const att = Math.min(0.045, noteDuration * 0.18);
-        const rel = Math.min(0.045, noteDuration * 0.12);
-        const sus = Math.max(0.01,  noteDuration - att - rel);
+        // Legato overrides to 8 ms snap-on / snap-off for seamless note flow.
+        const att = legato ? 0.008 : Math.min(0.045, noteDuration * 0.18);
+        const rel = legato ? 0.008 : Math.min(0.045, noteDuration * 0.12);
+        const sus = Math.max(0.001, noteDuration - att - rel);
         mainGain.gain.linearRampToValueAtTime(peakGain, now + att);
         mainGain.gain.setValueAtTime(peakGain,          now + att + sus);
         mainGain.gain.linearRampToValueAtTime(0.0001,   now + att + sus + rel);
@@ -1658,6 +1661,7 @@ function startPlayback(singleLineEl = null) {
             // Adlib lines always silence percussion regardless of the dropdown
             const isAdlib  = targetLine.querySelector('.line-adlib') &&
                              targetLine.querySelector('.line-adlib').checked;
+            const isLegato = !!(targetLine.querySelector('.line-legato')?.checked);
             const percSel  = targetLine.querySelector('.line-perc-sel');
             const percType = isAdlib ? 'mute' : (percSel ? percSel.value : 'tabla');
             const lineVol  = parseFloat(targetLine.querySelector('.line-vol').value);
@@ -1721,7 +1725,7 @@ function startPlayback(singleLineEl = null) {
                                 let freq = baseSa * ratio;
                                 const octBtn = unit.querySelector('.octave-btn.active');
                                 if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
-                                triggerNote(freq, inst, glide, noteDuration, lineVol);
+                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato);
                             } else {
                                 silenceNote();
                             }
@@ -2277,6 +2281,7 @@ function addLine(data, insertBeforeEl) {
     const volVal     = data ? (data.line_volume !== undefined ? data.line_volume : 1.0) : 1.0;
     const section    = data ? (data.section || '') : '';
     const adlibVal   = data ? !!data.adlib        : false;
+    const legatoVal  = data ? !!data.legato       : false;
     const lineBpmVal = data ? (data.line_bpm > 0 ? data.line_bpm : '') : '';
 
     const sheet = document.getElementById('song-sheet');
@@ -2314,6 +2319,10 @@ function addLine(data, insertBeforeEl) {
         <input type="range" class="line-vol" min="0.1" max="1" step="0.05" value="${volVal}" style="width:70px;">
         <label>Section:</label>
         <input type="text" class="line-section" value="${section}" style="width:80px;" placeholder="e.g. Mukhda">
+        <label title="Legato: notes snap on immediately and sustain until the next note, so the melody flows without gaps between beats.">Legato:</label>
+        <input type="checkbox" class="line-legato" ${legatoVal ? 'checked' : ''}
+               title="Legato: 8 ms attack/release so consecutive notes connect smoothly."
+               style="width:16px;">
         <label class="adlib-label">Adlib/Alap:</label>
         <input type="checkbox" class="line-adlib" ${adlibVal ? 'checked' : ''}
                title="Adlib/Alap mode: free tempo, tabla silenced. Use Line BPM to set the alap speed."
@@ -2555,6 +2564,7 @@ function buildCompositionData() {
             percussion:      l.querySelector('.line-perc-sel')?.value || 'tabla',
             line_volume:     parseFloat(l.querySelector('.line-vol').value),
             adlib:           l.querySelector('.line-adlib').checked,
+            legato:          l.querySelector('.line-legato')?.checked || false,
             line_bpm:        lineBpmSaved,
             taal_key:        l.getAttribute('data-taal'),
             beats:           l.getAttribute('data-beats'),
