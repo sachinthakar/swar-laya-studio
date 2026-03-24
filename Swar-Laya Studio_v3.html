@@ -1715,10 +1715,14 @@ function startPlayback(singleLineEl = null) {
                                 if (sv === '-' || sv === '~') subDur++;
                                 else break;
                             }
-                            // Hold (~) extends the LAST subnote of the beat, not the first.
-                            // e.g. [Sa, Ga] ~ → Sa plays subMs, Ga plays subMs + beatMs.
-                            const isLastSub    = (si === units.length - 1);
-                            const holdBeats    = isLastSub ? countSustains(targetLine, localIdx) : 0;
+                            // holdBeats applies when this note's trailing -/~ sub-beats
+                            // reach the end of the cell — meaning this note is the last
+                            // sounding one, regardless of whether it's literally the last
+                            // slot. e.g. [Sa, Ni, Sa, ~] next:[~][~] → Sa at si=2 gets
+                            // subDur=2 (covers the ~), si+subDur=4=units.length → reaches
+                            // end → holdBeats=2 → total = 2*subMs + 2*beatMs.
+                            const reachesEnd = (si + subDur === units.length);
+                            const holdBeats  = reachesEnd ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
                             if (ratio) {
