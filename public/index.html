@@ -577,18 +577,18 @@
         <div class="control-item">
             <label>Scale (Sa)</label>
             <select id="scale-select" onchange="updateTanpura()">
-                <option value="130.81">Pandhri 1 (C)</option>
-                <option value="138.59">Kali 1 (C#)</option>
-                <option value="146.83">Pandhri 2 (D)</option>
-                <option value="155.56">Kali 2 (D#)</option>
-                <option value="164.81">Pandhri 3 (E)</option>
-                <option value="174.61">Pandhri 4 (F)</option>
-                <option value="185.00">Kali 3 (F#)</option>
-                <option value="196.00">Pandhri 5 (G)</option>
-                <option value="207.65">Kali 4 (G#)</option>
-                <option value="220.00">Pandhri 6 (A)</option>
-                <option value="233.08">Kali 5 (A#)</option>
-                <option value="246.94">Pandhri 7 (B)</option>
+                <option value="261.63">Pandhri 1 (C)</option>
+                <option value="277.18">Kali 1 (C#)</option>
+                <option value="293.67">Pandhri 2 (D)</option>
+                <option value="311.13">Kali 2 (D#)</option>
+                <option value="329.63">Pandhri 3 (E)</option>
+                <option value="349.23">Pandhri 4 (F)</option>
+                <option value="370.00">Kali 3 (F#)</option>
+                <option value="392.00">Pandhri 5 (G)</option>
+                <option value="415.30">Kali 4 (G#)</option>
+                <option value="440.00">Pandhri 6 (A)</option>
+                <option value="466.16">Kali 5 (A#)</option>
+                <option value="493.88">Pandhri 7 (B)</option>
             </select>
         </div>
         <div class="control-item">
@@ -1150,7 +1150,7 @@ function playTablaSound(bol, isSam) {
     // Calibration: hardcoded values were written for Kali 4 (G#4 ≈ 415.3 Hz).
     // When the user selects a different scale, scaleRatio shifts the dayan pitch
     // proportionally so the tabla sounds in tune with the melody.
-    const tuningSa   = parseFloat(document.getElementById('scale-select').value) * 2;
+    const tuningSa   = parseFloat(document.getElementById('scale-select').value);
     const scaleRatio = tuningSa / 415.3;
 
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
@@ -1629,7 +1629,7 @@ function startPlayback(singleLineEl = null) {
     if (!allLines.length) return;
     const lines = singleLineEl ? [singleLineEl] : allLines;
 
-    const baseSa    = parseFloat(document.getElementById('scale-select').value) * 2;
+    const baseSa    = parseFloat(document.getElementById('scale-select').value);
     const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
     // Single-line mode always starts from beat 0 of that line
     const startBeat = singleLineEl ? 0 : (parseInt(document.getElementById('start-beat').value) || 1) - 1;
@@ -2154,7 +2154,7 @@ function playPakkad() {
     stopPakkad();
 
     initAudio();
-    const baseSa  = parseFloat(document.getElementById('scale-select').value) * 2;
+    const baseSa  = parseFloat(document.getElementById('scale-select').value);
     const bpm     = parseInt(document.getElementById('bpm').value) || 90;
     // stepSec  = time between successive note starts
     // noteSec  = individual note duration — slightly longer so notes overlap → smooth feel
@@ -2535,7 +2535,13 @@ function restoreSettings() {
     const scale = localStorage.getItem('sl_scale');
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
-    if (scale) document.getElementById('scale-select').value = scale;
+    if (scale) {
+        // Migrate old format: scale was stored as half the Sa Hz (pre-fix).
+        // New format stores the actual Sa Hz. Threshold 256 safely separates
+        // old max (246.94) from new min (261.63).
+        const sv = parseFloat(scale) < 256 ? parseFloat(scale) * 2 : parseFloat(scale);
+        document.getElementById('scale-select').value = sv;
+    }
     // Render ruler for restored taal (if any)
     if (taal) renderTaalRuler(taal, 'tabla');
 }
@@ -2658,7 +2664,10 @@ function loadJsonFile(e) {
     reader.onload = ev => {
         const d = JSON.parse(ev.target.result);
         if (d.title)    document.getElementById('song-title').value = d.title;
-        if (d.scale)    document.getElementById('scale-select').value = d.scale;
+        if (d.scale) {
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+            document.getElementById('scale-select').value = sv;
+        }
         if (d.bpm)      document.getElementById('bpm').value = d.bpm;
         if (d.pre_roll !== undefined)
                         document.getElementById('pre-roll-select').value = d.pre_roll;
@@ -3042,7 +3051,10 @@ async function loadFromCloud(docId) {
 
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.scale) {
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+            document.getElementById('scale-select').value = sv;
+        }
         if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));
