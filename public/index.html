@@ -2324,7 +2324,7 @@ function renumberLines() {
  *   insertBeforeEl — optional .line-container to insert before (null = append)
  */
 function addLine(data, insertBeforeEl) {
-    const taalKey = data ? data.taal_key : document.getElementById('taal-select').value;
+    const taalKey = (data && data.taal_key) ? data.taal_key : document.getElementById('taal-select').value;
     if (!taalKey) {
         alert('Please choose a Taal first using the Taal dropdown in the toolbar.');
         return;

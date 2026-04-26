@@ -146,13 +146,6 @@
             color: white;
             border-color: #37474f;
         }
-        /* Taar+1 (oct=2) gets a distinct amber colour so it is visually different
-           from the standard Taar (dark grey) at a glance. */
-        .octave-btn[data-oct="2"].active {
-            background-color: #e65100;
-            border-color: #e65100;
-            color: white;
-        }
         .meend-btn {
             cursor: pointer;
             border: 1px solid #8e24aa;
@@ -300,7 +293,7 @@
             background: #1b5e20; color: white; cursor: pointer; border: none;
         }
         .btn-play-line:hover  { background: #2e7d32; }
-        .btn-play-line.active { background: #e65100; }   /* orange while this line is playing */
+        .btn-play-line.active { background: #e65100; }   /* orange while this line loops */
         .btn-insert-before {
             position: absolute; top: 6px; right: 44px;
             font-size: 11px; padding: 2px 7px; border-radius: 4px;
@@ -577,18 +570,18 @@
         <div class="control-item">
             <label>Scale (Sa)</label>
             <select id="scale-select" onchange="updateTanpura()">
-                <option value="261.63">Pandhri 1 (C)</option>
-                <option value="277.18">Kali 1 (C#)</option>
-                <option value="293.67">Pandhri 2 (D)</option>
-                <option value="311.13">Kali 2 (D#)</option>
-                <option value="329.63">Pandhri 3 (E)</option>
-                <option value="349.23">Pandhri 4 (F)</option>
-                <option value="370.00">Kali 3 (F#)</option>
-                <option value="392.00">Pandhri 5 (G)</option>
-                <option value="415.30">Kali 4 (G#)</option>
-                <option value="440.00">Pandhri 6 (A)</option>
-                <option value="466.16">Kali 5 (A#)</option>
-                <option value="493.88">Pandhri 7 (B)</option>
+                <option value="130.81">Pandhri 1 (C)</option>
+                <option value="138.59">Kali 1 (C#)</option>
+                <option value="146.83">Pandhri 2 (D)</option>
+                <option value="155.56">Kali 2 (D#)</option>
+                <option value="164.81">Pandhri 3 (E)</option>
+                <option value="174.61">Pandhri 4 (F)</option>
+                <option value="185.00">Kali 3 (F#)</option>
+                <option value="196.00">Pandhri 5 (G)</option>
+                <option value="207.65">Kali 4 (G#)</option>
+                <option value="220.00">Pandhri 6 (A)</option>
+                <option value="233.08">Kali 5 (A#)</option>
+                <option value="246.94">Pandhri 7 (B)</option>
             </select>
         </div>
         <div class="control-item">
@@ -642,10 +635,6 @@
         </div>
         <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
         <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
-        <div class="control-item" title="Loop: repeat continuously. Off = play once and stop.">
-            <label>Loop</label>
-            <input type="checkbox" id="loop-toggle" style="width:16px; cursor:pointer;">
-        </div>
 
         <span class="ctrl-sep"></span>
 
@@ -731,7 +720,6 @@ let compressor     = null;
 let noiseBuffer    = null;   // short noise buffer (tabla transients)
 let breathBuffer   = null;   // longer loopable noise buffer (flute breath)
 let lastPlayedFreq = null;   // tracks prev note freq for meend glide with samples
-let legatoEnv      = null;   // last sample env in legato mode — faded out on next note
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
 // Equal-temperament semitone ratios (12th root of 2)
@@ -903,49 +891,36 @@ function buildNoiseBuffer(sec) {
 
 const SAMPLE_DEFS = {
     // Locally-hosted individual note files served from Firebase Hosting.
-    // fallback_base: CDN URL tried if the local file is missing (404/network error).
-    // Notes list = union of local files + useful CDN-only notes.
+    // Notes list = exactly the files present in public/samples/{instrument}/.
+    // Add instruments here as recordings become available; CDN used as fallback until then.
     harmonium: {
         base: '/samples/harmonium/',
-        fallback_base: null,
+        // Full chromatic range G2→C6 (42 notes, no pitch shifting needed when all present).
+        // Missing files are silently skipped; app falls back to nearest loaded sample.
+        // Currently recorded: A2, C3, Ds3, A3, C4, Ds4, Fs4, A4, C5, Ds5, Fs5, A5
         notes: [
-            'A2','As2','B2',
+            'G2','Gs2','A2','As2','B2',
             'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
             'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5','Cs5','D5','Ds5','E5','F5','Fs5','G5','Gs5','A5'
+            'C5','Cs5','D5','Ds5','E5','F5','Fs5','G5','Gs5','A5','As5','B5',
+            'C6'
         ]
     },
+    // CDN fallback until local recordings are ready
     flute: {
-        base: '/samples/Flute/',
-        fallback_base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
-        // Local: A2–Fs5 (34 notes). CDN extras: A5, C6.
-        notes: [
-            'A2','As2','B2',
-            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
-            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5','Cs5','D5','Ds5','E5','F5','Fs5',
-            'A5','C6'
-        ]
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
+        notes: ['C4','E4','A4','C5','E5','A5','C6']
     },
     sitar: {
         base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/',
-        fallback_base: null,
         notes: ['E2','A2','D3','E3','A3','Cs4','E4','Fs4','A4']
     },
     violin: {
-        base: '/samples/Violin/',
-        fallback_base: null,
-        // Local: A2–C5 (28 notes).
-        notes: [
-            'A2','As2','B2',
-            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
-            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5'
-        ]
+        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/violin/',
+        notes: ['A3','C4','E4','G4','A4','C5','E5','G5']
     },
     piano: {
         base: 'https://tonejs.github.io/audio/salamander/',
-        fallback_base: null,
         notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
     }
 };
@@ -996,14 +971,7 @@ async function ensureSamplesLoaded(instrument) {
     const results = await Promise.allSettled(def.notes.map(async noteName => {
         const key = `${instrument}|${noteName}`;
         if (SampleCache[key]) return;
-        let arr = null;
-        try {
-            arr = await fetchSampleArrayBuffer(def.base + noteName + '.mp3');
-        } catch(e) {
-            if (def.fallback_base)
-                arr = await fetchSampleArrayBuffer(def.fallback_base + noteName + '.mp3');
-            else throw e;
-        }
+        const arr  = await fetchSampleArrayBuffer(def.base + noteName + '.mp3');
         const buf  = await audioCtx.decodeAudioData(arr);
         buf.baseHz = noteNameToHz(noteName);
         if (buf.baseHz) SampleCache[key] = buf;
@@ -1030,7 +998,7 @@ function findBestSample(instrument, targetHz) {
 }
 
 // Play one note from a sample; returns true if a sample was found and played
-function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
+function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq) {
     const buf = findBestSample(instrument, freq);
     if (!buf || !sampleBus) return false;
     const now = audioCtx.currentTime;
@@ -1048,36 +1016,12 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
 
     const env = audioCtx.createGain();
 
-    // Legato handoff: fade out the previous note quickly so it doesn't ring
-    // under the new one.  Each sampled note has its own independent GainNode,
-    // so without this step both notes play simultaneously.
-    if (legato && legatoEnv) {
-        legatoEnv.gain.cancelScheduledValues(now);
-        legatoEnv.gain.setTargetAtTime(0, now, 0.006);   // ~6 ms exponential fade
-    }
-    if (legato) legatoEnv = env;
-
     // Amplitude envelope — matched to each instrument's character
     if (instrument === 'piano' || instrument === 'sitar') {
         const peak = 0.55 * vs;
-        if (legato && instrument === 'sitar') {
-            // Legato sitar: pluck attack → quick decay to a resonance sustain level
-            // → short release at note end (or cut by next note's handoff above).
-            const resonance = peak * 0.28;
-            const decayTime = Math.min(0.14, noteDuration * 0.35);
-            const rel       = 0.010;
-            const sus       = Math.max(0.001, noteDuration - decayTime - rel);
-            env.gain.setValueAtTime(0,          now);
-            env.gain.linearRampToValueAtTime(peak,      now + 0.008);
-            env.gain.exponentialRampToValueAtTime(resonance, now + decayTime);
-            env.gain.setValueAtTime(resonance,  now + decayTime + sus);
-            env.gain.linearRampToValueAtTime(0.001, now + noteDuration);
-        } else {
-            // Non-legato: natural percussive decay to silence
-            env.gain.setValueAtTime(0,    now);
-            env.gain.linearRampToValueAtTime(peak,  now + 0.008);
-            env.gain.exponentialRampToValueAtTime(0.001, now + Math.min(noteDuration * 1.5, 2.2));
-        }
+        env.gain.setValueAtTime(0,    now);
+        env.gain.linearRampToValueAtTime(peak,  now + 0.008);
+        env.gain.exponentialRampToValueAtTime(0.001, now + Math.min(noteDuration * 1.5, 2.2));
     } else if (instrument === 'flute') {
         const att = 0.09, rel = 0.07;
         const sus = Math.max(0.01, noteDuration - att - rel);
@@ -1088,13 +1032,9 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
         env.gain.setValueAtTime(peak,                now + att + sus);
         env.gain.linearRampToValueAtTime(0.001,      now + att + sus + rel);
     } else {
-        // harmonium, violin — attack and release scale with note length so that
-        // fast sub-notes (e.g. 4 per beat) sound just as full as slow ones.
-        // In legato mode use an 8 ms snap-on / 8 ms snap-off so notes connect
-        // without audible gaps while still landing precisely on the beat.
-        const att = legato ? 0.008 : Math.min(0.040, noteDuration * 0.18);
-        const rel = legato ? 0.008 : Math.min(0.040, noteDuration * 0.12);
-        const sus = Math.max(0.001, noteDuration - att - rel);
+        // harmonium, violin — moderate attack, held sustain
+        const att = 0.04, rel = Math.min(0.06, noteDuration * 0.1);
+        const sus = Math.max(0.01, noteDuration - att - rel);
         const peak = 0.50 * vs;
         env.gain.setValueAtTime(0,    now);
         env.gain.linearRampToValueAtTime(peak, now + att);
@@ -1150,7 +1090,7 @@ function playTablaSound(bol, isSam) {
     // Calibration: hardcoded values were written for Kali 4 (G#4 ≈ 415.3 Hz).
     // When the user selects a different scale, scaleRatio shifts the dayan pitch
     // proportionally so the tabla sounds in tune with the melody.
-    const tuningSa   = parseFloat(document.getElementById('scale-select').value);
+    const tuningSa   = parseFloat(document.getElementById('scale-select').value) * 2;
     const scaleRatio = tuningSa / 415.3;
 
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
@@ -1378,16 +1318,6 @@ const InstrumentHarmonics = {
         {ratio: 3.006, gainFactor: 0.10, detuneCents:  0},
         {ratio: 4.015, gainFactor: 0.06, detuneCents:  0},
         {ratio: 5.030, gainFactor: 0.03, detuneCents:  0}
-    ],
-    // Bellpad: inharmonic bell partials (carillon-like) + shimmer layers for pad warmth
-    bellpad: [
-        {ratio: 1.000, gainFactor: 0.32, detuneCents:  0},   // fundamental
-        {ratio: 2.000, gainFactor: 0.20, detuneCents:  0},   // octave
-        {ratio: 3.000, gainFactor: 0.14, detuneCents:  0},   // 5th of 2nd octave
-        {ratio: 4.170, gainFactor: 0.09, detuneCents:  0},   // bell minor 3rd partial
-        {ratio: 5.400, gainFactor: 0.05, detuneCents:  0},   // upper bell partial
-        {ratio: 1.000, gainFactor: 0.06, detuneCents: +7},   // shimmer layer
-        {ratio: 2.000, gainFactor: 0.04, detuneCents: -6}    // shimmer octave
     ]
 };
 
@@ -1396,8 +1326,7 @@ const InstrumentFilter = {
     flute:     {type: 'lowpass',  freq: 3500, Q: 0.6},  // airy, open
     sitar:     {type: 'highpass', freq:  180, Q: 0.7},  // remove low mud
     violin:    {type: 'lowpass',  freq: 3200, Q: 1.2},  // slight nasal peak
-    piano:     {type: 'lowpass',  freq: 4500, Q: 0.5},  // bright, clear
-    bellpad:   {type: 'lowpass',  freq: 5000, Q: 0.4}   // open, crystalline
+    piano:     {type: 'lowpass',  freq: 4500, Q: 0.5}   // bright, clear
 };
 
 // All instruments: pure sine per oscillator — correct additive synthesis.
@@ -1407,8 +1336,7 @@ const InstrumentOscType = {
     flute:     'sine',
     sitar:     'sine',
     violin:    'sine',
-    piano:     'sine',
-    bellpad:   'sine'
+    piano:     'sine'
 };
 
 function setupSynth(instrument) {
@@ -1499,12 +1427,12 @@ function stopSynth() {
     if (mainGain) { mainGain.disconnect(); mainGain = null; }
 }
 
-function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false) {
+function triggerNote(freq, instrument, glideTime, noteDuration, volScale) {
     const vs = (volScale !== undefined) ? volScale : 1.0;
 
     // ── Sample-based playback (preferred when samples are loaded) ─────────────
     const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
-    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato)) {
+    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq)) {
         lastPlayedFreq = freq;
         return;   // sample handled it; skip oscillator path
     }
@@ -1532,34 +1460,10 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato
     const peakGain = 0.18 * vs;
 
     if (instrument === 'piano' || instrument === 'sitar') {
-        if (legato && instrument === 'sitar') {
-            // Legato sitar (synth fallback): pluck → resonance sustain → release
-            const resonance = peakGain * 0.28;
-            const decayTime = Math.min(0.14, noteDuration * 0.35);
-            const rel       = 0.010;
-            const sus       = Math.max(0.001, noteDuration - decayTime - rel);
-            mainGain.gain.linearRampToValueAtTime(peakGain,   now + 0.010);
-            mainGain.gain.exponentialRampToValueAtTime(resonance, now + decayTime);
-            mainGain.gain.setValueAtTime(resonance,           now + decayTime + sus);
-            mainGain.gain.linearRampToValueAtTime(0.0001,     now + noteDuration);
-        } else {
-            // Non-legato: sharp attack, natural exponential decay
-            const decayEnd = Math.min(noteDuration * 1.4, 1.6);
-            mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
-            mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
-        }
-
-    } else if (instrument === 'bellpad') {
-        // Bell strike + pad sustain: fast attack, bell-like initial decay to a
-        // warm pad level, then clean release at note end.
-        const bellDecay = Math.min(noteDuration * 0.45, 1.2);
-        const padLevel  = peakGain * 0.28;
-        const rel       = Math.min(0.10, noteDuration * 0.12);
-        const sus       = Math.max(0.01, noteDuration - bellDecay - rel);
-        mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.012);
-        mainGain.gain.exponentialRampToValueAtTime(padLevel, now + bellDecay);
-        mainGain.gain.setValueAtTime(padLevel,           now + bellDecay + sus);
-        mainGain.gain.linearRampToValueAtTime(0.0001,    now + bellDecay + sus + rel);
+        // Percussive: sharp attack, natural exponential decay
+        const decayEnd = Math.min(noteDuration * 1.4, 1.6);
+        mainGain.gain.linearRampToValueAtTime(peakGain,  now + 0.010);
+        mainGain.gain.exponentialRampToValueAtTime(0.001, now + decayEnd);
 
     } else if (instrument === 'flute') {
         // Bansuri: slow breath attack, sustain, gentle release
@@ -1588,12 +1492,10 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato
         }
 
     } else {
-        // Harmonium / violin: attack and release scale with note length so that
-        // fast sub-notes sound just as full as slow single-beat notes.
-        // Legato overrides to 8 ms snap-on / snap-off for seamless note flow.
-        const att = legato ? 0.008 : Math.min(0.045, noteDuration * 0.18);
-        const rel = legato ? 0.008 : Math.min(0.045, noteDuration * 0.12);
-        const sus = Math.max(0.001, noteDuration - att - rel);
+        // Harmonium / violin: medium attack, sustain, scheduled release
+        const att = 0.045;
+        const rel = Math.min(0.065, noteDuration * 0.10);
+        const sus = Math.max(0.01, noteDuration - att - rel);
         mainGain.gain.linearRampToValueAtTime(peakGain, now + att);
         mainGain.gain.setValueAtTime(peakGain,          now + att + sus);
         mainGain.gain.linearRampToValueAtTime(0.0001,   now + att + sus + rel);
@@ -1618,23 +1520,16 @@ function silenceNote() {
 function startPlayback(singleLineEl = null) {
     initAudio();
     stopPlayback();
-    // stopPlayback() silences sampleBus for 300 ms (to let ringing notes die).
-    // Cancel that timer and restore immediately so the very first note is audible.
-    if (sampleBus) {
-        sampleBus.gain.cancelScheduledValues(audioCtx.currentTime);
-        sampleBus.gain.setValueAtTime(1, audioCtx.currentTime);
-    }
 
     const allLines = Array.from(document.querySelectorAll('.line-container'));
     if (!allLines.length) return;
     const lines = singleLineEl ? [singleLineEl] : allLines;
 
-    const baseSa    = parseFloat(document.getElementById('scale-select').value);
+    const baseSa    = parseFloat(document.getElementById('scale-select').value) * 2;
     const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
     // Single-line mode always starts from beat 0 of that line
     const startBeat = singleLineEl ? 0 : (parseInt(document.getElementById('start-beat').value) || 1) - 1;
-    // Pre-roll is meaningful only for full-song playback; skip it for single-line play.
-    const preRoll   = singleLineEl ? 0 : (parseInt(document.getElementById('pre-roll-select').value) || 0);
+    const preRoll   = parseInt(document.getElementById('pre-roll-select').value) || 0;
 
     // Total beats across the active lines
     let totalBeats = 0;
@@ -1662,14 +1557,7 @@ function startPlayback(singleLineEl = null) {
             return;
         }
 
-        if (globalBeat >= totalBeats) {
-            if (document.getElementById('loop-toggle')?.checked) {
-                globalBeat = 0;   // loop: wrap around to start
-            } else {
-                stopPlayback();   // play-once: stop cleanly
-                return;
-            }
-        }
+        if (globalBeat >= totalBeats) globalBeat = 0;
 
         // ── Find which line owns this beat ──
         let accumulated = 0, targetLine = null, localIdx = 0;
@@ -1718,7 +1606,6 @@ function startPlayback(singleLineEl = null) {
             // Adlib lines always silence percussion regardless of the dropdown
             const isAdlib  = targetLine.querySelector('.line-adlib') &&
                              targetLine.querySelector('.line-adlib').checked;
-            const isLegato = !!(targetLine.querySelector('.line-legato')?.checked);
             const percSel  = targetLine.querySelector('.line-perc-sel');
             const percType = isAdlib ? 'mute' : (percSel ? percSel.value : 'tabla');
             const lineVol  = parseFloat(targetLine.querySelector('.line-vol').value);
@@ -1772,21 +1659,14 @@ function startPlayback(singleLineEl = null) {
                                 if (sv === '-' || sv === '~') subDur++;
                                 else break;
                             }
-                            // holdBeats applies when this note's trailing -/~ sub-beats
-                            // reach the end of the cell — meaning this note is the last
-                            // sounding one, regardless of whether it's literally the last
-                            // slot. e.g. [Sa, Ni, Sa, ~] next:[~][~] → Sa at si=2 gets
-                            // subDur=2 (covers the ~), si+subDur=4=units.length → reaches
-                            // end → holdBeats=2 → total = 2*subMs + 2*beatMs.
-                            const reachesEnd = (si + subDur === units.length);
-                            const holdBeats  = reachesEnd ? countSustains(targetLine, localIdx) : 0;
+                            const holdBeats    = (si === 0) ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
                             if (ratio) {
                                 let freq = baseSa * ratio;
                                 const octBtn = unit.querySelector('.octave-btn.active');
-                                if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
-                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato);
+                                if (octBtn) freq *= (octBtn.dataset.oct === '1' ? 2 : 0.5);
+                                triggerNote(freq, inst, glide, noteDuration, lineVol);
                             } else {
                                 silenceNote();
                             }
@@ -1815,7 +1695,6 @@ function stopPlayback() {
     }
     lastPlayedFreq  = null;
     lastPlayingLine = null;
-    legatoEnv       = null;
     document.querySelectorAll('#taal-ruler .beat-num').forEach(el => el.classList.remove('playing'));
     document.querySelectorAll('.grid-row[data-row="notes"] .cell.playing').forEach(el => el.classList.remove('playing'));
     // Clear the orange "active" state on all per-line play buttons
@@ -2015,9 +1894,8 @@ function updateRagaInfoBar(ragaKey) {
         chip.className = 'raga-pakkad-chip';
         // Upper octave → combining dot above; lower → combining dot below
         let label = sw;
-        if (oct === 2)  label = sw + '\u0307\u0307'; // two dots above = Taar+1
-        if (oct === 1)  label = sw + '\u0307';        // dot above = Taar
-        if (oct === -1) label = sw + '\u0323';        // dot below = Mandra
+        if (oct === 1)  label = sw + '\u0307';
+        if (oct === -1) label = sw + '\u0323';
         chip.textContent = label;
         if      (sw === raga.vadi)          chip.classList.add('raga-swar-vadi');
         else if (sw === raga.samvadi)       chip.classList.add('raga-swar-samvadi');
@@ -2154,7 +2032,7 @@ function playPakkad() {
     stopPakkad();
 
     initAudio();
-    const baseSa  = parseFloat(document.getElementById('scale-select').value);
+    const baseSa  = parseFloat(document.getElementById('scale-select').value) * 2;
     const bpm     = parseInt(document.getElementById('bpm').value) || 90;
     // stepSec  = time between successive note starts
     // noteSec  = individual note duration — slightly longer so notes overlap → smooth feel
@@ -2188,7 +2066,8 @@ function playPakkad() {
         const ratio = SwaraMap[note];
         if (!ratio) return;
         let freq = baseSa * ratio;
-        if (oct) freq *= Math.pow(2, oct);   // oct: -1=Mandra, 1=Taar, 2=Taar+1
+        if (oct === 1)  freq *= 2;
+        if (oct === -1) freq *= 0.5;
         schedulePakkadNote(freq, inst, t0 + idx * stepSec, noteSec);
     }
 
@@ -2280,7 +2159,6 @@ function _makeNoteUnit(nv, ov, mv, allOpts, showRemove) {
     unit.innerHTML =
         `<select class="note-select">${opts}</select>` +
         `<span class="octave-controls">` +
-        `<button class="octave-btn${ov===2?' active':''}" data-oct="2"  onclick="toggleOctave(this,2)"  title="Taar+1 (2nd upper octave)">&#730;&#730;</button>` +
         `<button class="octave-btn${ov===1?' active':''}" data-oct="1"  onclick="toggleOctave(this,1)"  title="Taar (upper octave)">&#730;</button>` +
         `<button class="octave-btn${ov===-1?' active':''}" data-oct="-1" onclick="toggleOctave(this,-1)" title="Mandra (lower octave)">&#x2022;</button>` +
         `</span>` +
@@ -2343,7 +2221,6 @@ function addLine(data, insertBeforeEl) {
     const volVal     = data ? (data.line_volume !== undefined ? data.line_volume : 1.0) : 1.0;
     const section    = data ? (data.section || '') : '';
     const adlibVal   = data ? !!data.adlib        : false;
-    const legatoVal  = data ? !!data.legato       : false;
     const lineBpmVal = data ? (data.line_bpm > 0 ? data.line_bpm : '') : '';
 
     const sheet = document.getElementById('song-sheet');
@@ -2369,7 +2246,6 @@ function addLine(data, insertBeforeEl) {
             <option value="sitar"     ${instVal==='sitar'    ?'selected':''}>Sitar</option>
             <option value="violin"    ${instVal==='violin'   ?'selected':''}>Violin</option>
             <option value="piano"     ${instVal==='piano'    ?'selected':''}>Piano</option>
-            <option value="bellpad"   ${instVal==='bellpad'  ?'selected':''}>Bellpad</option>
         </select>
         <label>Percussion:</label>
         <select class="line-perc-sel" style="width:82px;">
@@ -2381,10 +2257,6 @@ function addLine(data, insertBeforeEl) {
         <input type="range" class="line-vol" min="0.1" max="1" step="0.05" value="${volVal}" style="width:70px;">
         <label>Section:</label>
         <input type="text" class="line-section" value="${section}" style="width:80px;" placeholder="e.g. Mukhda">
-        <label title="Legato: notes snap on immediately and sustain until the next note, so the melody flows without gaps between beats.">Legato:</label>
-        <input type="checkbox" class="line-legato" ${legatoVal ? 'checked' : ''}
-               title="Legato: 8 ms attack/release so consecutive notes connect smoothly."
-               style="width:16px;">
         <label class="adlib-label">Adlib/Alap:</label>
         <input type="checkbox" class="line-adlib" ${adlibVal ? 'checked' : ''}
                title="Adlib/Alap mode: free tempo, tabla silenced. Use Line BPM to set the alap speed."
@@ -2474,7 +2346,7 @@ function addLine(data, insertBeforeEl) {
     // ▶ Play this line only (loops until Stop is pressed)
     const playBtn = document.createElement('button');
     playBtn.className   = 'btn-play-line';
-    playBtn.title       = 'Play this line only (once, or loops if Loop is checked)';
+    playBtn.title       = 'Play this line only — loops until Stop';
     playBtn.textContent = '▶ Line';
     playBtn.addEventListener('click', () => {
         if (playBtn.classList.contains('active')) {
@@ -2535,13 +2407,7 @@ function restoreSettings() {
     const scale = localStorage.getItem('sl_scale');
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
-    if (scale) {
-        // Migrate old format: scale was stored as half the Sa Hz (pre-fix).
-        // New format stores the actual Sa Hz. Threshold 256 safely separates
-        // old max (246.94) from new min (261.63).
-        const sv = parseFloat(scale) < 256 ? parseFloat(scale) * 2 : parseFloat(scale);
-        document.getElementById('scale-select').value = sv;
-    }
+    if (scale) document.getElementById('scale-select').value = scale;
     // Render ruler for restored taal (if any)
     if (taal) renderTaalRuler(taal, 'tabla');
 }
@@ -2632,7 +2498,6 @@ function buildCompositionData() {
             percussion:      l.querySelector('.line-perc-sel')?.value || 'tabla',
             line_volume:     parseFloat(l.querySelector('.line-vol').value),
             adlib:           l.querySelector('.line-adlib').checked,
-            legato:          l.querySelector('.line-legato')?.checked || false,
             line_bpm:        lineBpmSaved,
             taal_key:        l.getAttribute('data-taal'),
             beats:           l.getAttribute('data-beats'),
@@ -2641,11 +2506,10 @@ function buildCompositionData() {
     });
 
     return {
-        title:    document.getElementById('song-title').value || 'Untitled',
-        scale:    document.getElementById('scale-select').value,
-        bpm:      parseInt(document.getElementById('bpm').value) || 90,
-        pre_roll: parseInt(document.getElementById('pre-roll-select').value) || 0,
-        lines:    lineArray
+        title: document.getElementById('song-title').value || 'Untitled',
+        scale: document.getElementById('scale-select').value,
+        bpm:   parseInt(document.getElementById('bpm').value) || 90,
+        lines: lineArray
     };
 }
 
@@ -2663,14 +2527,9 @@ function loadJsonFile(e) {
     const reader = new FileReader();
     reader.onload = ev => {
         const d = JSON.parse(ev.target.result);
-        if (d.title)    document.getElementById('song-title').value = d.title;
-        if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            document.getElementById('scale-select').value = sv;
-        }
-        if (d.bpm)      document.getElementById('bpm').value = d.bpm;
-        if (d.pre_roll !== undefined)
-                        document.getElementById('pre-roll-select').value = d.pre_roll;
+        if (d.title) document.getElementById('song-title').value = d.title;
+        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));
     };
@@ -3051,10 +2910,7 @@ async function loadFromCloud(docId) {
 
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            document.getElementById('scale-select').value = sv;
-        }
+        if (d.scale) document.getElementById('scale-select').value = d.scale;
         if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));
@@ -3135,7 +2991,7 @@ function raAdminRefreshTable() {
                 // Support both {note,oct} (Firestore) and [note,oct] (legacy)
                 const sw  = Array.isArray(entry) ? entry[0] : entry.note;
                 const oct = Array.isArray(entry) ? entry[1] : entry.oct;
-                return oct === 2 ? sw+"''" : oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw;
+                return oct === 1 ? sw+"'" : oct === -1 ? sw+"," : sw;
             }).join(' ');
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -3613,7 +3469,6 @@ function raAdminExport() {
           <option value="flute">Flute</option>
           <option value="sitar">Sitar</option>
           <option value="violin">Violin</option>
-          <option value="bellpad">Bellpad</option>
         </select>
       </div>
     </div>
