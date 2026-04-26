@@ -2528,7 +2528,19 @@ function loadJsonFile(e) {
     reader.onload = ev => {
         const d = JSON.parse(ev.target.result);
         if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.scale) {
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+            let closestOpt = '';
+            let minDiff = Infinity;
+            document.querySelectorAll('#scale-select option').forEach(opt => {
+                const diff = Math.abs(parseFloat(opt.value) - sv);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestOpt = opt.value;
+                }
+            });
+            document.getElementById('scale-select').value = closestOpt || sv;
+        }
         if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));
@@ -2910,7 +2922,19 @@ async function loadFromCloud(docId) {
 
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) document.getElementById('scale-select').value = d.scale;
+        if (d.scale) {
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+            let closestOpt = '';
+            let minDiff = Infinity;
+            document.querySelectorAll('#scale-select option').forEach(opt => {
+                const diff = Math.abs(parseFloat(opt.value) - sv);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestOpt = opt.value;
+                }
+            });
+            document.getElementById('scale-select').value = closestOpt || sv;
+        }
         if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
         (d.lines || []).forEach(line => addLine(line));

@@ -19,8 +19,8 @@ def lowpass_filter(data, cutoff=1100, fs=44100, order=5):
 
 # --- CONFIG ---
 SCALE_MAP = {
-    "Pandhri 1": 130.81, "Kali 1": 138.59, "Pandhri 2": 146.83, "Kali 2": 155.56,
-    "Pandhri 3": 164.81, "Pandhri 4": 174.61, "Kali 3": 185.00, "Pandhri 5": 196.00,
+    "Pandhri 1": 130.815, "Kali 1": 138.59, "Pandhri 2": 146.835, "Kali 2": 155.565,
+    "Pandhri 3": 164.815, "Pandhri 4": 174.615, "Kali 3": 185.00, "Pandhri 5": 196.00,
     "Kali 4": 207.65, "Pandhri 6": 220.00, "Kali 5": 233.08, "Pandhri 7": 246.94
 }
 SWARA_NAMES = ["Sa","re","Re","ga","Ga","Ma","ma","Pa","dha","Dha","ni","Ni"]

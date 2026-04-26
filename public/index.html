@@ -2666,7 +2666,16 @@ function loadJsonFile(e) {
         if (d.title)    document.getElementById('song-title').value = d.title;
         if (d.scale) {
             const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            document.getElementById('scale-select').value = sv;
+            let closestOpt = '';
+            let minDiff = Infinity;
+            document.querySelectorAll('#scale-select option').forEach(opt => {
+                const diff = Math.abs(parseFloat(opt.value) - sv);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestOpt = opt.value;
+                }
+            });
+            document.getElementById('scale-select').value = closestOpt || sv;
         }
         if (d.bpm)      document.getElementById('bpm').value = d.bpm;
         if (d.pre_roll !== undefined)
