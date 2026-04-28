@@ -634,9 +634,9 @@
         <div class="control-item">
             <label>Pre-roll</label>
             <select id="pre-roll-select" style="width:80px;">
-                <option value="0">Off</option>
+                <option value="0" selected>Off</option>
                 <option value="2">2 Beats</option>
-                <option value="4" selected>4 Beats</option>
+                <option value="4">4 Beats</option>
                 <option value="8">8 Beats</option>
             </select>
         </div>
@@ -818,9 +818,9 @@ const SEED_RAGAS = {"yaman":{"name":"Yaman","thaat":"Kalyan","order":10,"allowed
 const BUILTIN_RAGA_DATA = SEED_RAGAS;  // legacy alias used by Seed button
 
 // ─── Audio Initialisation ────────────────────────────────────────────────────
-function initAudio() {
+async function initAudio() {
     if (audioCtx) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
         return;
     }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1615,8 +1615,8 @@ function silenceNote() {
 
 // ─── Playback Engine ──────────────────────────────────────────────────────────
 // singleLineEl: if provided, only that line plays (loops); null = full song
-function startPlayback(singleLineEl = null) {
-    initAudio();
+async function startPlayback(singleLineEl = null) {
+    await initAudio();
     stopPlayback();
     // stopPlayback() silences sampleBus for 300 ms (to let ringing notes die).
     // Cancel that timer and restore immediately so the very first note is audible.
@@ -1824,8 +1824,8 @@ function stopPlayback() {
 }
 
 // ─── Tanpura (Cycling String Drone) ──────────────────────────────────────────
-function toggleTanpura() {
-    initAudio();
+async function toggleTanpura() {
+    await initAudio();
     isTanpuraOn = !isTanpuraOn;
     const btn = document.getElementById('tanpuraBtn');
     if (isTanpuraOn) {
@@ -2145,7 +2145,7 @@ function parseRagaString(str) {
     }).filter(e => e && SwaraMap[e.note] !== undefined && SwaraMap[e.note] !== null);
 }
 
-function playPakkad() {
+async function playPakkad() {
     const ragaKey = document.getElementById('raga-select').value;
     if (!ragaKey || !RagaData[ragaKey]) return;
     const raga = RagaData[ragaKey];
@@ -2153,7 +2153,7 @@ function playPakkad() {
     // Cancel any previous pakkad playback
     stopPakkad();
 
-    initAudio();
+    await initAudio();
     const baseSa  = parseFloat(document.getElementById('scale-select').value);
     const bpm     = parseInt(document.getElementById('bpm').value) || 90;
     // stepSec  = time between successive note starts
