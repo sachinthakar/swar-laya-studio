@@ -577,18 +577,18 @@
         <div class="control-item">
             <label>Scale (Sa)</label>
             <select id="scale-select" onchange="updateTanpura()">
-                <option value="130.81" data-note="C3">Pandhri 1 (C3)</option>
-                <option value="138.59" data-note="Cs3">Kali 1 (C#3)</option>
-                <option value="146.83" data-note="D3">Pandhri 2 (D3)</option>
-                <option value="155.56" data-note="Ds3">Kali 2 (D#3)</option>
-                <option value="164.81" data-note="E3">Pandhri 3 (E3)</option>
-                <option value="174.61" data-note="F3">Pandhri 4 (F3)</option>
-                <option value="185.00" data-note="Fs3">Kali 3 (F#3)</option>
-                <option value="196.00" data-note="G3">Pandhri 5 (G3)</option>
-                <option value="207.65" data-note="Gs3">Kali 4 (G#3)</option>
-                <option value="220.00" data-note="A3">Pandhri 6 (A3)</option>
-                <option value="233.08" data-note="As3">Kali 5 (A#3)</option>
-                <option value="246.94" data-note="B3">Pandhri 7 (B3)</option>
+                <option value="261.63">Pandhri 1 (C)</option>
+                <option value="277.18">Kali 1 (C#)</option>
+                <option value="293.67">Pandhri 2 (D)</option>
+                <option value="311.13">Kali 2 (D#)</option>
+                <option value="329.63">Pandhri 3 (E)</option>
+                <option value="349.23">Pandhri 4 (F)</option>
+                <option value="370.00">Kali 3 (F#)</option>
+                <option value="392.00">Pandhri 5 (G)</option>
+                <option value="415.30">Kali 4 (G#)</option>
+                <option value="440.00">Pandhri 6 (A)</option>
+                <option value="466.16">Kali 5 (A#)</option>
+                <option value="493.88">Pandhri 7 (B)</option>
             </select>
         </div>
         <div class="control-item">
@@ -623,6 +623,10 @@
             <label>Reverb (Wet)</label>
             <input type="range" id="reverb-wet" min="0" max="0.75" step="0.05" value="0.25" style="width:75px;" oninput="updateReverbMix()">
         </div>
+        <div class="control-item">
+            <label>Master Vol <span id="master-vol-display" style="font-weight:600;">1.0×</span></label>
+            <input type="range" id="master-vol" min="0" max="10" step="0.1" value="1.0" style="width:75px;" oninput="updateMasterVol()">
+        </div>
 
         <span class="ctrl-sep"></span>
 
@@ -634,9 +638,9 @@
         <div class="control-item">
             <label>Pre-roll</label>
             <select id="pre-roll-select" style="width:80px;">
-                <option value="0" selected>Off</option>
+                <option value="0">Off</option>
                 <option value="2">2 Beats</option>
-                <option value="4">4 Beats</option>
+                <option value="4" selected>4 Beats</option>
                 <option value="8">8 Beats</option>
             </select>
         </div>
@@ -731,6 +735,7 @@ let fluteNoiseGain = null;   // mixes breath noise into the signal chain
 
 // Master bus
 let masterBus      = null;
+let masterVolNode  = null;   // post-compressor gain — allows boost beyond 1.0×
 let sampleBus      = null;   // gain node for all sampled notes — zeroed on Stop
 let dryGain        = null;
 let wetGain        = null;
@@ -742,36 +747,23 @@ let lastPlayedFreq = null;   // tracks prev note freq for meend glide with sampl
 let legatoEnv      = null;   // last sample env in legato mode — faded out on next note
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
-// Equal-temperament semitone offsets from Sa
-const SwaraOffset = {
+// Equal-temperament semitone ratios (12th root of 2)
+const SwaraMap = {
     "-":  null,
     "~":  null,   // sustain / hold — continue previous note, do not re-attack
-    "Sa": 0,
-    "re": 1,   // komal Re  (minor 2nd)
-    "Re": 2,   // shuddha Re (major 2nd)
-    "ga": 3,   // komal Ga  (minor 3rd)
-    "Ga": 4,   // shuddha Ga (major 3rd)
-    "Ma": 5,   // shuddha Ma (perfect 4th)
-    "ma": 6,   // tivra Ma  (tritone)
-    "Pa": 7,   // Pa        (perfect 5th)
-    "dha": 8,  // komal Dha (minor 6th)
-    "Dha": 9,  // shuddha Dha (major 6th)
-    "ni": 10,  // komal Ni  (minor 7th)
-    "Ni": 11   // shuddha Ni (major 7th)
+    "Sa": 1,
+    "re": Math.pow(2, 1/12),   // komal Re  (minor 2nd)
+    "Re": Math.pow(2, 2/12),   // shuddha Re (major 2nd)
+    "ga": Math.pow(2, 3/12),   // komal Ga  (minor 3rd)
+    "Ga": Math.pow(2, 4/12),   // shuddha Ga (major 3rd)
+    "Ma": Math.pow(2, 5/12),   // shuddha Ma (perfect 4th)
+    "ma": Math.pow(2, 6/12),   // tivra Ma  (tritone)
+    "Pa": Math.pow(2, 7/12),   // Pa        (perfect 5th)
+    "dha": Math.pow(2, 8/12),  // komal Dha (minor 6th)
+    "Dha": Math.pow(2, 9/12),  // shuddha Dha (major 6th)
+    "ni": Math.pow(2, 10/12),  // komal Ni  (minor 7th)
+    "Ni": Math.pow(2, 11/12)   // shuddha Ni (major 7th)
 };
-
-// Helper: Convert a base note (e.g. "Ds3") + semitone offset + octave offset into a target note name (e.g. "As3")
-function getNoteName(baseNote, semitones, octaveOffset = 0) {
-    const map = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
-    const m = baseNote.match(/^([A-G]s?)(\d)$/);
-    if (!m) return baseNote;
-    const baseIdx = map.indexOf(m[1]);
-    const baseOct = parseInt(m[2]);
-    const totalSemitones = (baseOct * 12) + baseIdx + semitones + (octaveOffset * 12);
-    const targetOct = Math.floor(totalSemitones / 12);
-    const targetIdx = totalSemitones % 12;
-    return `${map[targetIdx]}${targetOct}`;
-}
 
 const TaalBols = {
     "4":        ["Dha","Gi","Na","Ti"],
@@ -839,9 +831,9 @@ const SEED_RAGAS = {"yaman":{"name":"Yaman","thaat":"Kalyan","order":10,"allowed
 const BUILTIN_RAGA_DATA = SEED_RAGAS;  // legacy alias used by Seed button
 
 // ─── Audio Initialisation ────────────────────────────────────────────────────
-async function initAudio() {
+function initAudio() {
     if (audioCtx) {
-        if (audioCtx.state === 'suspended') await audioCtx.resume();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         return;
     }
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -866,10 +858,16 @@ async function initAudio() {
     dryGain.gain.value = 1.0 - wetVal * 0.4;
     wetGain.gain.value = wetVal;
 
-    // Chain: instruments → masterBus → compressor → dry+reverb → destination
+    // Post-compressor volume — allows boosting up to 10× without the compressor
+    // fighting the gain (compressor acts on the pre-boost signal, then we amplify).
+    masterVolNode = audioCtx.createGain();
+    masterVolNode.gain.value = parseFloat(document.getElementById('master-vol').value) || 1.0;
+
+    // Chain: instruments → masterBus → compressor → masterVolNode → dry+reverb → destination
     masterBus.connect(compressor);
-    compressor.connect(dryGain);
-    compressor.connect(reverbNode);
+    compressor.connect(masterVolNode);
+    masterVolNode.connect(dryGain);
+    masterVolNode.connect(reverbNode);
     reverbNode.connect(wetGain);
     dryGain.connect(audioCtx.destination);
     wetGain.connect(audioCtx.destination);
@@ -1031,22 +1029,17 @@ function findBestSample(instrument, targetHz) {
 }
 
 // Play one note from a sample; returns true if a sample was found and played
-function triggerSampledNote(targetNoteName, instrument, glideTime, noteDuration, vs, prevNoteName, legato = false) {
-    const buf = SampleCache[`${instrument}|${targetNoteName}`];
+function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
+    const buf = findBestSample(instrument, freq);
     if (!buf || !sampleBus) return false;
-    // Add 25ms safety buffer to ensure envelope automation curves start reliably
-    const now = audioCtx.currentTime + 0.025;
+    const now = audioCtx.currentTime;
 
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
 
     // Pitch: if meend (glide > ~20ms), ramp playbackRate from prevFreq to freq
-    const endRate = 1.0;
-    let startRate = 1.0;
-    if (glideTime > 0.02 && prevNoteName) {
-        const prevFreq = noteNameToHz(prevNoteName);
-        startRate = prevFreq / buf.baseHz;
-    }
+    const endRate   = freq / buf.baseHz;
+    const startRate = (glideTime > 0.02 && prevFreq) ? (prevFreq / buf.baseHz) : endRate;
     src.playbackRate.setValueAtTime(startRate, now);
     if (startRate !== endRate) {
         src.playbackRate.exponentialRampToValueAtTime(endRate, now + glideTime);
@@ -1139,6 +1132,14 @@ function updateReverbMix() {
     wetGain.gain.value = wet;
 }
 
+function updateMasterVol() {
+    const val = parseFloat(document.getElementById('master-vol').value);
+    const display = document.getElementById('master-vol-display');
+    if (display) display.textContent = val.toFixed(1) + '×';
+    if (masterVolNode) masterVolNode.gain.value = val;
+    saveSettings();
+}
+
 // ─── Tabla Synthesis ──────────────────────────────────────────────────────────
 // Each bol modelled with:
 //   • Bayan  – two sine sweeps (fundamental + 2nd harmonic) + low-pass noise click
@@ -1157,13 +1158,7 @@ function playTablaSound(bol, isSam) {
     // When the user selects a different scale, scaleRatio shifts the dayan pitch
     // proportionally so the tabla sounds in tune with the melody.
     const tuningSa   = parseFloat(document.getElementById('scale-select').value);
-    
-    // We map the user's selected Sa to octave 4 for the tabla tuning formula
-    // so it doesn't drop an octave too low if they select a 3rd octave scale.
-    let tablaTuningHz = tuningSa;
-    while (tablaTuningHz < 260) tablaTuningHz *= 2; 
-    
-    const scaleRatio = tablaTuningHz / 415.3;
+    const scaleRatio = tuningSa / 415.3;
 
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
     function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
@@ -1425,7 +1420,6 @@ const InstrumentOscType = {
 
 function setupSynth(instrument) {
     stopSynth();
-    lastPlayedNoteName = null;
     lastPlayedFreq = null;   // reset meend glide state for new instrument
 
     mainGain   = audioCtx.createGain();
@@ -1512,24 +1506,20 @@ function stopSynth() {
     if (mainGain) { mainGain.disconnect(); mainGain = null; }
 }
 
-function triggerNote(targetNoteName, instrument, glideTime, noteDuration, volScale, legato = false) {
+function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false) {
     const vs = (volScale !== undefined) ? volScale : 1.0;
-    const freq = noteNameToHz(targetNoteName);
 
     // ── Sample-based playback (preferred when samples are loaded) ─────────────
-    const prevNoteName = (glideTime > 0.02) ? lastPlayedNoteName : null;
-    if (triggerSampledNote(targetNoteName, instrument, glideTime, noteDuration, vs, prevNoteName, legato)) {
-        lastPlayedNoteName = targetNoteName;
+    const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
+    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato)) {
         lastPlayedFreq = freq;
         return;   // sample handled it; skip oscillator path
     }
-    lastPlayedNoteName = targetNoteName;
     lastPlayedFreq = freq;
 
     // ── Oscillator fallback (used until samples finish loading) ───────────────
     if (!mainOsc || !mainGain) return;
-    // Add 25ms safety buffer to ensure envelope automation curves start reliably
-    const now = audioCtx.currentTime + 0.025;
+    const now = audioCtx.currentTime;
 
     // ── Frequency (with glide or near-instant snap) ────────────────────────
     for (const h of harmonics) {
@@ -1632,8 +1622,8 @@ function silenceNote() {
 
 // ─── Playback Engine ──────────────────────────────────────────────────────────
 // singleLineEl: if provided, only that line plays (loops); null = full song
-async function startPlayback(singleLineEl = null) {
-    await initAudio();
+function startPlayback(singleLineEl = null) {
+    initAudio();
     stopPlayback();
     // stopPlayback() silences sampleBus for 300 ms (to let ringing notes die).
     // Cancel that timer and restore immediately so the very first note is audible.
@@ -1646,9 +1636,7 @@ async function startPlayback(singleLineEl = null) {
     if (!allLines.length) return;
     const lines = singleLineEl ? [singleLineEl] : allLines;
 
-    const scaleSelect = document.getElementById('scale-select');
-    const baseSa      = parseFloat(scaleSelect.value);
-    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
+    const baseSa    = parseFloat(document.getElementById('scale-select').value);
     const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
     // Single-line mode always starts from beat 0 of that line
     const startBeat = singleLineEl ? 0 : (parseInt(document.getElementById('start-beat').value) || 1) - 1;
@@ -1775,7 +1763,7 @@ async function startPlayback(singleLineEl = null) {
                             // Do not re-attack; do not silence. Just let it ring.
                             if (swara === '~') return;
 
-                            const semitones = SwaraOffset[swara];
+                            const ratio   = SwaraMap[swara];
                             const isMeend = unit.querySelector('.meend-btn') &&
                                             unit.querySelector('.meend-btn').classList.contains('active');
                             // Meend: glide over 88% of sub-beat. Normal: 8 ms snap.
@@ -1801,11 +1789,11 @@ async function startPlayback(singleLineEl = null) {
                             const holdBeats  = reachesEnd ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
-                            if (semitones !== undefined && semitones !== null) {
+                            if (ratio) {
+                                let freq = baseSa * ratio;
                                 const octBtn = unit.querySelector('.octave-btn.active');
-                                const octaveOffset = octBtn ? parseInt(octBtn.dataset.oct) : 0;
-                                const targetNoteName = getNoteName(baseNoteStr, semitones, octaveOffset);
-                                triggerNote(targetNoteName, inst, glide, noteDuration, lineVol, isLegato);
+                                if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
+                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato);
                             } else {
                                 silenceNote();
                             }
@@ -1843,8 +1831,8 @@ function stopPlayback() {
 }
 
 // ─── Tanpura (Cycling String Drone) ──────────────────────────────────────────
-async function toggleTanpura() {
-    await initAudio();
+function toggleTanpura() {
+    initAudio();
     isTanpuraOn = !isTanpuraOn;
     const btn = document.getElementById('tanpuraBtn');
     if (isTanpuraOn) {
@@ -1858,16 +1846,9 @@ async function toggleTanpura() {
 
 function startTanpura() {
     stopTanpura();
-    const scaleSelect = document.getElementById('scale-select');
-    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
-
+    const sa = parseFloat(document.getElementById('scale-select').value);
     // Classic tanpura string order: Pa (lower), lower Sa, Sa, Sa
-    // Using equal-temperament semitones to perfectly align with the samples
-    const lowerPa = noteNameToHz(getNoteName(baseNoteStr, 7, -1));
-    const lowerSa = noteNameToHz(getNoteName(baseNoteStr, 0, -1));
-    const midSa   = noteNameToHz(getNoteName(baseNoteStr, 0, 0));
-
-    const strings = [lowerPa, lowerSa, midSa, midSa];
+    const strings = [sa * 0.75, sa * 0.5, sa, sa];
     let idx = 0;
 
     function pluck() {
@@ -2061,14 +2042,14 @@ let pakkadSources  = [];   // BufferSourceNode / OscillatorNode handles for canc
 let pakkadEndTimer = null; // single setTimeout for UI reset after last note
 
 // Schedule one pakkad note at a specific audioCtx time.
-function schedulePakkadNote(targetNoteName, inst, startTime, duration) {
-    const freq = noteNameToHz(targetNoteName);
-    const buf = SampleCache[`${inst}|${targetNoteName}`];
+function schedulePakkadNote(freq, inst, startTime, duration) {
+    const buf = findBestSample(inst, freq);
     if (buf && sampleBus) {
         // ── Sample path ──────────────────────────────────────────────────────
         const src = audioCtx.createBufferSource();
         src.buffer = buf;
-        src.playbackRate.setValueAtTime(1.0, startTime);
+        const rate = freq / buf.baseHz;
+        src.playbackRate.setValueAtTime(rate, startTime);
 
         const env = audioCtx.createGain();
         const t   = startTime;
@@ -2171,7 +2152,7 @@ function parseRagaString(str) {
     }).filter(e => e && SwaraMap[e.note] !== undefined && SwaraMap[e.note] !== null);
 }
 
-async function playPakkad() {
+function playPakkad() {
     const ragaKey = document.getElementById('raga-select').value;
     if (!ragaKey || !RagaData[ragaKey]) return;
     const raga = RagaData[ragaKey];
@@ -2179,7 +2160,7 @@ async function playPakkad() {
     // Cancel any previous pakkad playback
     stopPakkad();
 
-    await initAudio();
+    initAudio();
     const baseSa  = parseFloat(document.getElementById('scale-select').value);
     const bpm     = parseInt(document.getElementById('bpm').value) || 90;
     // stepSec  = time between successive note starts
@@ -2210,14 +2191,12 @@ async function playPakkad() {
     // Helper: schedule a single note at the current index position
     const t0 = audioCtx.currentTime + 0.05;
     let idx = 0;
-    const scaleSelect = document.getElementById('scale-select');
-    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
-
     function schedNote(note, oct) {
-        const semitones = SwaraOffset[note];
-        if (semitones === undefined || semitones === null) return;
-        const targetNoteName = getNoteName(baseNoteStr, semitones, oct || 0);
-        schedulePakkadNote(targetNoteName, inst, t0 + idx * stepSec, noteSec);
+        const ratio = SwaraMap[note];
+        if (!ratio) return;
+        let freq = baseSa * ratio;
+        if (oct) freq *= Math.pow(2, oct);   // oct: -1=Mandra, 1=Taar, 2=Taar+1
+        schedulePakkadNote(freq, inst, t0 + idx * stepSec, noteSec);
     }
 
     // Schedule Aroha
@@ -2548,9 +2527,10 @@ function toggleOctave(btn, val) {
 
 /** Save taal, BPM and scale to localStorage so they survive a page reload. */
 function saveSettings() {
-    localStorage.setItem('sl_taal',  document.getElementById('taal-select').value);
-    localStorage.setItem('sl_bpm',   document.getElementById('bpm').value);
-    localStorage.setItem('sl_scale', document.getElementById('scale-select').value);
+    localStorage.setItem('sl_taal',       document.getElementById('taal-select').value);
+    localStorage.setItem('sl_bpm',        document.getElementById('bpm').value);
+    localStorage.setItem('sl_scale',      document.getElementById('scale-select').value);
+    localStorage.setItem('sl_master_vol', document.getElementById('master-vol').value);
 }
 
 /**
@@ -2558,24 +2538,23 @@ function saveSettings() {
  * Called once at startup, before the initial addLine().
  */
 function restoreSettings() {
-    const taal  = localStorage.getItem('sl_taal');
-    const bpm   = localStorage.getItem('sl_bpm');
-    const scale = localStorage.getItem('sl_scale');
+    const taal      = localStorage.getItem('sl_taal');
+    const bpm       = localStorage.getItem('sl_bpm');
+    const scale     = localStorage.getItem('sl_scale');
+    const masterVol = localStorage.getItem('sl_master_vol');
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
     if (scale) {
-        let sv = parseFloat(scale);
-        if (sv > 256) sv = sv / 2;
-        let closestOpt = '';
-        let minDiff = Infinity;
-        document.querySelectorAll('#scale-select option').forEach(opt => {
-            const diff = Math.abs(parseFloat(opt.value) - sv);
-            if (diff < minDiff) {
-                minDiff = diff;
-                closestOpt = opt.value;
-            }
-        });
-        document.getElementById('scale-select').value = closestOpt || sv;
+        // Migrate old format: scale was stored as half the Sa Hz (pre-fix).
+        // New format stores the actual Sa Hz. Threshold 256 safely separates
+        // old max (246.94) from new min (261.63).
+        const sv = parseFloat(scale) < 256 ? parseFloat(scale) * 2 : parseFloat(scale);
+        document.getElementById('scale-select').value = sv;
+    }
+    if (masterVol) {
+        document.getElementById('master-vol').value = masterVol;
+        const display = document.getElementById('master-vol-display');
+        if (display) display.textContent = parseFloat(masterVol).toFixed(1) + '×';
     }
     // Render ruler for restored taal (if any)
     if (taal) renderTaalRuler(taal, 'tabla');
@@ -2700,8 +2679,7 @@ function loadJsonFile(e) {
         const d = JSON.parse(ev.target.result);
         if (d.title)    document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            let sv = parseFloat(d.scale);
-            if (sv > 256) sv = sv / 2;
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
             let closestOpt = '';
             let minDiff = Infinity;
             document.querySelectorAll('#scale-select option').forEach(opt => {
@@ -3097,8 +3075,7 @@ async function loadFromCloud(docId) {
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            let sv = parseFloat(d.scale);
-            if (sv > 256) sv = sv / 2;
+            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
             let closestOpt = '';
             let minDiff = Infinity;
             document.querySelectorAll('#scale-select option').forEach(opt => {
