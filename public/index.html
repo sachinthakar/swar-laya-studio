@@ -577,18 +577,30 @@
         <div class="control-item">
             <label>Scale (Sa)</label>
             <select id="scale-select" onchange="updateTanpura()">
-                <option value="261.63">Pandhri 1 (C)</option>
-                <option value="277.18">Kali 1 (C#)</option>
-                <option value="293.67">Pandhri 2 (D)</option>
-                <option value="311.13">Kali 2 (D#)</option>
-                <option value="329.63">Pandhri 3 (E)</option>
-                <option value="349.23">Pandhri 4 (F)</option>
-                <option value="370.00">Kali 3 (F#)</option>
-                <option value="392.00">Pandhri 5 (G)</option>
-                <option value="415.30">Kali 4 (G#)</option>
-                <option value="440.00">Pandhri 6 (A)</option>
-                <option value="466.16">Kali 5 (A#)</option>
-                <option value="493.88">Pandhri 7 (B)</option>
+                <option value="130.81">Pandhri 1 (C3)</option>
+                <option value="138.59">Kali 1 (C#3)</option>
+                <option value="146.83">Pandhri 2 (D3)</option>
+                <option value="155.56">Kali 2 (D#3)</option>
+                <option value="164.81">Pandhri 3 (E3)</option>
+                <option value="174.61">Pandhri 4 (F3)</option>
+                <option value="185.00">Kali 3 (F#3)</option>
+                <option value="196.00">Pandhri 5 (G3)</option>
+                <option value="207.65">Kali 4 (G#3)</option>
+                <option value="220.00">Pandhri 6 (A3)</option>
+                <option value="233.08">Kali 5 (A#3)</option>
+                <option value="246.94">Pandhri 7 (B3)</option>
+                <option value="261.63">Pandhri 1 (C4)</option>
+                <option value="277.18">Kali 1 (C#4)</option>
+                <option value="293.67">Pandhri 2 (D4)</option>
+                <option value="311.13">Kali 2 (D#4)</option>
+                <option value="329.63">Pandhri 3 (E4)</option>
+                <option value="349.23">Pandhri 4 (F4)</option>
+                <option value="370.00">Kali 3 (F#4)</option>
+                <option value="392.00">Pandhri 5 (G4)</option>
+                <option value="415.30">Kali 4 (G#4)</option>
+                <option value="440.00">Pandhri 6 (A4)</option>
+                <option value="466.16">Kali 5 (A#4)</option>
+                <option value="493.88">Pandhri 7 (B4)</option>
             </select>
         </div>
         <div class="control-item">
@@ -689,6 +701,14 @@
         <span class="raga-info-meta">Samvadi: <b id="raga-bar-samvadi" style="color:#1565c0;"></b></span>
         <span class="raga-info-meta" style="white-space:nowrap">Pakkad:</span>
         <div id="raga-pakkad-chips"></div>
+        <select id="raga-instrument" style="padding:2px 5px; font-size:11px; border-radius:4px; border:1px solid #d0c4e8; background:#fff; color:#4a148c; outline:none; margin-right:4px;">
+            <option value="harmonium">Harmonium</option>
+            <option value="flute">Flute</option>
+            <option value="sitar">Sitar</option>
+            <option value="violin">Violin</option>
+            <option value="piano">Piano</option>
+            <option value="bellpad">Bellpad</option>
+        </select>
         <button id="raga-pakkad-play" onclick="playPakkad()">▶ Play</button>
     </div>
 
@@ -903,57 +923,37 @@ function buildNoiseBuffer(sec) {
 
 const SAMPLE_DEFS = {
     // Locally-hosted individual note files served from Firebase Hosting.
-    // fallback_base: CDN URL tried if the local file is missing (404/network error).
-    // Notes list = union of local files + useful CDN-only notes.
     harmonium: {
-        base: '/samples/harmonium/',
+        base: '/samples/Harmonium/',
         fallback_base: null,
-        notes: [
-            'A2','As2','B2',
-            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
-            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5','Cs5','D5','Ds5','E5','F5','Fs5','G5','Gs5','A5'
-        ]
+        notes: ['C2','Cs2','D2','Ds2','E2','F2','Fs2','G2','Gs2','A2','As2','B2','C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3','C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4','C5','Cs5','D5','Ds5','E5','F5','Fs5']
     },
     flute: {
         base: '/samples/Flute/',
-        fallback_base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/flute/',
-        // Local: A2–Fs5 (34 notes). CDN extras: A5, C6.
-        notes: [
-            'A2','As2','B2',
-            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
-            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5','Cs5','D5','Ds5','E5','F5','Fs5',
-            'A5','C6'
-        ]
+        fallback_base: null,
+        notes: ['C2','Cs2','D2','Ds2','E2','F2','Fs2','G2','Gs2','A2','As2','B2','C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3','C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4','C5','Cs5','D5','Ds5','E5','F5','Fs5']
     },
     sitar: {
-        base: 'https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-nylon/',
+        base: '/samples/Sitar/',
         fallback_base: null,
-        notes: ['E2','A2','D3','E3','A3','Cs4','E4','Fs4','A4']
+        notes: ['C2','Cs2','D2','Ds2','E2','F2','Fs2','G2','Gs2','A2','As2','B2','C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3','C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4','C5','Cs5','D5','Ds5','E5','F5','Fs5']
     },
     violin: {
         base: '/samples/Violin/',
         fallback_base: null,
-        // Local: A2–C5 (28 notes).
-        notes: [
-            'A2','As2','B2',
-            'C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3',
-            'C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4',
-            'C5'
-        ]
+        notes: ['C2','Cs2','D2','Ds2','E2','F2','Fs2','G2','Gs2','A2','As2','B2','C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3','C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4','C5','Cs5','D5','Ds5','E5','F5','Fs5']
     },
     piano: {
-        base: 'https://tonejs.github.io/audio/salamander/',
+        base: '/samples/Piano/',
         fallback_base: null,
-        notes: ['A2','C3','Ds3','Fs3','A3','C4','Ds4','Fs4','A4','C5','Ds5','Fs5']
+        notes: ['C2','Cs2','D2','Ds2','E2','F2','Fs2','G2','Gs2','A2','As2','B2','C3','Cs3','D3','Ds3','E3','F3','Fs3','G3','Gs3','A3','As3','B3','C4','Cs4','D4','Ds4','E4','F4','Fs4','G4','Gs4','A4','As4','B4','C5','Cs5','D5','Ds5','E5','F5','Fs5']
     }
 };
 
 // Cache: 'harmonium|A3' → AudioBuffer (with .baseHz property attached)
 const SampleCache = {};
 const SampleLoadState = {};  // instrument → 'pending'|'loading'|'done'
-const CACHE_NAME = 'swar-laya-samples-v3';  // bump version to force re-download
+const CACHE_NAME = 'swar-laya-samples-v4';  // bump version to force re-download
 
 // Fetch a sample MP3 — checks the browser's persistent Cache API first,
 // so after the first visit the files load from disk with zero network traffic.
@@ -1033,7 +1033,8 @@ function findBestSample(instrument, targetHz) {
 function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
     const buf = findBestSample(instrument, freq);
     if (!buf || !sampleBus) return false;
-    const now = audioCtx.currentTime;
+    // Add 25ms safety buffer to ensure envelope automation curves start reliably
+    const now = audioCtx.currentTime + 0.025;
 
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
@@ -1151,7 +1152,13 @@ function playTablaSound(bol, isSam) {
     // When the user selects a different scale, scaleRatio shifts the dayan pitch
     // proportionally so the tabla sounds in tune with the melody.
     const tuningSa   = parseFloat(document.getElementById('scale-select').value);
-    const scaleRatio = tuningSa / 415.3;
+    
+    // We map the user's selected Sa to octave 4 for the tabla tuning formula
+    // so it doesn't drop an octave too low if they select a 3rd octave scale.
+    let tablaTuningHz = tuningSa;
+    while (tablaTuningHz < 260) tablaTuningHz *= 2; 
+    
+    const scaleRatio = tablaTuningHz / 415.3;
 
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
     function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
@@ -1512,7 +1519,8 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato
 
     // ── Oscillator fallback (used until samples finish loading) ───────────────
     if (!mainOsc || !mainGain) return;
-    const now = audioCtx.currentTime;
+    // Add 25ms safety buffer to ensure envelope automation curves start reliably
+    const now = audioCtx.currentTime + 0.025;
 
     // ── Frequency (with glide or near-instant snap) ────────────────────────
     for (const h of harmonics) {
@@ -2164,7 +2172,7 @@ async function playPakkad() {
 
     // Use the raga-mode instrument selector if present, else first line's, else harmonium
     const instEl = document.getElementById('raga-instrument') ||
-                   document.querySelector('.line-instrument select');
+                   document.querySelector('.line-inst-select');
     const inst   = instEl ? instEl.value : 'harmonium';
 
     ensureSamplesLoaded(inst);
