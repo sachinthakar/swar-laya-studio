@@ -589,18 +589,6 @@
                 <option value="220.00">Pandhri 6 (A3)</option>
                 <option value="233.08">Kali 5 (A#3)</option>
                 <option value="246.94">Pandhri 7 (B3)</option>
-                <option value="261.63">Pandhri 1 (C4)</option>
-                <option value="277.18">Kali 1 (C#4)</option>
-                <option value="293.67">Pandhri 2 (D4)</option>
-                <option value="311.13">Kali 2 (D#4)</option>
-                <option value="329.63">Pandhri 3 (E4)</option>
-                <option value="349.23">Pandhri 4 (F4)</option>
-                <option value="370.00">Kali 3 (F#4)</option>
-                <option value="392.00">Pandhri 5 (G4)</option>
-                <option value="415.30">Kali 4 (G#4)</option>
-                <option value="440.00">Pandhri 6 (A4)</option>
-                <option value="466.16">Kali 5 (A#4)</option>
-                <option value="493.88">Pandhri 7 (B4)</option>
             </select>
         </div>
         <div class="control-item">
@@ -2544,7 +2532,8 @@ function restoreSettings() {
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
     if (scale) {
-        const sv = parseFloat(scale);
+        let sv = parseFloat(scale);
+        if (sv > 256) sv = sv / 2;
         let closestOpt = '';
         let minDiff = Infinity;
         document.querySelectorAll('#scale-select option').forEach(opt => {
@@ -2679,7 +2668,8 @@ function loadJsonFile(e) {
         const d = JSON.parse(ev.target.result);
         if (d.title)    document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            const sv = parseFloat(d.scale);
+            let sv = parseFloat(d.scale);
+            if (sv > 256) sv = sv / 2;
             let closestOpt = '';
             let minDiff = Infinity;
             document.querySelectorAll('#scale-select option').forEach(opt => {
@@ -3075,7 +3065,8 @@ async function loadFromCloud(docId) {
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            const sv = parseFloat(d.scale);
+            let sv = parseFloat(d.scale);
+            if (sv > 256) sv = sv / 2;
             let closestOpt = '';
             let minDiff = Infinity;
             document.querySelectorAll('#scale-select option').forEach(opt => {
