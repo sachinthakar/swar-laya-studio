@@ -982,14 +982,7 @@ function noteNameToHz(name) {
     const map = {C:0,Cs:1,D:2,Ds:3,E:4,F:5,Fs:6,G:7,Gs:8,A:9,As:10,B:11};
     const m   = name.match(/^([A-G]s?)(\d)$/);
     if (!m || !(m[1] in map)) return null;
-    
-    // Acoustic calibration: The physical MP3 files in the library were rendered 
-    // exactly one octave higher than their filenames claim. 
-    // E.g., "Ds3.mp3" contains a D#4 tone (311 Hz), not a D#3 tone (155 Hz).
-    // We add +1 to the parsed octave to inform the audio engine of the TRUE acoustic pitch.
-    const actualAcousticOctave = parseInt(m[2]) + 1;
-    
-    return 440 * Math.pow(2, (map[m[1]] - 9 + (actualAcousticOctave - 4) * 12) / 12);
+    return 440 * Math.pow(2, (map[m[1]] - 9 + (parseInt(m[2]) - 4) * 12) / 12);
 }
 
 // Load all samples for one instrument; silently skips failed URLs
