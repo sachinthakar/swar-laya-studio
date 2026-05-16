@@ -577,18 +577,18 @@
         <div class="control-item">
             <label>Scale (Sa)</label>
             <select id="scale-select" onchange="updateTanpura()">
-                <option value="130.81">Pandhri 1 (C3)</option>
-                <option value="138.59">Kali 1 (C#3)</option>
-                <option value="146.83">Pandhri 2 (D3)</option>
-                <option value="155.56">Kali 2 (D#3)</option>
-                <option value="164.81">Pandhri 3 (E3)</option>
-                <option value="174.61">Pandhri 4 (F3)</option>
-                <option value="185.00">Kali 3 (F#3)</option>
-                <option value="196.00">Pandhri 5 (G3)</option>
-                <option value="207.65">Kali 4 (G#3)</option>
-                <option value="220.00">Pandhri 6 (A3)</option>
-                <option value="233.08">Kali 5 (A#3)</option>
-                <option value="246.94">Pandhri 7 (B3)</option>
+                <option value="130.81" data-note="C3">Pandhri 1 (C3)</option>
+                <option value="138.59" data-note="Cs3">Kali 1 (C#3)</option>
+                <option value="146.83" data-note="D3">Pandhri 2 (D3)</option>
+                <option value="155.56" data-note="Ds3">Kali 2 (D#3)</option>
+                <option value="164.81" data-note="E3">Pandhri 3 (E3)</option>
+                <option value="174.61" data-note="F3">Pandhri 4 (F3)</option>
+                <option value="185.00" data-note="Fs3">Kali 3 (F#3)</option>
+                <option value="196.00" data-note="G3">Pandhri 5 (G3)</option>
+                <option value="207.65" data-note="Gs3">Kali 4 (G#3)</option>
+                <option value="220.00" data-note="A3">Pandhri 6 (A3)</option>
+                <option value="233.08" data-note="As3">Kali 5 (A#3)</option>
+                <option value="246.94" data-note="B3">Pandhri 7 (B3)</option>
             </select>
         </div>
         <div class="control-item">
@@ -742,23 +742,36 @@ let lastPlayedFreq = null;   // tracks prev note freq for meend glide with sampl
 let legatoEnv      = null;   // last sample env in legato mode — faded out on next note
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
-// Equal-temperament semitone ratios (12th root of 2)
-const SwaraMap = {
+// Equal-temperament semitone offsets from Sa
+const SwaraOffset = {
     "-":  null,
     "~":  null,   // sustain / hold — continue previous note, do not re-attack
-    "Sa": 1,
-    "re": Math.pow(2, 1/12),   // komal Re  (minor 2nd)
-    "Re": Math.pow(2, 2/12),   // shuddha Re (major 2nd)
-    "ga": Math.pow(2, 3/12),   // komal Ga  (minor 3rd)
-    "Ga": Math.pow(2, 4/12),   // shuddha Ga (major 3rd)
-    "Ma": Math.pow(2, 5/12),   // shuddha Ma (perfect 4th)
-    "ma": Math.pow(2, 6/12),   // tivra Ma  (tritone)
-    "Pa": Math.pow(2, 7/12),   // Pa        (perfect 5th)
-    "dha": Math.pow(2, 8/12),  // komal Dha (minor 6th)
-    "Dha": Math.pow(2, 9/12),  // shuddha Dha (major 6th)
-    "ni": Math.pow(2, 10/12),  // komal Ni  (minor 7th)
-    "Ni": Math.pow(2, 11/12)   // shuddha Ni (major 7th)
+    "Sa": 0,
+    "re": 1,   // komal Re  (minor 2nd)
+    "Re": 2,   // shuddha Re (major 2nd)
+    "ga": 3,   // komal Ga  (minor 3rd)
+    "Ga": 4,   // shuddha Ga (major 3rd)
+    "Ma": 5,   // shuddha Ma (perfect 4th)
+    "ma": 6,   // tivra Ma  (tritone)
+    "Pa": 7,   // Pa        (perfect 5th)
+    "dha": 8,  // komal Dha (minor 6th)
+    "Dha": 9,  // shuddha Dha (major 6th)
+    "ni": 10,  // komal Ni  (minor 7th)
+    "Ni": 11   // shuddha Ni (major 7th)
 };
+
+// Helper: Convert a base note (e.g. "Ds3") + semitone offset + octave offset into a target note name (e.g. "As3")
+function getNoteName(baseNote, semitones, octaveOffset = 0) {
+    const map = ['C','Cs','D','Ds','E','F','Fs','G','Gs','A','As','B'];
+    const m = baseNote.match(/^([A-G]s?)(\d)$/);
+    if (!m) return baseNote;
+    const baseIdx = map.indexOf(m[1]);
+    const baseOct = parseInt(m[2]);
+    const totalSemitones = (baseOct * 12) + baseIdx + semitones + (octaveOffset * 12);
+    const targetOct = Math.floor(totalSemitones / 12);
+    const targetIdx = totalSemitones % 12;
+    return `${map[targetIdx]}${targetOct}`;
+}
 
 const TaalBols = {
     "4":        ["Dha","Gi","Na","Ti"],
@@ -1018,8 +1031,8 @@ function findBestSample(instrument, targetHz) {
 }
 
 // Play one note from a sample; returns true if a sample was found and played
-function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
-    const buf = findBestSample(instrument, freq);
+function triggerSampledNote(targetNoteName, instrument, glideTime, noteDuration, vs, prevNoteName, legato = false) {
+    const buf = SampleCache[`${instrument}|${targetNoteName}`];
     if (!buf || !sampleBus) return false;
     // Add 25ms safety buffer to ensure envelope automation curves start reliably
     const now = audioCtx.currentTime + 0.025;
@@ -1028,8 +1041,12 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
     src.buffer = buf;
 
     // Pitch: if meend (glide > ~20ms), ramp playbackRate from prevFreq to freq
-    const endRate   = freq / buf.baseHz;
-    const startRate = (glideTime > 0.02 && prevFreq) ? (prevFreq / buf.baseHz) : endRate;
+    const endRate = 1.0;
+    let startRate = 1.0;
+    if (glideTime > 0.02 && prevNoteName) {
+        const prevFreq = noteNameToHz(prevNoteName);
+        startRate = prevFreq / buf.baseHz;
+    }
     src.playbackRate.setValueAtTime(startRate, now);
     if (startRate !== endRate) {
         src.playbackRate.exponentialRampToValueAtTime(endRate, now + glideTime);
@@ -1408,6 +1425,7 @@ const InstrumentOscType = {
 
 function setupSynth(instrument) {
     stopSynth();
+    lastPlayedNoteName = null;
     lastPlayedFreq = null;   // reset meend glide state for new instrument
 
     mainGain   = audioCtx.createGain();
@@ -1494,15 +1512,18 @@ function stopSynth() {
     if (mainGain) { mainGain.disconnect(); mainGain = null; }
 }
 
-function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false) {
+function triggerNote(targetNoteName, instrument, glideTime, noteDuration, volScale, legato = false) {
     const vs = (volScale !== undefined) ? volScale : 1.0;
+    const freq = noteNameToHz(targetNoteName);
 
     // ── Sample-based playback (preferred when samples are loaded) ─────────────
-    const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
-    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato)) {
+    const prevNoteName = (glideTime > 0.02) ? lastPlayedNoteName : null;
+    if (triggerSampledNote(targetNoteName, instrument, glideTime, noteDuration, vs, prevNoteName, legato)) {
+        lastPlayedNoteName = targetNoteName;
         lastPlayedFreq = freq;
         return;   // sample handled it; skip oscillator path
     }
+    lastPlayedNoteName = targetNoteName;
     lastPlayedFreq = freq;
 
     // ── Oscillator fallback (used until samples finish loading) ───────────────
@@ -1625,7 +1646,9 @@ async function startPlayback(singleLineEl = null) {
     if (!allLines.length) return;
     const lines = singleLineEl ? [singleLineEl] : allLines;
 
-    const baseSa    = parseFloat(document.getElementById('scale-select').value);
+    const scaleSelect = document.getElementById('scale-select');
+    const baseSa      = parseFloat(scaleSelect.value);
+    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
     const masterBpm = parseInt(document.getElementById('bpm').value) || 90;
     // Single-line mode always starts from beat 0 of that line
     const startBeat = singleLineEl ? 0 : (parseInt(document.getElementById('start-beat').value) || 1) - 1;
@@ -1752,7 +1775,7 @@ async function startPlayback(singleLineEl = null) {
                             // Do not re-attack; do not silence. Just let it ring.
                             if (swara === '~') return;
 
-                            const ratio   = SwaraMap[swara];
+                            const semitones = SwaraOffset[swara];
                             const isMeend = unit.querySelector('.meend-btn') &&
                                             unit.querySelector('.meend-btn').classList.contains('active');
                             // Meend: glide over 88% of sub-beat. Normal: 8 ms snap.
@@ -1778,11 +1801,11 @@ async function startPlayback(singleLineEl = null) {
                             const holdBeats  = reachesEnd ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
 
-                            if (ratio) {
-                                let freq = baseSa * ratio;
+                            if (semitones !== undefined && semitones !== null) {
                                 const octBtn = unit.querySelector('.octave-btn.active');
-                                if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
-                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato);
+                                const octaveOffset = octBtn ? parseInt(octBtn.dataset.oct) : 0;
+                                const targetNoteName = getNoteName(baseNoteStr, semitones, octaveOffset);
+                                triggerNote(targetNoteName, inst, glide, noteDuration, lineVol, isLegato);
                             } else {
                                 silenceNote();
                             }
@@ -1835,9 +1858,16 @@ async function toggleTanpura() {
 
 function startTanpura() {
     stopTanpura();
-    const sa = parseFloat(document.getElementById('scale-select').value);
+    const scaleSelect = document.getElementById('scale-select');
+    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
+
     // Classic tanpura string order: Pa (lower), lower Sa, Sa, Sa
-    const strings = [sa * 0.75, sa * 0.5, sa, sa];
+    // Using equal-temperament semitones to perfectly align with the samples
+    const lowerPa = noteNameToHz(getNoteName(baseNoteStr, 7, -1));
+    const lowerSa = noteNameToHz(getNoteName(baseNoteStr, 0, -1));
+    const midSa   = noteNameToHz(getNoteName(baseNoteStr, 0, 0));
+
+    const strings = [lowerPa, lowerSa, midSa, midSa];
     let idx = 0;
 
     function pluck() {
@@ -2031,14 +2061,14 @@ let pakkadSources  = [];   // BufferSourceNode / OscillatorNode handles for canc
 let pakkadEndTimer = null; // single setTimeout for UI reset after last note
 
 // Schedule one pakkad note at a specific audioCtx time.
-function schedulePakkadNote(freq, inst, startTime, duration) {
-    const buf = findBestSample(inst, freq);
+function schedulePakkadNote(targetNoteName, inst, startTime, duration) {
+    const freq = noteNameToHz(targetNoteName);
+    const buf = SampleCache[`${inst}|${targetNoteName}`];
     if (buf && sampleBus) {
         // ── Sample path ──────────────────────────────────────────────────────
         const src = audioCtx.createBufferSource();
         src.buffer = buf;
-        const rate = freq / buf.baseHz;
-        src.playbackRate.setValueAtTime(rate, startTime);
+        src.playbackRate.setValueAtTime(1.0, startTime);
 
         const env = audioCtx.createGain();
         const t   = startTime;
@@ -2180,12 +2210,14 @@ async function playPakkad() {
     // Helper: schedule a single note at the current index position
     const t0 = audioCtx.currentTime + 0.05;
     let idx = 0;
+    const scaleSelect = document.getElementById('scale-select');
+    const baseNoteStr = scaleSelect.options[scaleSelect.selectedIndex].getAttribute('data-note');
+
     function schedNote(note, oct) {
-        const ratio = SwaraMap[note];
-        if (!ratio) return;
-        let freq = baseSa * ratio;
-        if (oct) freq *= Math.pow(2, oct);   // oct: -1=Mandra, 1=Taar, 2=Taar+1
-        schedulePakkadNote(freq, inst, t0 + idx * stepSec, noteSec);
+        const semitones = SwaraOffset[note];
+        if (semitones === undefined || semitones === null) return;
+        const targetNoteName = getNoteName(baseNoteStr, semitones, oct || 0);
+        schedulePakkadNote(targetNoteName, inst, t0 + idx * stepSec, noteSec);
     }
 
     // Schedule Aroha
