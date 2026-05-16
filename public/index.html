@@ -2544,11 +2544,17 @@ function restoreSettings() {
     if (taal)  document.getElementById('taal-select').value  = taal;
     if (bpm)   document.getElementById('bpm').value          = bpm;
     if (scale) {
-        // Migrate old format: scale was stored as half the Sa Hz (pre-fix).
-        // New format stores the actual Sa Hz. Threshold 256 safely separates
-        // old max (246.94) from new min (261.63).
-        const sv = parseFloat(scale) < 256 ? parseFloat(scale) * 2 : parseFloat(scale);
-        document.getElementById('scale-select').value = sv;
+        const sv = parseFloat(scale);
+        let closestOpt = '';
+        let minDiff = Infinity;
+        document.querySelectorAll('#scale-select option').forEach(opt => {
+            const diff = Math.abs(parseFloat(opt.value) - sv);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestOpt = opt.value;
+            }
+        });
+        document.getElementById('scale-select').value = closestOpt || sv;
     }
     // Render ruler for restored taal (if any)
     if (taal) renderTaalRuler(taal, 'tabla');
@@ -2673,7 +2679,7 @@ function loadJsonFile(e) {
         const d = JSON.parse(ev.target.result);
         if (d.title)    document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+            const sv = parseFloat(d.scale);
             let closestOpt = '';
             let minDiff = Infinity;
             document.querySelectorAll('#scale-select option').forEach(opt => {
@@ -3069,8 +3075,17 @@ async function loadFromCloud(docId) {
         const d = doc.data();
         if (d.title) document.getElementById('song-title').value = d.title;
         if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            document.getElementById('scale-select').value = sv;
+            const sv = parseFloat(d.scale);
+            let closestOpt = '';
+            let minDiff = Infinity;
+            document.querySelectorAll('#scale-select option').forEach(opt => {
+                const diff = Math.abs(parseFloat(opt.value) - sv);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestOpt = opt.value;
+                }
+            });
+            document.getElementById('scale-select').value = closestOpt || sv;
         }
         if (d.bpm)   document.getElementById('bpm').value = d.bpm;
         document.getElementById('song-sheet').innerHTML = '';
