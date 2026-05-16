@@ -1760,8 +1760,47 @@ function startPlayback(singleLineEl = null) {
                             const swara = unit.querySelector('.note-select').value;
 
                             // "~" = hold/sustain: previous note is still ringing.
-                            // Do not re-attack; do not silence. Just let it ring.
-                            if (swara === '~') return;
+                            // If meend is active on this ~, and it is the FIRST in a
+                            // consecutive ~(m) chain, launch a long glide from the last
+                            // played pitch to the next sounding note right now.
+                            // Subsequent ~(m) beats in the same chain are skipped normally.
+                            if (swara === '~') {
+                                const mb = unit.querySelector('.meend-btn');
+                                if (mb && mb.classList.contains('active') && lastPlayedFreq) {
+                                    // Is the PREVIOUS beat also a ~(meend)?  If so the
+                                    // slide was already started there — skip.
+                                    const prevCell = localIdx > 0 ? cells[localIdx - 1] : null;
+                                    const prevIsMeendTilde =
+                                        prevCell &&
+                                        prevCell.querySelector('.note-select')?.value === '~' &&
+                                        prevCell.querySelector('.meend-btn')?.classList.contains('active');
+
+                                    if (!prevIsMeendTilde) {
+                                        // Count consecutive ~(meend) beats from here
+                                        let slideBeats = 1;
+                                        for (let ci = localIdx + 1; ci < cells.length; ci++) {
+                                            const ns = cells[ci].querySelector('.note-select')?.value;
+                                            const nm = cells[ci].querySelector('.meend-btn')?.classList.contains('active');
+                                            if (ns === '~' && nm) slideBeats++;
+                                            else break;
+                                        }
+                                        // Target note = first non-~ cell after the chain
+                                        const tCell = cells[localIdx + slideBeats];
+                                        const tSel  = tCell?.querySelector('.note-select');
+                                        const tRatio = tSel ? SwaraMap[tSel.value] : null;
+                                        if (tRatio) {
+                                            let tf = baseSa * tRatio;
+                                            const tOct = tCell.querySelector('.octave-btn.active');
+                                            if (tOct) tf *= Math.pow(2, parseInt(tOct.dataset.oct));
+                                            // Glide covers 92% of the sustained period so the
+                                            // pitch arrives naturally just before the target beat.
+                                            const slideDur = slideBeats * beatMs / 1000;
+                                            triggerNote(tf, inst, slideDur * 0.92, slideDur, lineVol, isLegato);
+                                        }
+                                    }
+                                }
+                                return;
+                            }
 
                             const ratio   = SwaraMap[swara];
                             const isMeend = unit.querySelector('.meend-btn') &&
@@ -2244,10 +2283,18 @@ function stopPakkad() {
 function applySustainStyle(unit) {
     const sel  = unit.querySelector('.note-select');
     const hold = sel && sel.value === '~';
-    unit.querySelectorAll('.octave-btn, .meend-btn').forEach(btn => {
-        btn.disabled     = hold;
+    // Octave buttons are meaningless on a hold beat — keep them disabled.
+    // Meend IS meaningful on a hold: it marks the sustained period as a slide
+    // toward the next sounding note, so it stays clickable.
+    unit.querySelectorAll('.octave-btn').forEach(btn => {
+        btn.disabled      = hold;
         btn.style.opacity = hold ? '0.25' : '';
     });
+    const meendBtn = unit.querySelector('.meend-btn');
+    if (meendBtn) {
+        meendBtn.disabled      = false;
+        meendBtn.style.opacity = '';
+    }
     if (sel) {
         sel.style.backgroundColor = hold ? '#e3f2fd' : '';
         sel.style.color           = hold ? '#1565c0' : '';
