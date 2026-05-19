@@ -554,6 +554,99 @@
             transition: opacity 0.35s ease;
             pointer-events: none;
         }
+
+        /* ── Tab bar ── */
+        .tab-bar {
+            display: flex; gap: 4px; padding: 8px 12px 0;
+            background: #1a1a2e; border-bottom: 2px solid #2d2d4e;
+        }
+        .tab-btn {
+            padding: 8px 20px; border: none; border-radius: 8px 8px 0 0;
+            background: #2d2d4e; color: #aaa; font-size: 14px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .tab-btn:hover { background: #3d3d6e; color: #ccc; }
+        .tab-btn.active { background: #4a4aff; color: #fff; }
+
+        /* ── Sargam Mapper panel ── */
+        #tab-mapper-content { display: none; padding: 16px 12px; }
+        .sm-panel {
+            background: #1e1e38; border: 1px solid #2d2d4e; border-radius: 10px;
+            padding: 14px 16px; margin-bottom: 14px;
+        }
+        .sm-panel h3 {
+            margin: 0 0 12px; font-size: 14px; font-weight: 700;
+            color: #8888ff; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .sm-setup-row {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+        }
+        .sm-control { display: flex; flex-direction: column; gap: 4px; }
+        .sm-control label { font-size: 11px; color: #888; font-weight: 600; }
+        .sm-control input, .sm-control select {
+            background: #111128; border: 1px solid #3d3d6e; color: #ddd;
+            border-radius: 6px; padding: 6px 10px; font-size: 13px;
+        }
+        .sm-btn {
+            padding: 7px 16px; border: none; border-radius: 6px;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s;
+        }
+        .sm-btn-primary  { background: #4a4aff; color: #fff; }
+        .sm-btn-primary:hover  { background: #6060ff; }
+        .sm-btn-success  { background: #22a855; color: #fff; }
+        .sm-btn-success:hover  { background: #2bc463; }
+        .sm-btn-danger   { background: #cc3333; color: #fff; }
+        .sm-btn-danger:hover   { background: #e04444; }
+        .sm-btn-neutral  { background: #3d3d5e; color: #ccc; }
+        .sm-btn-neutral:hover  { background: #4d4d7e; }
+        .sm-btn-accent   { background: #a050e0; color: #fff; }
+        .sm-btn-accent:hover   { background: #b060f0; }
+        #sm-waveform-canvas {
+            width: 100%; height: 80px; background: #0a0a1e;
+            border-radius: 6px; cursor: crosshair; display: block;
+        }
+        .sm-waveform-hint { font-size: 11px; color: #555; margin-top: 4px; }
+        .sm-notation-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        .sm-notation-table td {
+            padding: 4px 6px; text-align: center; font-size: 12px;
+            border: 1px solid #2d2d4e; min-width: 48px;
+        }
+        .sm-row-label { color: #777; font-size: 11px; font-weight: 700; text-align: right; }
+        .sm-cell-note  { color: #ffffaa; font-weight: 700; font-size: 14px; }
+        .sm-cell-pyin  { color: #88ccff; font-size: 11px; }
+        .sm-cell-voiced{ color: #99ffaa; font-size: 11px; }
+        .sm-cell-sustain{ color: #aaaaaa; }
+        .sm-accepted-line {
+            background: #0d1f0d; border: 1px solid #226622; border-radius: 6px;
+            padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
+        }
+        .sm-accepted-line .sm-line-header {
+            color: #66cc66; font-weight: 700; margin-bottom: 4px; font-size: 11px;
+        }
+        .sm-accepted-note { color: #ffffaa; font-weight: 700; margin-right: 6px; }
+        /* Edit grid */
+        .sm-edit-grid {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
+        }
+        .sm-edit-cell {
+            background: #111128; border: 1px solid #3d3d6e; border-radius: 6px;
+            padding: 6px; min-width: 60px; text-align: center;
+        }
+        .sm-edit-cell .sm-beat-num { font-size: 10px; color: #666; margin-bottom: 3px; }
+        .sm-edit-cell select {
+            background: #0a0a1e; border: 1px solid #4a4aff; color: #ffffaa;
+            border-radius: 4px; padding: 2px 4px; font-size: 12px; width: 100%;
+            margin-bottom: 3px;
+        }
+        .sm-oct-btns { display: flex; gap: 2px; justify-content: center; }
+        .sm-oct-btn {
+            padding: 2px 5px; border: 1px solid #3d3d6e; border-radius: 3px;
+            font-size: 10px; cursor: pointer; background: #1e1e38; color: #aaa;
+        }
+        .sm-oct-btn.active { background: #4a4aff; color: #fff; border-color: #4a4aff; }
+        .sm-action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .sm-status { font-size: 12px; color: #88aaff; margin-top: 6px; }
+        .sm-error  { font-size: 12px; color: #ff6666; margin-top: 6px; }
     </style>
 </head>
 <body>
@@ -564,6 +657,12 @@
         <span style="font-size:11px; opacity:0.55; margin-left:6px;">Professional Suite</span>
         <div class="spacer"></div>
         <span style="font-size:11px; opacity:0.6;">Loading…</span>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="composer" onclick="switchTab('composer')">🎵 Composer</button>
+        <button class="tab-btn" data-tab="mapper" onclick="switchTab('mapper')">🎤 Sargam Mapper</button>
     </div>
 
     <div id="sticky-header">
@@ -710,7 +809,132 @@
     </div><!-- /#sticky-header -->
 
     <div id="song-sheet" style="padding-top:16px;"></div>
-</div>
+
+    <!-- ── Sargam Mapper Tab ── -->
+    <div id="tab-mapper-content">
+
+        <!-- Setup panel -->
+        <div class="sm-panel">
+            <h3>🎤 Sargam Mapper — Setup</h3>
+            <div class="sm-setup-row">
+                <div class="sm-control">
+                    <label>Audio File (MP3/WAV/OGG)</label>
+                    <input type="file" id="sm-file-input" accept="audio/*" onchange="smLoadFile(event)" style="color:#ccc;">
+                </div>
+                <div class="sm-control">
+                    <label>Base Sa (Scale)</label>
+                    <select id="sm-sa-select">
+                        <option value="130.81">Safed 1 (C3 = 130.81 Hz)</option>
+                        <option value="138.59">Kali 1 (C#3 = 138.59 Hz)</option>
+                        <option value="146.83">Safed 2 (D3 = 146.83 Hz)</option>
+                        <option value="155.56">Kali 2 (D#3 = 155.56 Hz)</option>
+                        <option value="164.81">Safed 3 (E3 = 164.81 Hz)</option>
+                        <option value="174.61">Safed 4 (F3 = 174.61 Hz)</option>
+                        <option value="185.00">Kali 3 (F#3 = 185.00 Hz)</option>
+                        <option value="196.00">Safed 5 (G3 = 196.00 Hz)</option>
+                        <option value="207.65">Kali 4 (G#3 = 207.65 Hz)</option>
+                        <option value="220.00">Safed 6 (A3 = 220.00 Hz)</option>
+                        <option value="233.08">Kali 5 (A#3 = 233.08 Hz)</option>
+                        <option value="246.94">Safed 7 (B3 = 246.94 Hz)</option>
+                    </select>
+                </div>
+                <div class="sm-control">
+                    <label>BPM</label>
+                    <input type="number" id="sm-bpm" value="90" min="30" max="240" style="width:70px;">
+                </div>
+                <div class="sm-control">
+                    <label>Beats per Line</label>
+                    <input type="number" id="sm-beats-per-line" value="8" min="4" max="16" style="width:60px;">
+                </div>
+                <div class="sm-control">
+                    <label>Song Title</label>
+                    <input type="text" id="sm-title" value="Transcription" style="width:160px;">
+                </div>
+            </div>
+            <div id="sm-load-status" class="sm-status" style="margin-top:8px;"></div>
+        </div>
+
+        <!-- Waveform panel -->
+        <div class="sm-panel" id="sm-waveform-panel" style="display:none;">
+            <h3>📊 Waveform — Click to set Start, Shift+Click to set End</h3>
+            <canvas id="sm-waveform-canvas" height="80"></canvas>
+            <div class="sm-waveform-hint">Click: set segment start &nbsp;|&nbsp; Shift+click: set segment end &nbsp;|&nbsp; Drag: select region</div>
+            <div style="margin-top:10px; display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+                <div class="sm-control">
+                    <label>Start (sec)</label>
+                    <input type="number" id="sm-start-sec" value="0" min="0" step="0.1" style="width:80px;">
+                </div>
+                <div class="sm-control">
+                    <label>End (sec)</label>
+                    <input type="number" id="sm-end-sec" value="4" min="0" step="0.1" style="width:80px;">
+                </div>
+                <div class="sm-control">
+                    <label>Beats in segment</label>
+                    <input type="number" id="sm-seg-beats" value="8" min="1" max="32" style="width:60px;">
+                </div>
+                <div class="sm-control">
+                    <label>Section label</label>
+                    <input type="text" id="sm-section" value="Mukhda" style="width:110px;">
+                </div>
+                <div class="sm-control">
+                    <label>Instrument</label>
+                    <select id="sm-instrument">
+                        <option value="harmonium">Harmonium</option>
+                        <option value="flute">Flute</option>
+                        <option value="sitar">Sitar</option>
+                        <option value="violin">Violin</option>
+                        <option value="piano">Piano</option>
+                    </select>
+                </div>
+                <div class="sm-control" style="flex-direction:row; align-items:center; gap:6px;">
+                    <input type="checkbox" id="sm-adlib" style="width:16px; height:16px;">
+                    <label for="sm-adlib" style="font-size:12px; color:#aaa; cursor:pointer;">Ad-lib line</label>
+                </div>
+                <button class="sm-btn sm-btn-primary" onclick="smDetect()" style="align-self:flex-end;">🔍 Detect Notes</button>
+                <button class="sm-btn sm-btn-neutral" onclick="smPlayOriginal()" style="align-self:flex-end;">▶ Play Original</button>
+            </div>
+        </div>
+
+        <!-- Result panel -->
+        <div class="sm-panel" id="sm-result-panel" style="display:none;">
+            <h3>🎼 Detected Notation</h3>
+            <div id="sm-notation-display"></div>
+            <div class="sm-action-row">
+                <button class="sm-btn sm-btn-neutral" onclick="smPlaySynth()">🎹 Play Synth</button>
+                <button class="sm-btn sm-btn-neutral" onclick="smPlayOriginal()">▶ Play Original</button>
+                <button class="sm-btn sm-btn-success" onclick="smAccept()">✔ Accept</button>
+                <button class="sm-btn sm-btn-accent"  onclick="smToggleEdit()">✏ Edit</button>
+                <button class="sm-btn sm-btn-danger"  onclick="smSkip()">⏭ Skip</button>
+            </div>
+            <!-- Edit grid (hidden by default) -->
+            <div id="sm-edit-panel" style="display:none; margin-top:12px;">
+                <div style="font-size:12px; color:#88aaff; margin-bottom:8px;">
+                    Edit beats below. Prefix: <code style="color:#ffdd88;">.</code>=mandra &nbsp; <code style="color:#ffdd88;">'</code>=taar &nbsp; no prefix=madhya
+                </div>
+                <div id="sm-edit-grid" class="sm-edit-grid"></div>
+                <div class="sm-action-row" style="margin-top:10px;">
+                    <button class="sm-btn sm-btn-success" onclick="smAcceptEdited()">✔ Accept Edited</button>
+                    <button class="sm-btn sm-btn-neutral" onclick="smToggleEdit()">✖ Cancel Edit</button>
+                    <button class="sm-btn sm-btn-neutral" onclick="smPlaySynth(true)">🎹 Play Edited</button>
+                </div>
+            </div>
+            <div id="sm-result-status" class="sm-status"></div>
+        </div>
+
+        <!-- Accepted lines panel -->
+        <div class="sm-panel" id="sm-accepted-panel" style="display:none;">
+            <h3>✅ Accepted Lines (<span id="sm-line-count">0</span>)</h3>
+            <div id="sm-accepted-list"></div>
+            <div class="sm-action-row" style="margin-top:12px;">
+                <button class="sm-btn sm-btn-success"  onclick="smSendToComposer()">📤 Send to Composer</button>
+                <button class="sm-btn sm-btn-accent"   onclick="smRunAI()">✨ AI Cleanup</button>
+                <button class="sm-btn sm-btn-neutral"  onclick="smDownloadJSON()">💾 Download JSON</button>
+            </div>
+            <div id="sm-ai-status" class="sm-status"></div>
+        </div>
+
+    </div><!-- /#tab-mapper-content -->
+</div><!-- /.container -->
 
 <script>
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -3929,6 +4153,798 @@ function raAdminExport() {
 
 <!-- ── Toast notification ── -->
 <div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SARGAM MAPPER — Tab 2
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Constants ──────────────────────────────────────────────────────────────────
+const SM_SWARA_NAMES = ['Sa','re','Re','ga','Ga','Ma','ma','Pa','dha','Dha','ni','Ni'];
+const SM_VALID_NOTES = new Set([...SM_SWARA_NAMES, '-', '~']);
+const SM_SEMITONE = {
+    'Sa':0,'re':1,'Re':2,'ga':3,'Ga':4,'Ma':5,'ma':6,
+    'Pa':7,'dha':8,'Dha':9,'ni':10,'Ni':11,'-':null,'~':null
+};
+const SM_OCT_LABEL = {'-2':'‥','-1':'.','0':'','1':"'",'2':"''"};
+const SM_COLS = 8;
+
+// ── State ──────────────────────────────────────────────────────────────────────
+const SM = {
+    audioCtx:    null,
+    audioBuffer: null,     // decoded AudioBuffer
+    pitchTrack:  null,     // Float32Array, Hz per frame (0=unvoiced)
+    hopLen:      512,
+    frameLen:    2048,
+    sampleRate:  44100,
+    saHz:        155.56,   // base Sa in Hz (madhya octave)
+    bpm:         90,
+    segStart:    0,
+    segEnd:      4,
+    segBeats:    8,
+    currentBeats: null,    // [{note, oct, dom_hz, dom_note, dom_oct, voiced_pct, clusters}]
+    acceptedLines: [],
+    carryNote:   null,
+    carryOct:    0,
+    playSource:  null,
+    editBeats:   null,     // copy for edit mode
+    dragging:    false,
+    dragStartX:  0,
+};
+
+// ── Tab switch ─────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+    document.getElementById('sticky-header').style.display   = tab === 'composer' ? '' : 'none';
+    document.getElementById('song-sheet').style.display      = tab === 'composer' ? '' : 'none';
+    document.getElementById('tab-mapper-content').style.display = tab === 'mapper' ? 'block' : 'none';
+    document.querySelectorAll('.tab-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.tab === tab));
+    if (tab === 'mapper') { setTimeout(smDrawWaveform, 80); }
+}
+
+// ── YIN pitch detection ────────────────────────────────────────────────────────
+function yinDifference(buf, W) {
+    const d = new Float32Array(W);
+    for (let tau = 1; tau < W; tau++) {
+        let s = 0;
+        for (let j = 0; j < W; j++) {
+            const diff = buf[j] - buf[j + tau];
+            s += diff * diff;
+        }
+        d[tau] = s;
+    }
+    return d;
+}
+
+function yinCMND(d) {
+    const cmnd = new Float32Array(d.length);
+    cmnd[0] = 1;
+    let runSum = 0;
+    for (let tau = 1; tau < d.length; tau++) {
+        runSum += d[tau];
+        cmnd[tau] = runSum === 0 ? 0 : d[tau] * tau / runSum;
+    }
+    return cmnd;
+}
+
+function yinDetectFrame(frame, sampleRate, threshold = 0.12) {
+    const W = Math.floor(frame.length / 2);
+    const d = yinDifference(frame, W);
+    const cmnd = yinCMND(d);
+    // Find first dip below threshold
+    for (let tau = 2; tau < W - 1; tau++) {
+        if (cmnd[tau] < threshold) {
+            // Search for local minimum in this dip
+            while (tau + 1 < W && cmnd[tau + 1] < cmnd[tau]) tau++;
+            // Parabolic interpolation
+            const prev = cmnd[tau - 1], curr = cmnd[tau], next = cmnd[tau + 1];
+            const denom = 2 * (2 * curr - prev - next);
+            const betterTau = denom === 0 ? tau : tau + (prev - next) / denom;
+            return sampleRate / betterTau;
+        }
+    }
+    return 0; // unvoiced
+}
+
+// Compute full pitch track for audio samples (Float32Array, mono, normalized)
+function smComputePitchTrack(samples, sampleRate) {
+    const hop = SM.hopLen;
+    const frame = SM.frameLen;
+    const nFrames = Math.floor((samples.length - frame) / hop) + 1;
+    const track = new Float32Array(nFrames);
+    // Hann window
+    const hann = new Float32Array(frame);
+    for (let i = 0; i < frame; i++) hann[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (frame - 1)));
+
+    for (let fi = 0; fi < nFrames; fi++) {
+        const start = fi * hop;
+        const buf = new Float32Array(frame);
+        for (let i = 0; i < frame; i++) buf[i] = samples[start + i] * hann[i];
+        const hz = yinDetectFrame(buf, sampleRate);
+        // Filter to vocal/melodic range 80–700 Hz
+        track[fi] = (hz >= 80 && hz <= 700) ? hz : 0;
+    }
+    return track;
+}
+
+// Smooth pitch track with median-like window (suppress outliers)
+function smSmoothPitch(track, w = 5) {
+    const out = new Float32Array(track.length);
+    const half = Math.floor(w / 2);
+    for (let i = 0; i < track.length; i++) {
+        const slice = [];
+        for (let j = i - half; j <= i + half; j++) {
+            if (j >= 0 && j < track.length && track[j] > 0) slice.push(track[j]);
+        }
+        if (slice.length === 0) { out[i] = 0; continue; }
+        slice.sort((a, b) => a - b);
+        out[i] = slice[Math.floor(slice.length / 2)];
+    }
+    return out;
+}
+
+// ── Beat aggregation ───────────────────────────────────────────────────────────
+function smSemitone(hz, saHz) {
+    if (hz <= 0 || saHz <= 0) return null;
+    return Math.round(12 * Math.log2(hz / saHz));
+}
+
+function smAggregateBeat(pitchSlice, saHz, minSubFrac = 0.25) {
+    const voiced = pitchSlice.filter(h => h > 0);
+    if (voiced.length === 0) return { notes: ['-'], octs: [0], dom_hz: 0, voiced_pct: 0, clusters: [] };
+
+    const voicedPct = Math.round(100 * voiced.length / pitchSlice.length);
+
+    // Convert to semitones relative to madhya Sa
+    const semitones = voiced.map(h => smSemitone(h, saHz)).filter(s => s !== null);
+    if (semitones.length === 0) return { notes: ['-'], octs: [0], dom_hz: 0, voiced_pct: voicedPct, clusters: [] };
+
+    // Dominant by majority vote
+    const counts = {};
+    semitones.forEach(s => counts[s] = (counts[s] || 0) + 1);
+    let dominant = parseInt(Object.entries(counts).sort((a,b) => b[1]-a[1])[0][0]);
+
+    // Vibrato absorption: snap ±1 semitone to dominant
+    const clean = semitones.map(s => Math.abs(s - dominant) <= 1 ? dominant : s);
+
+    // Clusters (top 3 for diagnostics)
+    const cleanCounts = {};
+    clean.forEach(s => cleanCounts[s] = (cleanCounts[s] || 0) + 1);
+    const total = clean.length;
+    const clusters = Object.entries(cleanCounts)
+        .sort((a,b) => b[1]-a[1]).slice(0,3)
+        .map(([sem, cnt]) => {
+            const s = parseInt(sem);
+            const hz = saHz * Math.pow(2, s / 12);
+            return {
+                hz: hz, pct: Math.round(100*cnt/total),
+                note: SM_SWARA_NAMES[((s % 12) + 12) % 12],
+                oct:  Math.floor(s / 12)
+            };
+        });
+
+    // RLE on cleaned semitones
+    const minFrames = Math.max(1, Math.round(minSubFrac * total));
+    const rle = [];
+    let curr = clean[0], cnt = 1;
+    for (let i = 1; i < clean.length; i++) {
+        if (clean[i] === curr) cnt++;
+        else { rle.push([curr, cnt]); curr = clean[i]; cnt = 1; }
+    }
+    rle.push([curr, cnt]);
+
+    const sig = rle.filter(([,c]) => c >= minFrames);
+    const final = sig.length ? sig : [[dominant, 1]];
+
+    const notes = final.map(([s]) => SM_SWARA_NAMES[((s % 12) + 12) % 12]);
+    const octs  = final.map(([s]) => Math.floor(s / 12));
+    const domHz = saHz * Math.pow(2, dominant / 12);
+
+    return { notes, octs, dom_hz: domHz, voiced_pct: voicedPct, clusters };
+}
+
+// ── Process a segment (start_sec, nBeats) ─────────────────────────────────────
+function smProcessSegment(startSec, nBeats) {
+    const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const beatDur = 60.0 / bpm;
+    const secPerFrame = SM.hopLen / SM.sampleRate;
+    const saHz = SM.saHz;
+    const track = SM.pitchTrack;
+    const beats = [];
+
+    for (let i = 0; i < nBeats; i++) {
+        const bs = startSec + i * beatDur;
+        const be = bs + beatDur;
+        const fi_s = Math.max(0, Math.floor(bs / secPerFrame));
+        const fi_e = Math.min(track.length, Math.floor(be / secPerFrame));
+        if (fi_e <= fi_s) {
+            beats.push({ notes:['-'], octs:[0], dom_hz:0, voiced_pct:0, clusters:[] });
+        } else {
+            const slice = Array.from(track.slice(fi_s, fi_e));
+            beats.push(smAggregateBeat(slice, saHz));
+        }
+    }
+    return beats;
+}
+
+// Apply sustain carry-over: replace '-' when prior note should sustain
+function smApplySustain(beats, carryNote, carryOct) {
+    const out = beats.map(b => Object.assign({}, b, {notes: [...b.notes], octs: [...b.octs]}));
+    let lastN = carryNote, lastO = carryOct;
+    for (let i = 0; i < out.length; i++) {
+        const n = out[i].notes[0];
+        if (n === '-' && lastN && lastN !== '-') {
+            out[i].notes = ['~'];
+            out[i].octs  = [lastO];
+        } else if (n !== '-' && n !== '~') {
+            lastN = out[i].notes[out[i].notes.length - 1];
+            lastO = out[i].octs[out[i].octs.length - 1];
+        }
+    }
+    return out;
+}
+
+// ── Audio loading ──────────────────────────────────────────────────────────────
+async function smLoadFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    smSetStatus('sm-load-status', '⏳ Loading audio…');
+
+    if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const arrayBuf = await file.arrayBuffer();
+    SM.audioBuffer = await SM.audioCtx.decodeAudioData(arrayBuf);
+    SM.sampleRate  = SM.audioBuffer.sampleRate;
+
+    smSetStatus('sm-load-status', `⏳ Computing pitch track… (${SM.audioBuffer.duration.toFixed(1)}s audio)`);
+
+    // Extract mono samples
+    const raw = SM.audioBuffer.getChannelData(0);
+    // Downsample to ≤22050 Hz for speed if needed
+    let samples = raw;
+    let sr = SM.sampleRate;
+    if (sr > 22050) {
+        // Simple 2x downsample (average pairs)
+        const ds = new Float32Array(Math.floor(raw.length / 2));
+        for (let i = 0; i < ds.length; i++) ds[i] = (raw[i*2] + raw[i*2+1]) * 0.5;
+        samples = ds;
+        sr = Math.floor(sr / 2);
+        SM.sampleRate = sr;
+    }
+
+    // Run pitch tracking in a chunked async loop to avoid blocking UI
+    await smRunPitchAsync(samples, sr);
+
+    document.getElementById('sm-waveform-panel').style.display = 'block';
+    document.getElementById('sm-end-sec').value = Math.min(4, SM.audioBuffer.duration).toFixed(1);
+    smDrawWaveform();
+    smInitWaveform();
+    smSetStatus('sm-load-status', `✅ Ready — ${SM.audioBuffer.duration.toFixed(1)}s, ${SM.pitchTrack.length} frames`);
+}
+
+async function smRunPitchAsync(samples, sr) {
+    const hop = SM.hopLen;
+    const frame = SM.frameLen;
+    const nFrames = Math.floor((samples.length - frame) / hop) + 1;
+    const track = new Float32Array(nFrames);
+    const hann = new Float32Array(frame);
+    for (let i = 0; i < frame; i++) hann[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (frame - 1)));
+
+    const CHUNK = 200; // frames per async tick
+    for (let fi = 0; fi < nFrames; fi += CHUNK) {
+        const end = Math.min(fi + CHUNK, nFrames);
+        for (let f = fi; f < end; f++) {
+            const start = f * hop;
+            const buf = new Float32Array(frame);
+            for (let i = 0; i < frame; i++) buf[i] = samples[start + i] * hann[i];
+            const hz = yinDetectFrame(buf, sr);
+            track[f] = (hz >= 80 && hz <= 700) ? hz : 0;
+        }
+        // Yield to browser
+        await new Promise(r => setTimeout(r, 0));
+        const pct = Math.round(100 * end / nFrames);
+        if (pct % 10 === 0) smSetStatus('sm-load-status', `⏳ Pitch tracking… ${pct}%`);
+    }
+    SM.pitchTrack = smSmoothPitch(track);
+}
+
+// ── Waveform canvas ────────────────────────────────────────────────────────────
+function smDrawWaveform() {
+    const canvas = document.getElementById('sm-waveform-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.offsetWidth || canvas.width;
+    const H = canvas.height;
+    canvas.width = W;
+
+    ctx.fillStyle = '#0a0a1e';
+    ctx.fillRect(0, 0, W, H);
+
+    if (!SM.audioBuffer) return;
+
+    const samples = SM.audioBuffer.getChannelData(0);
+    const step = Math.max(1, Math.floor(samples.length / W));
+    ctx.strokeStyle = '#3a3a8a';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = 0; x < W; x++) {
+        let max = 0;
+        for (let j = 0; j < step; j++) {
+            const v = Math.abs(samples[x * step + j] || 0);
+            if (v > max) max = v;
+        }
+        const y = (1 - max) * H / 2;
+        const y2 = (1 + max) * H / 2;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        ctx.lineTo(x, y2);
+    }
+    ctx.stroke();
+
+    // Draw pitch track overlay
+    if (SM.pitchTrack) {
+        const dur = SM.audioBuffer.duration;
+        const secPerFrame = SM.hopLen / SM.sampleRate;
+        ctx.strokeStyle = '#4a4aff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        let first = true;
+        for (let fi = 0; fi < SM.pitchTrack.length; fi++) {
+            const hz = SM.pitchTrack[fi];
+            if (hz <= 0) { first = true; continue; }
+            const t = fi * secPerFrame;
+            const x = (t / dur) * W;
+            // Map Hz to Y: 80Hz = bottom, 700Hz = top
+            const logHz = Math.log2(hz / 80) / Math.log2(700 / 80);
+            const y = H - logHz * H * 0.8 - H * 0.1;
+            if (first) { ctx.moveTo(x, y); first = false; }
+            else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+    }
+
+    // Selection region
+    const dur = SM.audioBuffer.duration;
+    const xs = (SM.segStart / dur) * W;
+    const xe = (SM.segEnd   / dur) * W;
+    ctx.fillStyle = 'rgba(74,74,255,0.18)';
+    ctx.fillRect(xs, 0, xe - xs, H);
+    ctx.strokeStyle = '#4a4aff';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(xs, 0); ctx.lineTo(xs, H); ctx.stroke();
+    ctx.strokeStyle = '#ff9944';
+    ctx.beginPath(); ctx.moveTo(xe, 0); ctx.lineTo(xe, H); ctx.stroke();
+
+    // Position cursor
+    const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const posT = SM.acceptedLines.reduce((acc, _) => acc + (SM.segBeats || 8) * 60 / bpm, 0);
+    if (posT < dur) {
+        const xp = (posT / dur) * W;
+        ctx.strokeStyle = '#22cc55';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(xp, 0); ctx.lineTo(xp, H); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+}
+
+function smInitWaveform() {
+    const canvas = document.getElementById('sm-waveform-canvas');
+    if (!canvas || canvas._smInited) return;
+    canvas._smInited = true;
+    canvas.addEventListener('mousedown', e => {
+        if (!SM.audioBuffer) return;
+        SM.dragging = true;
+        SM.dragStartX = e.offsetX;
+        const t = (e.offsetX / canvas.offsetWidth) * SM.audioBuffer.duration;
+        if (e.shiftKey) {
+            SM.segEnd = +t.toFixed(2);
+            document.getElementById('sm-end-sec').value = SM.segEnd;
+        } else {
+            SM.segStart = +t.toFixed(2);
+            document.getElementById('sm-start-sec').value = SM.segStart;
+        }
+        smDrawWaveform();
+    });
+    canvas.addEventListener('mousemove', e => {
+        if (!SM.dragging || !SM.audioBuffer) return;
+        const t = (e.offsetX / canvas.offsetWidth) * SM.audioBuffer.duration;
+        SM.segEnd = +Math.max(SM.segStart + 0.1, t).toFixed(2);
+        document.getElementById('sm-end-sec').value = SM.segEnd;
+        smDrawWaveform();
+    });
+    canvas.addEventListener('mouseup', () => { SM.dragging = false; });
+    canvas.addEventListener('mouseleave', () => { SM.dragging = false; });
+}
+
+// ── Detect ─────────────────────────────────────────────────────────────────────
+function smDetect() {
+    if (!SM.pitchTrack) { smSetStatus('sm-result-status', '❌ Load an audio file first.'); return; }
+    SM.saHz    = parseFloat(document.getElementById('sm-sa-select').value);
+    SM.segStart = parseFloat(document.getElementById('sm-start-sec').value) || 0;
+    SM.segEnd   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
+    SM.segBeats = parseInt(document.getElementById('sm-seg-beats').value)   || 8;
+
+    const raw = smProcessSegment(SM.segStart, SM.segBeats);
+    SM.currentBeats = smApplySustain(raw, SM.carryNote, SM.carryOct);
+
+    document.getElementById('sm-result-panel').style.display = 'block';
+    document.getElementById('sm-edit-panel').style.display   = 'none';
+    smDisplayNotation(SM.currentBeats);
+    smDrawWaveform();
+    smSetStatus('sm-result-status', '');
+}
+
+// ── Notation display ───────────────────────────────────────────────────────────
+function smDisplayNotation(beats) {
+    const div = document.getElementById('sm-notation-display');
+    if (!div) return;
+    const n = beats.length;
+    let html = '<table class="sm-notation-table">';
+
+    for (let rowS = 0; rowS < n; rowS += SM_COLS) {
+        const rowE = Math.min(rowS + SM_COLS, n);
+
+        // Beat number header
+        html += '<tr><td class="sm-row-label">Beat</td>';
+        for (let i = rowS; i < rowE; i++) html += `<td style="color:#666;font-size:11px;">${i+1}</td>`;
+        html += '</tr>';
+
+        // Note row
+        html += '<tr><td class="sm-row-label">Note</td>';
+        for (let i = rowS; i < rowE; i++) {
+            const b = beats[i];
+            let cell = '';
+            if (b.notes.length === 1) {
+                const pfx = SM_OCT_LABEL[String(b.octs[0])] || String(b.octs[0]);
+                cell = pfx + b.notes[0];
+            } else {
+                cell = b.notes.map((nn,j) => (SM_OCT_LABEL[String(b.octs[j])]||'')+nn).join('/');
+            }
+            const cls = b.notes[0] === '~' ? 'sm-cell-sustain' : 'sm-cell-note';
+            html += `<td class="${cls}">${cell}</td>`;
+        }
+        html += '</tr>';
+
+        // Pyin row
+        html += '<tr><td class="sm-row-label">pyin Hz</td>';
+        for (let i = rowS; i < rowE; i++) {
+            const b = beats[i];
+            let cell = '—';
+            if (b.clusters && b.clusters.length) {
+                const c = b.clusters[0];
+                const pfx = SM_OCT_LABEL[String(c.oct)] || '';
+                cell = `${c.hz.toFixed(0)}/${pfx}${c.note}`;
+            }
+            html += `<td class="sm-cell-pyin">${cell}</td>`;
+        }
+        html += '</tr>';
+
+        // Voiced row
+        html += '<tr><td class="sm-row-label">voiced%</td>';
+        for (let i = rowS; i < rowE; i++) {
+            const b = beats[i];
+            let cell = `${b.voiced_pct}%`;
+            if (b.clusters && b.clusters.length > 1 && b.clusters[1].pct >= 25) {
+                const c2 = b.clusters[1];
+                const pfx = SM_OCT_LABEL[String(c2.oct)] || '';
+                cell += ` ${pfx}${c2.note}${c2.pct}%`;
+            }
+            html += `<td class="sm-cell-voiced">${cell}</td>`;
+        }
+        html += '</tr>';
+
+        // Spacer
+        html += '<tr><td colspan="' + (rowE - rowS + 1) + '" style="height:6px;border:none;"></td></tr>';
+    }
+    html += '</table>';
+    div.innerHTML = html;
+}
+
+// ── Edit grid ──────────────────────────────────────────────────────────────────
+function smToggleEdit() {
+    const panel = document.getElementById('sm-edit-panel');
+    if (panel.style.display === 'none') {
+        SM.editBeats = SM.currentBeats.map(b =>
+            ({notes:[...b.notes], octs:[...b.octs], dom_hz:b.dom_hz,
+              voiced_pct:b.voiced_pct, clusters:b.clusters}));
+        smBuildEditGrid(SM.editBeats);
+        panel.style.display = 'block';
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
+function smBuildEditGrid(beats) {
+    const grid = document.getElementById('sm-edit-grid');
+    if (!grid) return;
+    const allNotes = ['-', '~', ...SM_SWARA_NAMES];
+    let html = '';
+    for (let i = 0; i < beats.length; i++) {
+        const b = beats[i];
+        const note = b.notes[0];
+        const oct  = b.octs[0];
+        html += `<div class="sm-edit-cell">
+            <div class="sm-beat-num">Beat ${i+1}</div>
+            <select id="sm-en-${i}" onchange="smEditSetNote(${i}, this.value)">`;
+        allNotes.forEach(nn => {
+            html += `<option value="${nn}"${nn===note?' selected':''}>${nn}</option>`;
+        });
+        html += `</select>
+            <div class="sm-oct-btns">`;
+        [[-2,'‥'],[-1,'.'],[0,'—'],[1,"'"],[2,"''"]].forEach(([o, lbl]) => {
+            html += `<button class="sm-oct-btn${o===oct?' active':''}"
+                        onclick="smEditSetOct(${i},${o})">${lbl}</button>`;
+        });
+        html += `</div></div>`;
+    }
+    grid.innerHTML = html;
+}
+
+function smEditSetNote(beatIdx, note) {
+    if (!SM.editBeats) return;
+    SM.editBeats[beatIdx].notes = [note];
+    smBuildEditGrid(SM.editBeats); // rebuild to keep sync
+}
+
+function smEditSetOct(beatIdx, oct) {
+    if (!SM.editBeats) return;
+    SM.editBeats[beatIdx].octs = [oct];
+    smBuildEditGrid(SM.editBeats);
+}
+
+function smAcceptEdited() {
+    if (!SM.editBeats) return;
+    SM.currentBeats = SM.editBeats.map(b =>
+        ({notes:[...b.notes], octs:[...b.octs], dom_hz:b.dom_hz,
+          voiced_pct:b.voiced_pct, clusters:b.clusters}));
+    document.getElementById('sm-edit-panel').style.display = 'none';
+    smDisplayNotation(SM.currentBeats);
+    smAccept();
+}
+
+// ── Accept / Skip ──────────────────────────────────────────────────────────────
+function smAccept() {
+    if (!SM.currentBeats) return;
+    const beats   = SM.currentBeats;
+    const section = document.getElementById('sm-section').value.trim()    || 'Line';
+    const instr   = document.getElementById('sm-instrument').value         || 'harmonium';
+    const adlib   = document.getElementById('sm-adlib').checked;
+    const bpm     = parseInt(document.getElementById('sm-bpm').value)       || 90;
+    const beatsN  = SM.segBeats;
+
+    // Build line object matching v3 JSON schema
+    const lineObj = {
+        section,
+        line_instrument: instr,
+        tabla_mute: adlib,
+        line_volume: 1.0,
+        taal_key: String(beatsN),
+        beats: String(beatsN),
+        lyrics:  beats.map((_,i) => String(i+1)),
+        notes:   beats.map(b => b.notes),
+        octaves: beats.map(b => b.octs),
+        meend:   beats.map(b => b.notes.map(() => false))
+    };
+
+    SM.acceptedLines.push(lineObj);
+
+    // Update carry note
+    const lastBeat = beats[beats.length - 1];
+    const ln = lastBeat.notes[lastBeat.notes.length - 1];
+    if (ln !== '-' && ln !== '~') {
+        SM.carryNote = ln;
+        SM.carryOct  = lastBeat.octs[lastBeat.octs.length - 1];
+    }
+
+    // Advance waveform position
+    SM.segStart = SM.segEnd;
+    SM.segEnd   = +(SM.segStart + beatsN * 60 / bpm).toFixed(2);
+    document.getElementById('sm-start-sec').value = SM.segStart;
+    document.getElementById('sm-end-sec').value   = SM.segEnd;
+
+    SM.currentBeats = null;
+    document.getElementById('sm-result-panel').style.display = 'none';
+
+    smRenderAcceptedLines();
+    smDrawWaveform();
+    smSetStatus('sm-result-status', '');
+}
+
+function smSkip() {
+    const bpm    = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const beatsN = SM.segBeats;
+    SM.segStart = SM.segEnd;
+    SM.segEnd   = +(SM.segStart + beatsN * 60 / bpm).toFixed(2);
+    document.getElementById('sm-start-sec').value = SM.segStart;
+    document.getElementById('sm-end-sec').value   = SM.segEnd;
+    SM.currentBeats = null;
+    document.getElementById('sm-result-panel').style.display = 'none';
+    smDrawWaveform();
+}
+
+// ── Accepted lines display ─────────────────────────────────────────────────────
+function smRenderAcceptedLines() {
+    const list = document.getElementById('sm-accepted-list');
+    const panel = document.getElementById('sm-accepted-panel');
+    if (!list) return;
+    if (SM.acceptedLines.length === 0) { panel.style.display = 'none'; return; }
+    panel.style.display = 'block';
+    document.getElementById('sm-line-count').textContent = SM.acceptedLines.length;
+
+    let html = '';
+    SM.acceptedLines.forEach((line, idx) => {
+        html += `<div class="sm-accepted-line">
+            <div class="sm-line-header">${idx+1}. ${line.section} — ${line.line_instrument} — ${line.beats} beats</div>
+            <div>`;
+        line.notes.forEach((nn, bi) => {
+            const oo = line.octaves[bi];
+            let cell = '';
+            if (nn.length === 1) {
+                const pfx = SM_OCT_LABEL[String(oo[0])] || '';
+                cell = pfx + nn[0];
+            } else {
+                cell = nn.map((n,j) => (SM_OCT_LABEL[String(oo[j])]||'')+n).join('/');
+            }
+            html += `<span class="sm-accepted-note">${bi+1}:${cell}</span>`;
+        });
+        html += `</div></div>`;
+    });
+    list.innerHTML = html;
+}
+
+// ── Playback ───────────────────────────────────────────────────────────────────
+function smStopPlay() {
+    if (SM.playSource) { try { SM.playSource.stop(); } catch(e) {} SM.playSource = null; }
+}
+
+function smPlayOriginal() {
+    smStopPlay();
+    if (!SM.audioBuffer) return;
+    if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = SM.audioCtx.createBufferSource();
+    src.buffer = SM.audioBuffer;
+    src.connect(SM.audioCtx.destination);
+    const start = parseFloat(document.getElementById('sm-start-sec').value) || 0;
+    const end   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
+    src.start(0, start, end - start);
+    SM.playSource = src;
+}
+
+function smPlayTone(ctx, freq, startTime, dur, instrument) {
+    if (freq <= 0) return;
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+    gain.gain.linearRampToValueAtTime(0.25, startTime + dur * 0.7);
+    gain.gain.linearRampToValueAtTime(0, startTime + dur);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(startTime); osc.stop(startTime + dur);
+}
+
+function smPlaySynth(useEdit) {
+    smStopPlay();
+    if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = SM.audioCtx;
+    const beats = useEdit ? SM.editBeats : SM.currentBeats;
+    if (!beats) return;
+    const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const beatDur = 60.0 / bpm;
+    const saHz    = SM.saHz;
+    let t = ctx.currentTime + 0.05;
+    beats.forEach(b => {
+        const note = b.notes[0];
+        const oct  = b.octs[0];
+        if (note !== '-' && note !== '~') {
+            const semi = SM_SEMITONE[note];
+            if (semi !== null && semi !== undefined) {
+                const freq = saHz * Math.pow(2, (semi + oct * 12) / 12);
+                smPlayTone(ctx, freq, t, beatDur * 0.92, 'harmonium');
+            }
+        }
+        t += beatDur;
+    });
+}
+
+// ── Export ─────────────────────────────────────────────────────────────────────
+function smBuildOutput() {
+    const title   = document.getElementById('sm-title').value   || 'Transcription';
+    const saHz    = SM.saHz;
+    const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
+    return {
+        title,
+        scale: String(saHz),
+        bpm,
+        lines: SM.acceptedLines
+    };
+}
+
+function smSendToComposer() {
+    if (!SM.acceptedLines.length) {
+        smSetStatus('sm-ai-status', '❌ No accepted lines yet.'); return;
+    }
+    const json = JSON.stringify(smBuildOutput(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const file = new File([blob], 'transcription.json', { type: 'application/json' });
+    const dt   = new DataTransfer();
+    dt.items.add(file);
+    const fi = document.getElementById('file-input');
+    fi.files = dt.files;
+    fi.dispatchEvent(new Event('change'));
+    switchTab('composer');
+}
+
+function smDownloadJSON() {
+    if (!SM.acceptedLines.length) {
+        smSetStatus('sm-ai-status', '❌ No accepted lines yet.'); return;
+    }
+    const json = JSON.stringify(smBuildOutput(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = (document.getElementById('sm-title').value || 'transcription') + '.json';
+    a.click(); URL.revokeObjectURL(url);
+}
+
+async function smRunAI() {
+    if (!SM.acceptedLines.length) {
+        smSetStatus('sm-ai-status', '❌ No accepted lines yet.'); return;
+    }
+    const apiKey = (document.getElementById('gemini-api-key') || {}).value || '';
+    if (!apiKey) {
+        smSetStatus('sm-ai-status', '❌ Enter Gemini API key in Composer tab first.'); return;
+    }
+    smSetStatus('sm-ai-status', '⏳ Sending to AI…');
+    const saHz = SM.saHz;
+    const notation = SM.acceptedLines.map((line, i) => {
+        const notes = line.notes.map((nn,bi) => {
+            const oo = line.octaves[bi];
+            if (nn.length === 1) return (SM_OCT_LABEL[String(oo[0])]||'') + nn[0];
+            return nn.map((n,j) => (SM_OCT_LABEL[String(oo[j])]||'')+n).join('/');
+        }).join(' ');
+        return `Line ${i+1} (${line.section}): ${notes}`;
+    }).join('\n');
+
+    const prompt = `You are a Hindustani music expert. Review this auto-detected sargam notation and correct errors.
+Sa = ${saHz.toFixed(2)} Hz.
+
+Rules:
+1. Replace obvious pitch detection errors based on melodic context and natural phrase flow
+2. Replace "~" (sustain) where a different note sounds more natural
+3. Correct octave errors (. prefix = mandra, ' prefix = taar)
+4. Keep corrections minimal — only change what is clearly wrong
+5. Do NOT invent notes not suggested by the original
+6. Return ONLY the corrected JSON in the same schema, no explanation
+
+Input JSON:
+${JSON.stringify(smBuildOutput(), null, 2)}`;
+
+    try {
+        const resp = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
+            { method:'POST', headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({ contents:[{parts:[{text:prompt}]}] }) }
+        );
+        const data = await resp.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        const jsonStr = match ? match[1] : text.trim();
+        const parsed = JSON.parse(jsonStr);
+        SM.acceptedLines = parsed.lines || SM.acceptedLines;
+        smRenderAcceptedLines();
+        smSetStatus('sm-ai-status', '✅ AI cleanup complete.');
+    } catch(e) {
+        smSetStatus('sm-ai-status', `❌ AI error: ${e.message}`);
+    }
+}
+
+// ── Utility ────────────────────────────────────────────────────────────────────
+function smSetStatus(id, msg) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = msg;
+}
+</script>
 
 </body>
 </html>
