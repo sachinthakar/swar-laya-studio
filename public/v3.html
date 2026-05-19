@@ -4989,41 +4989,77 @@ function smAnimatePlayhead() {
     }
 }
 
-function smPlayTone(ctx, freq, startTime, dur, instrument) {
-    if (freq <= 0) return;
-    const osc  = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sawtooth';
+// Play one note using the shared Composer sample library (same engine, same timbre)
+function smPlaySampledNote(freq, instrument, startTime, duration) {
+    // ── Sample-based (preferred) ──────────────────────────────────────────────
+    const buf = findBestSample(instrument, freq);
+    if (buf && audioCtx) {
+        const src = audioCtx.createBufferSource();
+        src.buffer = buf;
+        src.playbackRate.value = freq / buf.baseHz;
+
+        const env = audioCtx.createGain();
+        env.gain.setValueAtTime(0, startTime);
+        env.gain.linearRampToValueAtTime(0.75, startTime + 0.015);
+        env.gain.setValueAtTime(0.75, startTime + Math.max(0.02, duration * 0.80));
+        env.gain.linearRampToValueAtTime(0, startTime + duration + 0.04);
+
+        src.connect(env);
+        env.connect(audioCtx.destination);
+        src.start(startTime);
+        src.stop(startTime + duration + 0.08);
+        return;
+    }
+    // ── Sine fallback (only if samples not yet loaded) ────────────────────────
+    const ctx2 = audioCtx || SM.audioCtx;
+    if (!ctx2 || freq <= 0) return;
+    const osc  = ctx2.createOscillator();
+    const gain = ctx2.createGain();
+    osc.type = 'sine';
     osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
-    gain.gain.linearRampToValueAtTime(0.25, startTime + dur * 0.7);
-    gain.gain.linearRampToValueAtTime(0, startTime + dur);
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.start(startTime); osc.stop(startTime + dur);
+    gain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
+    gain.gain.linearRampToValueAtTime(0.22, startTime + duration * 0.75);
+    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+    osc.connect(gain); gain.connect(ctx2.destination);
+    osc.start(startTime); osc.stop(startTime + duration + 0.04);
 }
 
-function smPlaySynth(useEdit) {
+async function smPlaySynth(useEdit) {
     smStopPlay();
-    if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = SM.audioCtx;
     const beats = useEdit ? SM.editBeats : SM.currentBeats;
     if (!beats) return;
+
     const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
     const beatDur = 60.0 / bpm;
-    const saHz    = SM.saHz;
-    let t = ctx.currentTime + 0.05;
-    beats.forEach(b => {
+    const instr   = document.getElementById('sm-instrument').value || 'harmonium';
+
+    // Use the shared Composer audioCtx — it already holds the decoded sample buffers.
+    // Initialise it here if the user came straight to the Mapper tab.
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+    // Load samples for this instrument if not already cached
+    const alreadyLoaded = SampleLoadState[instr] === 'done';
+    if (!alreadyLoaded) {
+        smSetStatus('sm-result-status', `⏳ Loading ${instr} samples…`);
+        await ensureSamplesLoaded(instr);
+        smSetStatus('sm-result-status', '');
+    }
+
+    // SM.saHz is stored at half the Composer's baseSa (C3 vs C4 convention).
+    // Multiply ×2 so notes play at the same octave as the Composer tab.
+    const saHz = SM.saHz * 2;
+    const t0   = audioCtx.currentTime + 0.05;
+
+    beats.forEach((b, i) => {
         const note = b.notes[0];
         const oct  = b.octs[0];
-        if (note !== '-' && note !== '~') {
-            const semi = SM_SEMITONE[note];
-            if (semi !== null && semi !== undefined) {
-                const freq = saHz * Math.pow(2, (semi + oct * 12) / 12);
-                smPlayTone(ctx, freq, t, beatDur * 0.92, 'harmonium');
-            }
-        }
-        t += beatDur;
+        if (note === '-' || note === '~') return;
+        const ratio = SwaraMap[note];           // reuse Composer's ratio table
+        if (!ratio) return;
+        const freq = saHz * ratio * Math.pow(2, oct);
+        smPlaySampledNote(freq, instr, t0 + i * beatDur, beatDur * 0.88);
     });
 }
 
