@@ -4232,20 +4232,26 @@ function yinCMND(d) {
     return cmnd;
 }
 
-function yinDetectFrame(frame, sampleRate, threshold = 0.12) {
-    const W = Math.floor(frame.length / 2);
-    const d = yinDifference(frame, W);
-    const cmnd = yinCMND(d);
-    // Find first dip below threshold
-    for (let tau = 2; tau < W - 1; tau++) {
+function yinDetectFrame(frame, sampleRate, threshold = 0.20) {
+    const W     = Math.floor(frame.length / 2);
+    const d     = yinDifference(frame, W);
+    const cmnd  = yinCMND(d);
+    // Only search within the target pitch range (80–700 Hz)
+    const tauMin = Math.max(2, Math.ceil(sampleRate / 700));   // ≈31 at 22050 Hz
+    const tauMax = Math.min(W - 1, Math.floor(sampleRate / 80)); // ≈275 at 22050 Hz
+    // Find first dip below threshold within the musical pitch range
+    for (let tau = tauMin; tau < tauMax; tau++) {
         if (cmnd[tau] < threshold) {
-            // Search for local minimum in this dip
-            while (tau + 1 < W && cmnd[tau + 1] < cmnd[tau]) tau++;
-            // Parabolic interpolation
-            const prev = cmnd[tau - 1], curr = cmnd[tau], next = cmnd[tau + 1];
+            // Walk to the local minimum of this dip
+            while (tau + 1 < tauMax && cmnd[tau + 1] < cmnd[tau]) tau++;
+            // Parabolic interpolation for sub-sample accuracy
+            const prev  = cmnd[tau - 1];
+            const curr  = cmnd[tau];
+            const next  = tau + 1 < W ? cmnd[tau + 1] : curr;
             const denom = 2 * (2 * curr - prev - next);
-            const betterTau = denom === 0 ? tau : tau + (prev - next) / denom;
-            return sampleRate / betterTau;
+            const betterTau = (!denom || !isFinite(denom)) ? tau : tau + (prev - next) / denom;
+            const hz = sampleRate / Math.max(1, betterTau);
+            return (hz >= 80 && hz <= 700) ? hz : 0;
         }
     }
     return 0; // unvoiced
@@ -4615,7 +4621,8 @@ function smInitWaveform() {
 
 // ── Detect ─────────────────────────────────────────────────────────────────────
 function smDetect() {
-    if (!SM.pitchTrack) { smSetStatus('sm-result-status', '❌ Load an audio file first.'); return; }
+    if (!SM.pitchTrack) { smSetStatus('sm-load-status', '❌ Load an audio file first.'); return; }
+    smSetStatus('sm-result-status', '🔍 Detecting…');
     SM.saHz    = parseFloat(document.getElementById('sm-sa-select').value);
     SM.segStart = parseFloat(document.getElementById('sm-start-sec').value) || 0;
     SM.segEnd   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
@@ -4629,6 +4636,11 @@ function smDetect() {
     smDisplayNotation(SM.currentBeats);
     smDrawWaveform();
     smSetStatus('sm-result-status', '');
+}
+
+// ── Octave prefix helper (avoids "" falsy fallback for oct=0) ──────────────────
+function smOctPfx(o) {
+    return SM_OCT_LABEL.hasOwnProperty(String(o)) ? SM_OCT_LABEL[String(o)] : String(o);
 }
 
 // ── Notation display ───────────────────────────────────────────────────────────
@@ -4652,10 +4664,9 @@ function smDisplayNotation(beats) {
             const b = beats[i];
             let cell = '';
             if (b.notes.length === 1) {
-                const pfx = SM_OCT_LABEL[String(b.octs[0])] || String(b.octs[0]);
-                cell = pfx + b.notes[0];
+                cell = smOctPfx(b.octs[0]) + b.notes[0];
             } else {
-                cell = b.notes.map((nn,j) => (SM_OCT_LABEL[String(b.octs[j])]||'')+nn).join('/');
+                cell = b.notes.map((nn,j) => smOctPfx(b.octs[j]) + nn).join('/');
             }
             const cls = b.notes[0] === '~' ? 'sm-cell-sustain' : 'sm-cell-note';
             html += `<td class="${cls}">${cell}</td>`;
@@ -4669,8 +4680,7 @@ function smDisplayNotation(beats) {
             let cell = '—';
             if (b.clusters && b.clusters.length) {
                 const c = b.clusters[0];
-                const pfx = SM_OCT_LABEL[String(c.oct)] || '';
-                cell = `${c.hz.toFixed(0)}/${pfx}${c.note}`;
+                cell = `${c.hz.toFixed(0)}/${smOctPfx(c.oct)}${c.note}`;
             }
             html += `<td class="sm-cell-pyin">${cell}</td>`;
         }
@@ -4683,8 +4693,7 @@ function smDisplayNotation(beats) {
             let cell = `${b.voiced_pct}%`;
             if (b.clusters && b.clusters.length > 1 && b.clusters[1].pct >= 25) {
                 const c2 = b.clusters[1];
-                const pfx = SM_OCT_LABEL[String(c2.oct)] || '';
-                cell += ` ${pfx}${c2.note}${c2.pct}%`;
+                cell += ` ${smOctPfx(c2.oct)}${c2.note}${c2.pct}%`;
             }
             html += `<td class="sm-cell-voiced">${cell}</td>`;
         }
@@ -4837,10 +4846,9 @@ function smRenderAcceptedLines() {
             const oo = line.octaves[bi];
             let cell = '';
             if (nn.length === 1) {
-                const pfx = SM_OCT_LABEL[String(oo[0])] || '';
-                cell = pfx + nn[0];
+                cell = smOctPfx(oo[0]) + nn[0];
             } else {
-                cell = nn.map((n,j) => (SM_OCT_LABEL[String(oo[j])]||'')+n).join('/');
+                cell = nn.map((n,j) => smOctPfx(oo[j]) + n).join('/');
             }
             html += `<span class="sm-accepted-note">${bi+1}:${cell}</span>`;
         });
@@ -4989,8 +4997,8 @@ async function smRunAI() {
     const notation = SM.acceptedLines.map((line, i) => {
         const notes = line.notes.map((nn,bi) => {
             const oo = line.octaves[bi];
-            if (nn.length === 1) return (SM_OCT_LABEL[String(oo[0])]||'') + nn[0];
-            return nn.map((n,j) => (SM_OCT_LABEL[String(oo[j])]||'')+n).join('/');
+            if (nn.length === 1) return smOctPfx(oo[0]) + nn[0];
+            return nn.map((n,j) => smOctPfx(oo[j]) + n).join('/');
         }).join(' ');
         return `Line ${i+1} (${line.section}): ${notes}`;
     }).join('\n');
