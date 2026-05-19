@@ -619,11 +619,34 @@
         .sm-accepted-line {
             background: #0d1f0d; border: 1px solid #226622; border-radius: 6px;
             padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .sm-accepted-line.sm-line-playing {
+            border-color: #44ff88; background: #0a2a16;
+            box-shadow: 0 0 8px rgba(68,255,136,0.25);
         }
         .sm-accepted-line .sm-line-header {
-            color: #66cc66; font-weight: 700; margin-bottom: 4px; font-size: 11px;
+            display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+            color: #66cc66; font-weight: 700; margin-bottom: 6px; font-size: 11px;
         }
+        .sm-line-meta { flex: 1; }
+        .sm-line-time { color: #6688aa; font-weight: 400; font-size: 10px; }
+        .sm-line-actions { display: flex; gap: 5px; margin-left: auto; }
+        .sm-line-play-btn {
+            padding: 3px 10px; border: 1px solid #226644; border-radius: 4px;
+            background: #122a1a; color: #66ee88; font-size: 11px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sm-line-play-btn:hover { background: #1a3a24; color: #88ffaa; }
+        .sm-line-play-btn.playing { background: #1a4a2a; color: #44ff88; border-color: #44ff88; }
+        .sm-line-remove-btn {
+            padding: 3px 8px; border: 1px solid #552222; border-radius: 4px;
+            background: #2a1212; color: #ee6666; font-size: 11px; cursor: pointer;
+            transition: all 0.15s;
+        }
+        .sm-line-remove-btn:hover { background: #3a1a1a; color: #ff8888; border-color: #883333; }
         .sm-accepted-note { color: #ffffaa; font-weight: 700; margin-right: 6px; }
+        .sm-notes-row { line-height: 1.8; }
         /* Edit grid */
         .sm-edit-grid {
             display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
@@ -4862,7 +4885,10 @@ function smAccept() {
     const beatsN  = SM.segBeats;
 
     // Build line object matching v3 JSON schema
+    // _segStart/_segEnd are internal metadata for review/replace — stripped on export
     const lineObj = {
+        _segStart: SM.segStart,
+        _segEnd:   SM.segEnd,
         section,
         line_instrument: instr,
         tabla_mute: adlib,
@@ -4913,7 +4939,7 @@ function smSkip() {
 
 // ── Accepted lines display ─────────────────────────────────────────────────────
 function smRenderAcceptedLines() {
-    const list = document.getElementById('sm-accepted-list');
+    const list  = document.getElementById('sm-accepted-list');
     const panel = document.getElementById('sm-accepted-panel');
     if (!list) return;
     if (SM.acceptedLines.length === 0) { panel.style.display = 'none'; return; }
@@ -4922,22 +4948,100 @@ function smRenderAcceptedLines() {
 
     let html = '';
     SM.acceptedLines.forEach((line, idx) => {
-        html += `<div class="sm-accepted-line">
-            <div class="sm-line-header">${idx+1}. ${line.section} — ${line.line_instrument} — ${line.beats} beats</div>
-            <div>`;
+        const timeRange = (line._segStart !== undefined)
+            ? `<span class="sm-line-time">${line._segStart.toFixed(2)}s – ${line._segEnd.toFixed(2)}s</span>`
+            : '';
+        html += `<div class="sm-accepted-line" id="sm-aline-${idx}">
+            <div class="sm-line-header">
+                <span class="sm-line-meta">${idx+1}. <b>${line.section}</b> — ${line.line_instrument} — ${line.beats} beats ${timeRange}</span>
+                <div class="sm-line-actions">
+                    <button class="sm-line-play-btn" id="sm-playbtn-${idx}"
+                            onclick="smPlayAcceptedLine(${idx})">▶ Play</button>
+                    <button class="sm-line-remove-btn"
+                            onclick="smRemoveAcceptedLine(${idx})">✕ Remove</button>
+                </div>
+            </div>
+            <div class="sm-notes-row">`;
         line.notes.forEach((nn, bi) => {
             const oo = line.octaves[bi];
-            let cell = '';
-            if (nn.length === 1) {
-                cell = smOctPfx(oo[0]) + nn[0];
-            } else {
-                cell = nn.map((n,j) => smOctPfx(oo[j]) + n).join('/');
-            }
+            const cell = nn.length === 1
+                ? smOctPfx(oo[0]) + nn[0]
+                : nn.map((n,j) => smOctPfx(oo[j]) + n).join('/');
             html += `<span class="sm-accepted-note">${bi+1}:${cell}</span>`;
         });
         html += `</div></div>`;
     });
     list.innerHTML = html;
+}
+
+// Play synth for one already-accepted line
+async function smPlayAcceptedLine(idx) {
+    const line = SM.acceptedLines[idx];
+    if (!line) return;
+
+    // Initialise shared audio context if needed
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+    const instr = line.line_instrument || 'harmonium';
+    if (SampleLoadState[instr] !== 'done') await ensureSamplesLoaded(instr);
+
+    const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const beatDur = 60.0 / bpm;
+    const saHz    = SM.saHz * 2;   // ×2 to match Composer octave convention
+    const t0      = audioCtx.currentTime + 0.05;
+
+    // Highlight this line while it plays
+    document.querySelectorAll('.sm-accepted-line').forEach(el => el.classList.remove('sm-line-playing'));
+    document.querySelectorAll('.sm-line-play-btn').forEach(b => b.classList.remove('playing'));
+    const lineEl = document.getElementById(`sm-aline-${idx}`);
+    const btnEl  = document.getElementById(`sm-playbtn-${idx}`);
+    if (lineEl) lineEl.classList.add('sm-line-playing');
+    if (btnEl)  { btnEl.classList.add('playing'); btnEl.textContent = '▶ Playing…'; }
+
+    line.notes.forEach((nn, bi) => {
+        const note = nn[0];
+        const oct  = line.octaves[bi][0];
+        if (note === '-' || note === '~') return;
+        const ratio = SwaraMap[note];
+        if (!ratio) return;
+        const freq = saHz * ratio * Math.pow(2, oct);
+        smPlaySampledNote(freq, instr, t0 + bi * beatDur, beatDur * 0.88);
+    });
+
+    // Remove highlight when playback finishes
+    const totalMs = (line.notes.length * beatDur + 0.3) * 1000;
+    setTimeout(() => {
+        if (lineEl) lineEl.classList.remove('sm-line-playing');
+        if (btnEl)  { btnEl.classList.remove('playing'); btnEl.textContent = '▶ Play'; }
+    }, totalMs);
+}
+
+// Remove an accepted line and restore its segment for re-detection
+function smRemoveAcceptedLine(idx) {
+    const line = SM.acceptedLines[idx];
+    if (!line) return;
+
+    SM.acceptedLines.splice(idx, 1);
+
+    // Restore the segment boundaries so the user can re-detect immediately
+    if (line._segStart !== undefined) {
+        SM.segStart = line._segStart;
+        SM.segEnd   = line._segEnd;
+        document.getElementById('sm-start-sec').value  = SM.segStart;
+        document.getElementById('sm-end-sec').value    = SM.segEnd;
+        document.getElementById('sm-seg-beats').value  = line.beats;
+        document.getElementById('sm-section').value    = line.section;
+        document.getElementById('sm-instrument').value = line.line_instrument;
+    }
+
+    smRenderAcceptedLines();
+    smDrawWaveform();
+
+    const statusMsg = `Line ${idx+1} removed — segment ${line._segStart !== undefined
+        ? `${line._segStart.toFixed(2)}s–${line._segEnd.toFixed(2)}s ` : ''}restored. Click Detect Notes to replace.`;
+    smSetStatus('sm-ai-status', statusMsg);
+    setTimeout(() => smSetStatus('sm-ai-status', ''), 5000);
 }
 
 // ── Playback ───────────────────────────────────────────────────────────────────
@@ -5072,7 +5176,8 @@ function smBuildOutput() {
         title,
         scale: String(saHz),
         bpm,
-        lines: SM.acceptedLines
+        // Strip internal _seg* metadata fields before export
+        lines: SM.acceptedLines.map(({ _segStart, _segEnd, ...rest }) => rest)
     };
 }
 
