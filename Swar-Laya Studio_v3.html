@@ -3617,6 +3617,112 @@ async function raAdminSeed() {
     showToast(msg);
 }
 
+// ── AI provider helpers ───────────────────────────────────────────────────────
+const AI_PROVIDER_INFO = {
+    gemini:     { label: 'Google Gemini API Key',  href: 'https://aistudio.google.com/app/apikey',  placeholder: 'AIza…' },
+    mistral:    { label: 'Mistral API Key',         href: 'https://console.mistral.ai/api-keys/',    placeholder: 'your-mistral-key…' },
+    openrouter: { label: 'OpenRouter API Key',      href: 'https://openrouter.ai/keys',              placeholder: 'sk-or-…' },
+};
+
+const MISTRAL_MODELS = new Set([
+    'mistral-small-latest','mistral-medium-latest','mistral-large-latest',
+    'open-mistral-7b','open-mixtral-8x7b','open-mixtral-8x22b',
+    'codestral-latest','pixtral-large-latest'
+]);
+
+function aiGetProvider(model) {
+    if (model.startsWith('gemini')) return 'gemini';
+    if (MISTRAL_MODELS.has(model))  return 'mistral';
+    return 'openrouter'; // models with org/name:free format go via OpenRouter
+}
+
+function aiUpdateKeyLabel() {
+    const model    = document.getElementById('ai-model').value;
+    const provider = aiGetProvider(model);
+    const info     = AI_PROVIDER_INFO[provider];
+    document.getElementById('ai-key-label-text').textContent = info.label;
+    const link = document.getElementById('ai-key-link');
+    link.href = info.href;
+    document.getElementById('ai-api-key').placeholder = info.placeholder;
+    // Restore saved key for this provider
+    const saved = localStorage.getItem(`ai_key_${provider}`)
+               || (provider === 'gemini' ? localStorage.getItem('gemini_api_key') : '');
+    if (saved) document.getElementById('ai-api-key').value = saved;
+    else       document.getElementById('ai-api-key').value = '';
+}
+
+// Unified LLM call — handles Gemini, Mistral, and OpenRouter
+async function aiCallLLM(prompt, model, apiKey, opts = {}) {
+    const provider = aiGetProvider(model);
+    const temp     = opts.temperature  || 0.75;
+    const maxTok   = opts.maxTokens    || 4096;
+
+    let res;
+    if (provider === 'gemini') {
+        res = await fetch(
+            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: temp, maxOutputTokens: maxTok }
+                })
+            }
+        );
+    } else {
+        // OpenAI-compatible format (Mistral + OpenRouter)
+        const endpoint = provider === 'mistral'
+            ? 'https://api.mistral.ai/v1/chat/completions'
+            : 'https://openrouter.ai/api/v1/chat/completions';
+        const headers = {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+        };
+        if (provider === 'openrouter') {
+            headers['HTTP-Referer'] = window.location.origin;
+            headers['X-Title']      = 'Swar-Laya Studio';
+        }
+        res = await fetch(endpoint, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                model,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: temp,
+                max_tokens: maxTok
+            })
+        });
+    }
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.error?.message || `HTTP ${res.status}`;
+        if (res.status === 429 || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')
+                               || msg.includes('rate_limit')) {
+            throw new Error(
+                `Quota / rate-limit exceeded for "${model}".\n\n` +
+                `Try a different model or provider:\n` +
+                `• Gemini free: aistudio.google.com/app/apikey\n` +
+                `• Mistral free: console.mistral.ai\n` +
+                `• OpenRouter free: openrouter.ai (no billing needed)`
+            );
+        }
+        throw new Error(msg);
+    }
+
+    const data = await res.json();
+    let text;
+    if (provider === 'gemini') {
+        text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    } else {
+        text = (data.choices?.[0]?.message?.content || '').trim();
+    }
+    // Strip markdown code fences
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+    return text;
+}
+
 // ── AI Compose ────────────────────────────────────────────────────────────────
 function openAICompose() {
     // Populate raga list (all ragas, sorted by order)
@@ -3633,9 +3739,8 @@ function openAICompose() {
     // Pre-select current raga if one is active
     const cur = document.getElementById('raga-select').value;
     if (cur) sel.value = cur;
-    // Restore saved API key
-    const saved = localStorage.getItem('gemini_api_key');
-    if (saved) document.getElementById('ai-api-key').value = saved;
+    // Restore saved API key for the currently selected provider
+    aiUpdateKeyLabel();
     document.getElementById('ai-status').textContent = '';
     document.getElementById('ai-generate-btn').disabled = false;
     document.getElementById('ai-compose-modal').style.display = 'flex';
@@ -3659,11 +3764,18 @@ async function doAICompose() {
     const emotion   = document.getElementById('ai-emotion').value.trim();
     const apiKey    = document.getElementById('ai-api-key').value.trim();
 
+    const provider = aiGetProvider(model);
     if (!ragaKey) { alert('Please choose a Raga.'); return; }
-    if (!apiKey)  { alert('Please enter your Gemini API key.\n\nGet a free key at: https://aistudio.google.com/app/apikey'); return; }
+    if (!apiKey)  {
+        const info = AI_PROVIDER_INFO[provider];
+        alert(`Please enter your ${info.label}.\n\nGet a free key at: ${info.href}`);
+        return;
+    }
 
-    if (document.getElementById('ai-save-key').checked)
-        localStorage.setItem('gemini_api_key', apiKey);
+    if (document.getElementById('ai-save-key').checked) {
+        localStorage.setItem(`ai_key_${provider}`, apiKey);
+        if (provider === 'gemini') localStorage.setItem('gemini_api_key', apiKey); // backward compat
+    }
 
     const raga     = RagaData[ragaKey];
     const beats    = TaalBeats[taalKey] || parseInt(taalKey) || 8;
@@ -3717,36 +3829,7 @@ Critical rules:
     btn.disabled = true;
 
     try {
-        const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.75, maxOutputTokens: 4096 }
-                })
-            }
-        );
-        if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            const msg = err.error?.message || `HTTP ${res.status}`;
-            if (res.status === 429 || msg.includes('quota') || msg.includes('RESOURCE_EXHAUSTED')) {
-                throw new Error(
-                    `Quota exceeded for model "${model}".\n\n` +
-                    `Try switching to a different model in the AI Model dropdown ` +
-                    `(gemini-1.5-flash is recommended for free tier).\n\n` +
-                    `If all models fail, your API key's Google Cloud project may need ` +
-                    `Gemini API quota enabled at: https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com`
-                );
-            }
-            throw new Error(msg);
-        }
-        const data = await res.json();
-        let text = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-
-        // Strip markdown code fences if Gemini added them
-        text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+        let text = await aiCallLLM(prompt, model, apiKey, { temperature: 0.75, maxTokens: 4096 });
 
         let lines;
         try {
@@ -3757,7 +3840,7 @@ Critical rules:
             if (match) {
                 lines = JSON.parse(match[0]);
             } else {
-                console.error('Raw Gemini response:', text);
+                console.error('Raw AI response:', text);
                 throw new Error('Could not parse JSON from AI response. Try again.');
             }
         }
@@ -3800,21 +3883,8 @@ Example output format for ${beats}-beat lines:
 Return only the JSON array.`;
 
             try {
-                const lyrRes = await fetch(
-                    `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ parts: [{ text: lyricsPrompt }] }],
-                            generationConfig: { temperature: 0.85, maxOutputTokens: 2048 }
-                        })
-                    }
-                );
-                if (lyrRes.ok) {
-                    const lyrData = await lyrRes.json();
-                    let lyrText = (lyrData.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-                    lyrText = lyrText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+                const lyrText = await aiCallLLM(lyricsPrompt, model, apiKey, { temperature: 0.85, maxTokens: 2048 });
+                {
 
                     let lyrArr;
                     try { lyrArr = JSON.parse(lyrText); }
@@ -3836,8 +3906,6 @@ Return only the JSON array.`;
                     } else {
                         console.warn('Lyrics parse failed — keeping "-" placeholders');
                     }
-                } else {
-                    console.warn('Lyrics API call failed — keeping "-" placeholders');
                 }
             } catch(lyricErr) {
                 // Non-fatal: notation still loads, just without lyrics
@@ -3923,11 +3991,25 @@ function raAdminExport() {
 
     <div style="margin-bottom:12px;">
       <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">AI Model</label>
-      <select id="ai-model" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
-        <option value="gemini-1.5-flash">gemini-1.5-flash (recommended — free tier)</option>
-        <option value="gemini-2.0-flash">gemini-2.0-flash (newer, may need billing)</option>
-        <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b (fastest / lightest)</option>
-        <option value="gemini-1.5-pro">gemini-1.5-pro (best quality, slower)</option>
+      <select id="ai-model" onchange="aiUpdateKeyLabel()" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+        <optgroup label="── Google Gemini (key: aistudio.google.com)">
+          <option value="gemini-2.0-flash">gemini-2.0-flash ✦ free tier · recommended</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash ✦ free tier · stable</option>
+          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b ✦ free tier · fastest</option>
+          <option value="gemini-1.5-pro">gemini-1.5-pro · best quality · slower</option>
+        </optgroup>
+        <optgroup label="── Mistral AI (key: console.mistral.ai)">
+          <option value="mistral-small-latest">mistral-small-latest ✦ free tier</option>
+          <option value="open-mistral-7b">open-mistral-7b ✦ free tier</option>
+          <option value="open-mixtral-8x7b">open-mixtral-8x7b ✦ free tier · larger</option>
+          <option value="mistral-large-latest">mistral-large-latest · best Mistral quality</option>
+        </optgroup>
+        <optgroup label="── OpenRouter — completely free models (key: openrouter.ai)">
+          <option value="mistral/mistral-7b-instruct:free">mistral-7b-instruct ✦ free · via OpenRouter</option>
+          <option value="meta-llama/llama-3.1-8b-instruct:free">llama-3.1-8b ✦ free · via OpenRouter</option>
+          <option value="google/gemma-2-9b-it:free">gemma-2-9b ✦ free · via OpenRouter</option>
+          <option value="microsoft/phi-3-mini-128k-instruct:free">phi-3-mini ✦ free · via OpenRouter</option>
+        </optgroup>
       </select>
     </div>
 
@@ -3968,14 +4050,15 @@ function raAdminExport() {
 
     <div style="margin-bottom:16px;">
       <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">
-        Gemini API Key
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#6a1b9a;font-size:11px;margin-left:6px;">Get free key ↗</a>
+        <span id="ai-key-label-text">Google Gemini API Key</span>
+        <a id="ai-key-link" href="https://aistudio.google.com/app/apikey" target="_blank"
+           style="color:#6a1b9a;font-size:11px;margin-left:6px;">Get free key ↗</a>
       </label>
       <input type="password" id="ai-api-key" placeholder="AIza…"
         style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;box-sizing:border-box;">
       <label style="font-size:11px;color:#888;margin-top:4px;display:block;">
         <input type="checkbox" id="ai-save-key" checked style="vertical-align:middle;margin-right:4px;">
-        Remember on this device
+        Remember on this device (saved separately per provider)
       </label>
     </div>
 
