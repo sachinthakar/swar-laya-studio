@@ -891,7 +891,7 @@
                     <label for="sm-adlib" style="font-size:12px; color:#aaa; cursor:pointer;">Ad-lib line</label>
                 </div>
                 <button class="sm-btn sm-btn-primary" onclick="smDetect()" style="align-self:flex-end;">🔍 Detect Notes</button>
-                <button class="sm-btn sm-btn-neutral" onclick="smPlayOriginal()" style="align-self:flex-end;">▶ Play Original</button>
+                <button class="sm-btn sm-btn-neutral sm-play-orig-btn" onclick="smTogglePlay()" style="align-self:flex-end;">▶ Play Original</button>
             </div>
         </div>
 
@@ -901,7 +901,7 @@
             <div id="sm-notation-display"></div>
             <div class="sm-action-row">
                 <button class="sm-btn sm-btn-neutral" onclick="smPlaySynth()">🎹 Play Synth</button>
-                <button class="sm-btn sm-btn-neutral" onclick="smPlayOriginal()">▶ Play Original</button>
+                <button class="sm-btn sm-btn-neutral sm-play-orig-btn" onclick="smTogglePlay()">▶ Play Original</button>
                 <button class="sm-btn sm-btn-success" onclick="smAccept()">✔ Accept</button>
                 <button class="sm-btn sm-btn-accent"  onclick="smToggleEdit()">✏ Edit</button>
                 <button class="sm-btn sm-btn-danger"  onclick="smSkip()">⏭ Skip</button>
@@ -4187,6 +4187,11 @@ const SM = {
     carryNote:   null,
     carryOct:    0,
     playSource:  null,
+    playStartAudioTime: 0,
+    playStartOffset: 0,
+    playDuration: 0,
+    animFrameId: null,
+    playheadT:   -1,
     editBeats:   null,     // copy for edit mode
     dragging:    false,
     dragStartX:  0,
@@ -4460,10 +4465,31 @@ function smDrawWaveform() {
     ctx.fillRect(0, 0, W, H);
 
     if (!SM.audioBuffer) return;
+    const dur = SM.audioBuffer.duration;
 
+    // ── 0.5s time grid ─────────────────────────────────────────────────────────
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    for (let t = 0; t <= dur + 0.01; t += 0.5) {
+        const x = Math.round((t / dur) * W);
+        const isSec = Math.abs(t - Math.round(t)) < 0.01; // whole second
+        ctx.strokeStyle = isSec ? 'rgba(100,100,160,0.7)' : 'rgba(60,60,100,0.5)';
+        ctx.lineWidth = isSec ? 1 : 0.5;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+        // Label: whole seconds at top, half-seconds near bottom
+        if (isSec && t > 0.1) {
+            ctx.fillStyle = 'rgba(140,140,190,0.85)';
+            ctx.fillText(`${t.toFixed(0)}s`, x + 2, 10);
+        } else if (!isSec) {
+            ctx.fillStyle = 'rgba(100,100,140,0.6)';
+            ctx.fillText(`${t.toFixed(1)}`, x + 2, H - 3);
+        }
+    }
+
+    // ── Waveform ────────────────────────────────────────────────────────────────
     const samples = SM.audioBuffer.getChannelData(0);
     const step = Math.max(1, Math.floor(samples.length / W));
-    ctx.strokeStyle = '#3a3a8a';
+    ctx.strokeStyle = '#4a4a9a';
     ctx.lineWidth = 1;
     ctx.beginPath();
     for (let x = 0; x < W; x++) {
@@ -4472,18 +4498,17 @@ function smDrawWaveform() {
             const v = Math.abs(samples[x * step + j] || 0);
             if (v > max) max = v;
         }
-        const y = (1 - max) * H / 2;
+        const y  = (1 - max) * H / 2;
         const y2 = (1 + max) * H / 2;
         if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
         ctx.lineTo(x, y2);
     }
     ctx.stroke();
 
-    // Draw pitch track overlay
+    // ── Pitch track overlay ─────────────────────────────────────────────────────
     if (SM.pitchTrack) {
-        const dur = SM.audioBuffer.duration;
         const secPerFrame = SM.hopLen / SM.sampleRate;
-        ctx.strokeStyle = '#4a4aff';
+        ctx.strokeStyle = '#5858ff';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         let first = true;
@@ -4492,7 +4517,6 @@ function smDrawWaveform() {
             if (hz <= 0) { first = true; continue; }
             const t = fi * secPerFrame;
             const x = (t / dur) * W;
-            // Map Hz to Y: 80Hz = bottom, 700Hz = top
             const logHz = Math.log2(hz / 80) / Math.log2(700 / 80);
             const y = H - logHz * H * 0.8 - H * 0.1;
             if (first) { ctx.moveTo(x, y); first = false; }
@@ -4501,28 +4525,62 @@ function smDrawWaveform() {
         ctx.stroke();
     }
 
-    // Selection region
-    const dur = SM.audioBuffer.duration;
+    // ── Selection region ────────────────────────────────────────────────────────
     const xs = (SM.segStart / dur) * W;
     const xe = (SM.segEnd   / dur) * W;
-    ctx.fillStyle = 'rgba(74,74,255,0.18)';
+    ctx.fillStyle = 'rgba(74,74,255,0.15)';
     ctx.fillRect(xs, 0, xe - xs, H);
-    ctx.strokeStyle = '#4a4aff';
     ctx.lineWidth = 2;
+    ctx.strokeStyle = '#4a4aff';
     ctx.beginPath(); ctx.moveTo(xs, 0); ctx.lineTo(xs, H); ctx.stroke();
     ctx.strokeStyle = '#ff9944';
     ctx.beginPath(); ctx.moveTo(xe, 0); ctx.lineTo(xe, H); ctx.stroke();
+    // Start/end time labels
+    ctx.fillStyle = '#4a9aff';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${SM.segStart.toFixed(2)}s`, xs + 3, H / 2 - 4);
+    ctx.fillStyle = '#ff9944';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${SM.segEnd.toFixed(2)}s`, xe - 3, H / 2 - 4);
+    ctx.textAlign = 'left';
 
-    // Position cursor
+    // ── Accepted-lines position cursor (green dashed) ───────────────────────────
     const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
     const posT = SM.acceptedLines.reduce((acc, _) => acc + (SM.segBeats || 8) * 60 / bpm, 0);
-    if (posT < dur) {
+    if (posT > 0 && posT < dur) {
         const xp = (posT / dur) * W;
         ctx.strokeStyle = '#22cc55';
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 3]);
         ctx.beginPath(); ctx.moveTo(xp, 0); ctx.lineTo(xp, H); ctx.stroke();
         ctx.setLineDash([]);
+    }
+
+    // ── Playhead — moving white cursor during playback ──────────────────────────
+    if (SM.playheadT >= 0 && SM.playheadT <= dur) {
+        const xh = Math.round((SM.playheadT / dur) * W);
+        // Glow effect
+        ctx.shadowColor = '#ffff88';
+        ctx.shadowBlur  = 8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth   = 2;
+        ctx.beginPath(); ctx.moveTo(xh, 0); ctx.lineTo(xh, H); ctx.stroke();
+        ctx.shadowBlur  = 0;
+        // Triangle pointer at top
+        ctx.fillStyle = '#ffff88';
+        ctx.beginPath();
+        ctx.moveTo(xh - 5, 0);
+        ctx.lineTo(xh + 5, 0);
+        ctx.lineTo(xh, 9);
+        ctx.closePath();
+        ctx.fill();
+        // Time readout below triangle
+        ctx.fillStyle = '#ffff88';
+        ctx.font = '10px monospace';
+        ctx.textAlign = xh > W - 40 ? 'right' : 'left';
+        ctx.fillText(`${SM.playheadT.toFixed(2)}s`, xh + (xh > W - 40 ? -4 : 4), 20);
+        ctx.textAlign = 'left';
     }
 }
 
@@ -4793,20 +4851,51 @@ function smRenderAcceptedLines() {
 
 // ── Playback ───────────────────────────────────────────────────────────────────
 function smStopPlay() {
-    if (SM.playSource) { try { SM.playSource.stop(); } catch(e) {} SM.playSource = null; }
+    if (SM.animFrameId) { cancelAnimationFrame(SM.animFrameId); SM.animFrameId = null; }
+    if (SM.playSource)  { try { SM.playSource.stop(); } catch(e) {} SM.playSource = null; }
+    SM.playheadT = -1;
+    smDrawWaveform();
+    document.querySelectorAll('.sm-play-orig-btn').forEach(b => {
+        b.textContent = '▶ Play Original';
+        b.classList.replace('sm-btn-danger', 'sm-btn-neutral');
+    });
+}
+
+function smTogglePlay() {
+    if (SM.playSource) smStopPlay();
+    else smPlayOriginal();
 }
 
 function smPlayOriginal() {
     smStopPlay();
     if (!SM.audioBuffer) return;
     if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const src = SM.audioCtx.createBufferSource();
-    src.buffer = SM.audioBuffer;
+    const src   = SM.audioCtx.createBufferSource();
+    src.buffer  = SM.audioBuffer;
     src.connect(SM.audioCtx.destination);
     const start = parseFloat(document.getElementById('sm-start-sec').value) || 0;
     const end   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
     src.start(0, start, end - start);
-    SM.playSource = src;
+    src.onended = () => smStopPlay();
+    SM.playSource          = src;
+    SM.playStartAudioTime  = SM.audioCtx.currentTime;
+    SM.playStartOffset     = start;
+    SM.playDuration        = end - start;
+    document.querySelectorAll('.sm-play-orig-btn').forEach(b => {
+        b.textContent = '⏹ Stop';
+        b.classList.replace('sm-btn-neutral', 'sm-btn-danger');
+    });
+    smAnimatePlayhead();
+}
+
+function smAnimatePlayhead() {
+    if (!SM.audioCtx || !SM.playSource) return;
+    const elapsed = SM.audioCtx.currentTime - SM.playStartAudioTime;
+    SM.playheadT  = SM.playStartOffset + elapsed;
+    smDrawWaveform();
+    if (elapsed < SM.playDuration + 0.05) {
+        SM.animFrameId = requestAnimationFrame(smAnimatePlayhead);
+    }
 }
 
 function smPlayTone(ctx, freq, startTime, dur, instrument) {
