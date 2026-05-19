@@ -5050,18 +5050,13 @@ async function smPlayAcceptedLine(idx) {
     if (lineEl) lineEl.classList.add('sm-line-playing');
     if (btnEl)  { btnEl.classList.add('playing'); btnEl.textContent = '▶ Playing…'; }
 
-    line.notes.forEach((nn, bi) => {
-        const subCount = nn.length;
-        const subDur   = beatDur / subCount;
-        nn.forEach((note, si) => {
-            if (note === '-' || note === '~') return;
-            const ratio = SwaraMap[note];
-            if (!ratio) return;
-            const oct  = (line.octaves[bi][si] !== undefined) ? line.octaves[bi][si] : 0;
-            const freq = saHz * ratio * Math.pow(2, oct);
-            smPlaySampledNote(freq, instr, t0 + bi * beatDur + si * subDur, subDur * 0.88);
-        });
-    });
+    // Convert the stored line format (notes: [[n], [n,n], ...], octaves: [[o], [o,o], ...])
+    // into the beats array format smPlayBeats expects
+    const beats = line.notes.map((nn, bi) => ({
+        notes: nn,
+        octs:  line.octaves[bi]
+    }));
+    smPlayBeats(beats, beatDur, saHz, instr, t0);
 
     // Remove highlight when playback finishes
     const totalMs = (line.notes.length * beatDur + 0.3) * 1000;
@@ -5096,6 +5091,59 @@ function smRemoveAcceptedLine(idx) {
         ? `${line._segStart.toFixed(2)}s–${line._segEnd.toFixed(2)}s ` : ''}restored. Click Detect Notes to replace.`;
     smSetStatus('sm-ai-status', statusMsg);
     setTimeout(() => smSetStatus('sm-ai-status', ''), 5000);
+}
+
+// ── Shared beat-playback helper ────────────────────────────────────────────────
+// Plays a beats array using the sample engine.
+// ~ (sustain) extends the duration of the preceding note instead of being silent.
+// Multi-note beats divide the beat duration equally among sub-notes.
+function smPlayBeats(beats, beatDur, saHz, instr, t0) {
+    let i = 0;
+    while (i < beats.length) {
+        const b         = beats[i];
+        const beatStart = t0 + i * beatDur;
+
+        // ── Multi-note beat: equal subdivision, no cross-beat sustain ──────────
+        if (b.notes.length > 1) {
+            const subDur = beatDur / b.notes.length;
+            b.notes.forEach((note, si) => {
+                if (note === '-' || note === '~') return;
+                const ratio = SwaraMap[note];
+                if (!ratio) return;
+                const oct  = b.octs[si] !== undefined ? b.octs[si] : 0;
+                const freq = saHz * ratio * Math.pow(2, oct);
+                smPlaySampledNote(freq, instr, beatStart + si * subDur, subDur * 0.90);
+            });
+            i++;
+            continue;
+        }
+
+        // ── Single-note beat ───────────────────────────────────────────────────
+        const note = b.notes[0];
+
+        if (note === '-') { i++; continue; }        // silence
+
+        if (note === '~') { i++; continue; }        // orphan sustain — no prior note, skip
+
+        const ratio = SwaraMap[note];
+        if (!ratio) { i++; continue; }
+
+        const oct  = b.octs[0] !== undefined ? b.octs[0] : 0;
+        const freq = saHz * ratio * Math.pow(2, oct);
+
+        // Look ahead: count consecutive ~ beats so we play one longer note
+        let holdCount = 0;
+        while (i + 1 + holdCount < beats.length) {
+            const ahead = beats[i + 1 + holdCount];
+            if (ahead.notes.length === 1 && ahead.notes[0] === '~') holdCount++;
+            else break;
+        }
+
+        const totalDur = (1 + holdCount) * beatDur;
+        smPlaySampledNote(freq, instr, beatStart, totalDur * 0.96);
+
+        i += 1 + holdCount;     // advance past the note + all its sustain beats
+    }
 }
 
 // ── Playback ───────────────────────────────────────────────────────────────────
@@ -5210,18 +5258,7 @@ async function smPlaySynth(useEdit) {
     const saHz = SM.saHz * 2;
     const t0   = audioCtx.currentTime + 0.05;
 
-    beats.forEach((b, i) => {
-        const subCount = b.notes.length;
-        const subDur   = beatDur / subCount;          // divide beat equally among sub-notes
-        b.notes.forEach((note, si) => {
-            if (note === '-' || note === '~') return;
-            const ratio = SwaraMap[note];
-            if (!ratio) return;
-            const oct  = b.octs[si] !== undefined ? b.octs[si] : 0;
-            const freq = saHz * ratio * Math.pow(2, oct);
-            smPlaySampledNote(freq, instr, t0 + i * beatDur + si * subDur, subDur * 0.88);
-        });
-    });
+    smPlayBeats(beats, beatDur, saHz, instr, t0);
 }
 
 // ── Export ─────────────────────────────────────────────────────────────────────
