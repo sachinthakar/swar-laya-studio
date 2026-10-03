@@ -1,0 +1,57 @@
+# Render Blueprint — Swar-Laya Studio
+#   swar-laya-studio : static site (Studio page, metronome, instrument samples)
+#   swar-laya-api    : FastAPI Raga list API
+#   swar-laya-db     : PostgreSQL holding the Raga list
+# Create with: Render Dashboard -> New -> Blueprint -> select this repo/branch.
+
+services:
+  - type: web
+    name: swar-laya-studio
+    runtime: static
+    # Studio (v4 + Render changes) is served as the home page; source files stay untouched.
+    buildCommand: rm -rf dist && mkdir dist && cp -r public/. dist/ && cp dist/studio.html dist/index.html
+    staticPublishPath: ./dist
+    buildFilter:
+      paths:
+        - public/**
+        - render.yaml
+    headers:
+      - path: /samples/*
+        name: Cache-Control
+        value: public, max-age=2592000
+      - path: /*.html
+        name: Cache-Control
+        value: no-cache
+      - path: /config.js
+        name: Cache-Control
+        value: no-cache
+
+  - type: web
+    name: swar-laya-api
+    runtime: python
+    plan: free
+    rootDir: api
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DATABASE_URL
+        fromDatabase:
+          name: swar-laya-db
+          property: connectionString
+      - key: FIREBASE_PROJECT_ID
+        value: swar-laya-studio
+      - key: ADMIN_EMAILS          # comma-separated; entered in the dashboard
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: SEED_FROM_FIRESTORE
+        value: "1"
+
+databases:
+  - name: swar-laya-db
+    plan: free          # free Postgres expires 30 days after creation; upgrade before then
+    databaseName: swarlaya
+    user: swarlaya
