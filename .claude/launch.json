@@ -4,8 +4,14 @@
     {
       "name": "Swar-Laya Studio",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4200"],
+      "runtimeArgs": ["-m", "http.server", "4200", "--directory", "public"],
       "port": 4200
+    },
+    {
+      "name": "Quant Approach Trader",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["C:\\Personal\\Quant Approach Trader\\app.py"],
+      "port": 5000
     }
   ]
 }

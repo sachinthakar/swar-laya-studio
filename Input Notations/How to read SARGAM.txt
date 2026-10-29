@@ -1,0 +1,11 @@
+How to read SARGAM
+CAPITAL LETTERS = Shuddh Swars (Natural Notes)
+small letters = Komal Swars (Flat Notes)
+M with # [hash] or ^ [exponent] = Tivra Madhyam (M# / M^)
+Letter/Alphabet ONLY = Medium Pitch/Normal blow on flute
+Letter/Alphabet PRECEDED BY a ” . ” [full stop] or  a ” , ” [comma] = Low Octave Note/Softer blow on flute
+Letter/Alphabet FOLLOWED BY a ‘ [single quote] = High Octave Note/harder blow on flute
+Notes in { } = “murki” have to be played very fast without any pause
+A Note in ( ) = “kann swar” has to be just touched before moving on to the next note
+A “~” between two Notes  = “meend”. That is, you have to glide from one note to another slowly to produce that wavy effect.
+Few “….” (dots) after a note = Play and hold that note

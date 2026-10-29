@@ -1,0 +1,693 @@
+body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background-color: #eef2f3;
+    padding: 20px;
+    color: #333;
+}
+.container {
+    max-width: 98%;
+    margin: auto;
+    background-color: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+#sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #fdfdfd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+}
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 0;
+    background-color: #fdfdfd;
+    padding: 16px;
+    border-radius: 0;
+    align-items: flex-end;
+    border-bottom: 1px solid #ddd;
+}
+/* Taal ruler — shows beat structure once for the whole sheet */
+#taal-ruler {
+    display: none;
+    align-items: center;
+    overflow-x: auto;
+    background: #f0f4f8;
+    border-bottom: 2px solid #b0bec5;
+    padding: 4px 16px;
+    gap: 0;
+}
+#taal-ruler.visible { display: flex; }
+.control-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.control-item label {
+    font-size: 10px;
+    font-weight: bold;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+/* Thin vertical divider between control groups */
+.ctrl-sep {
+    width: 1px;
+    background: #d0d0d0;
+    align-self: stretch;   /* fills full row height regardless of align-items:flex-end */
+    flex-shrink: 0;
+    margin: 0 4px;
+    border-radius: 1px;
+}
+.line-container {
+    border: 1px solid #ccc;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    background-color: #fff;
+    overflow-x: auto;
+    position: relative;
+    /* Leave room for sticky toolbar when scrolled into view */
+    scroll-margin-top: 120px;
+}
+.line-settings {
+    display: flex;
+    gap: 12px;
+    background: #f5f5f5;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    border: 1px solid #e8e8e8;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.line-settings label { font-size: 11px; color: #555; font-weight: 600; }
+.grid-row {
+    display: flex;
+    margin-bottom: 4px;
+    min-width: max-content;
+}
+.row-label {
+    width: 80px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #444;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.cell {
+    width: 120px;
+    margin-right: 4px;
+    border: 1px solid #eee;
+    padding: 3px;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
+.sub-cell-container {
+    display: flex;
+    gap: 3px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+.note-unit {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+.octave-btn {
+    cursor: pointer;
+    border: 1px solid #bbb;
+    background-color: #ececec;
+    font-size: 11px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    line-height: 1.4;
+}
+.octave-btn.active {
+    background-color: #37474f;
+    color: white;
+    border-color: #37474f;
+}
+/* Taar+1 (oct=2) gets a distinct amber colour so it is visually different
+   from the standard Taar (dark grey) at a glance. */
+.octave-btn[data-oct="2"].active {
+    background-color: #e65100;
+    border-color: #e65100;
+    color: white;
+}
+.meend-btn {
+    cursor: pointer;
+    border: 1px solid #8e24aa;
+    background-color: #f3e5f5;
+    color: #6a1b9a;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: bold;
+    font-style: italic;
+}
+.meend-btn.active {
+    background-color: #8e24aa;
+    color: white;
+    border-color: #6a1b9a;
+}
+.add-sub-btn {
+    font-size: 11px; padding: 1px 5px; border-radius: 3px;
+    background: #e3f2fd; border: 1px solid #90caf9; cursor: pointer;
+    color: #1565c0; margin-top: 2px; display: inline-block; align-self: flex-start;
+}
+.add-sub-btn:hover { background: #bbdefb; }
+.rem-sub-btn {
+    font-size: 10px; padding: 0 3px; border-radius: 2px;
+    background: transparent; border: none; cursor: pointer;
+    color: #bbb; line-height: 1; flex-shrink: 0;
+}
+.rem-sub-btn:hover { color: #e53935; }
+/* ── Gamak (multi-note) compact card layout ──
+   When a cell has 2+ sub-notes they flow as horizontal chips so
+   4 gamak notes take ~2 rows of height instead of 4. */
+.sub-cell-container:has(.note-unit + .note-unit) .note-unit {
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    border: 1px solid #f48fb1;
+    border-radius: 4px;
+    padding: 2px 3px;
+    background: #fff8f9;
+    width: 46px;
+    box-sizing: border-box;
+}
+.sub-cell-container:has(.note-unit + .note-unit) .note-select {
+    width: 40px;
+    font-size: 10px;
+    padding: 1px 1px;
+}
+.sub-cell-container:has(.note-unit + .note-unit) .octave-controls {
+    display: flex;
+    gap: 1px;
+}
+.sub-cell-container:has(.note-unit + .note-unit) .octave-btn,
+.sub-cell-container:has(.note-unit + .note-unit) .meend-btn {
+    font-size: 9px;
+    padding: 0 3px;
+    line-height: 1.3;
+}
+.sub-cell-container:has(.note-unit + .note-unit) .rem-sub-btn {
+    font-size: 9px;
+}
+select { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+input[type="number"], input[type="text"] { border: 1px solid #ddd; font-size: 13px; padding: 4px 6px; border-radius: 4px; }
+input[type="range"] { border: none; cursor: pointer; }
+.note-select {
+    background-color: #fffde7;
+    font-weight: bold;
+    width: 56px;
+    font-size: 12px;
+    padding: 3px 2px;
+}
+.lyr-input {
+    width: 100%;
+    font-size: 12px;
+    padding: 3px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-align: center;
+    box-sizing: border-box;
+}
+.beat-num {
+    text-align: center;
+    font-size: 12px;
+    color: #777;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    padding: 5px 0;
+}
+.beat-num.sam {
+    background-color: #fff3e0;
+    color: #bf360c;
+    font-weight: bold;
+}
+.beat-num.khali {
+    color: #78909c;
+    background: #f5f5f5;
+}
+.beat-num.khali .bol-text { color: #b0bec5; }
+.taal-marker {
+    font-size: 9px;
+    font-weight: bold;
+    line-height: 1.1;
+    min-height: 11px;
+    color: #bf360c;
+}
+.beat-num.khali .taal-marker { color: #90a4ae; }
+.bol-text {
+    font-size: 10px;
+    color: #d35400;
+    font-weight: bold;
+    height: 14px;
+    text-align: center;
+    line-height: 14px;
+}
+.playing {
+    background-color: #fff176 !important;
+    border: 2px solid #f9a825 !important;
+    transform: scale(1.03);
+    transition: all 0.08s;
+}
+button {
+    padding: 8px 15px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+}
+.btn-tanpura { background-color: #ef6c00; color: white; }
+.btn-play    { background-color: #0277bd; color: white; }
+.btn-stop    { background-color: #455a64; color: white; }
+.btn-add     { background-color: #2e7d32; color: white; }
+.btn-save    { background-color: #4a148c; color: white; }
+.btn-load    { background-color: #37474f; color: white; }
+.btn-ai         { background-color: #6a1b9a; color: white; }
+.btn-fullscreen { background-color: #263238; color: white; }
+.btn-fullscreen:hover { background-color: #37474f; }
+.btn-remove  {
+    position: absolute; top: 6px; right: 6px;
+    background: #c62828; color: white;
+    padding: 2px 8px; font-size: 11px; border-radius: 4px;
+}
+.btn-play-line {
+    position: absolute; top: 6px; right: 136px;
+    font-size: 11px; padding: 2px 8px; border-radius: 4px;
+    background: #1b5e20; color: white; cursor: pointer; border: none;
+}
+.btn-play-line:hover  { background: #2e7d32; }
+.btn-play-line.active { background: #e65100; }   /* orange while this line is playing */
+.btn-insert-before {
+    position: absolute; top: 6px; right: 44px;
+    font-size: 11px; padding: 2px 7px; border-radius: 4px;
+    background: #f3f4f6; border: 1px solid #ccc; cursor: pointer;
+    color: #555;
+}
+.btn-insert-before:hover { background: #e8f4fd; border-color: #90caf9; color: #1565c0; }
+.line-badge {
+    position: absolute; top: 7px; left: 10px;
+    font-size: 10px; color: #999; font-weight: bold;
+}
+.section-hint {
+    font-size: 10px; color: #26a69a; font-weight: bold; margin-left: 6px;
+}
+/* ── Adlib / Alap line styling ── */
+.adlib-line {
+    border-left: 5px solid #ef6c00;   /* orange accent = free tempo */
+    background-color: #fffbf7;
+}
+.adlib-line .bol-text { display: none; }  /* hide tabla bols — no tabla in alap */
+.adlib-line .beat-num {
+    background-color: #fff3e0;
+    color: #bf360c;
+    font-style: italic;
+}
+.adlib-label {
+    font-size: 10px; color: #ef6c00; font-weight: bold;
+    margin-left: 4px; letter-spacing: 0.3px;
+}
+.adlib-beat-controls {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff3e0; border: 1px solid #ef6c00; border-radius: 5px;
+    padding: 4px 10px; margin-bottom: 6px;
+    font-size: 12px; color: #bf360c;
+}
+.adlib-beat-controls-label {
+    font-weight: 600; letter-spacing: 0.2px;
+}
+.btn-add-beat, .btn-rem-beat {
+    font-size: 13px; padding: 2px 10px; cursor: pointer;
+    background: #ef6c00; border: none; border-radius: 4px;
+    color: #fff; font-weight: bold;
+}
+.btn-add-beat:hover { background: #e65100; }
+.btn-rem-beat:hover { background: #e65100; }
+.adlib-beat-count {
+    font-size: 12px; color: #bf360c; font-style: italic;
+    min-width: 50px; font-weight: 600;
+}
+
+/* ── Raga Mode ── */
+#raga-info-bar {
+    display: none;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 7px 16px;
+    background: linear-gradient(to right, #fff8e1, #ede7f6);
+    border-bottom: 1px solid #d0c4e8;
+    font-size: 12px;
+}
+#raga-bar-name { font-weight: 900; color: #4a148c; font-size: 14px; }
+.raga-info-meta { color: #555; }
+.raga-palette { display: flex; gap: 3px; flex-wrap: wrap; margin-left: 6px; }
+.raga-swar {
+    padding: 1px 5px; border-radius: 4px; font-weight: bold;
+    font-size: 11px; border: 1.5px solid transparent;
+    min-width: 24px; text-align: center; cursor: default;
+}
+.raga-swar-in       { background:#e8f5e9; color:#2e7d32; border-color:#a5d6a7; }
+.raga-swar-out      { background:#f5f5f5; color:#bdbdbd; border-color:#e0e0e0; text-decoration:line-through; }
+.raga-swar-vadi     { background:#fff9c4; color:#e65100; border-color:#fbc02d; font-weight:900; }
+.raga-swar-samvadi  { background:#e3f2fd; color:#1565c0; border-color:#90caf9; font-weight:900; }
+/* Note-unit raga states */
+.note-unit.raga-vadi    { outline:2px solid #fbc02d; border-radius:4px; background:#fffde7; }
+.note-unit.raga-samvadi { outline:2px solid #90caf9; border-radius:4px; background:#e3f2fd; }
+.note-unit.raga-out     { opacity:0.42; outline:2px solid #ef9a9a; border-radius:4px; }
+.raga-label { font-size:10px; color:#6a1b9a; font-weight:bold; margin-left:4px; }
+/* Raga info badges (Time / Jaati / Rasa) */
+.raga-badge { display:inline-flex; align-items:center; gap:3px; padding:1px 7px; border-radius:10px; font-size:10px; font-weight:bold; white-space:nowrap; }
+.raga-badge-time  { background:#e0f2f1; color:#00695c; border:1px solid #b2dfdb; }
+.raga-badge-jaati { background:#f3e5f5; color:#6a1b9a; border:1px solid #ce93d8; }
+.raga-badge-rasa  { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
+#raga-info-badges { display:flex; gap:4px; flex-wrap:wrap; align-items:center; }
+#raga-pakkad-chips { display:flex; gap:3px; flex-wrap:wrap; align-items:center; }
+.raga-pakkad-chip {
+    padding:1px 5px; border-radius:4px; font-weight:bold;
+    font-size:11px; border:1.5px solid transparent;
+    min-width:24px; text-align:center; cursor:default;
+}
+#raga-pakkad-play {
+    padding:2px 9px; font-size:12px; border-radius:4px; cursor:pointer;
+    background:#6a1b9a; color:#fff; border:none; font-weight:bold;
+    transition: background 0.15s;
+}
+#raga-pakkad-play:hover { background:#4a148c; }
+#raga-pakkad-play:disabled { background:#bdbdbd; cursor:default; }
+/* ── Raga Admin Panel ── */
+#raga-admin-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:flex-start; justify-content:center; padding-top:40px; overflow-y:auto; }
+#raga-admin-modal.open { display:flex; }
+#raga-admin-box {
+    background:#fff; border-radius:10px; width:min(96vw,860px);
+    box-shadow:0 8px 40px rgba(74,20,140,0.18); padding:24px 28px 20px;
+    display:flex; flex-direction:column; gap:16px; margin-bottom:40px;
+}
+#raga-admin-box h2 { margin:0; color:#4a148c; font-size:18px; display:flex; align-items:center; gap:12px; }
+.ra-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.ra-toolbar button { padding:5px 13px; border-radius:5px; border:none; cursor:pointer; font-size:12px; font-weight:bold; }
+.ra-btn-seed  { background:#e8f5e9; color:#2e7d32; }
+.ra-btn-add   { background:#4a148c; color:#fff; }
+.ra-btn-export{ background:#e3f2fd; color:#1565c0; }
+.ra-btn-close { background:#f5f5f5; color:#555; margin-left:auto; }
+#raga-admin-table { width:100%; border-collapse:collapse; font-size:12px; }
+#raga-admin-table th { background:#ede7f6; color:#4a148c; padding:6px 8px; text-align:left; font-size:11px; }
+#raga-admin-table td { padding:5px 8px; border-bottom:1px solid #f0e9fb; vertical-align:middle; }
+#raga-admin-table tr:hover td { background:#faf5ff; }
+.ra-edit-btn   { background:#fff9c4; color:#e65100; border:1px solid #fbc02d; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
+.ra-delete-btn { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; border-radius:4px; padding:2px 8px; cursor:pointer; font-size:11px; }
+.ra-search-bar { display:flex; align-items:center; gap:8px; }
+.ra-search-bar input { flex:1; padding:6px 10px; border:1px solid #d0c4e8; border-radius:6px; font-size:13px; outline:none; }
+.ra-search-bar input:focus { border-color:#7e57c2; box-shadow:0 0 0 2px rgba(126,87,194,0.15); }
+.ra-search-count { font-size:11px; color:#888; white-space:nowrap; }
+/* Raga edit form */
+#raga-edit-form { display:none; background:#faf5ff; border:1px solid #d0c4e8; border-radius:8px; padding:16px; }
+#raga-edit-form.open { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; }
+#raga-edit-form .full { grid-column:1/-1; }
+#raga-edit-form label { font-size:11px; color:#6a1b9a; font-weight:bold; display:block; margin-bottom:2px; }
+#raga-edit-form input, #raga-edit-form textarea {
+    width:100%; box-sizing:border-box; padding:5px 8px; border:1px solid #d0c4e8;
+    border-radius:4px; font-size:12px; font-family:inherit;
+}
+#raga-edit-form textarea { height:52px; resize:vertical; }
+.ra-form-actions { display:flex; gap:8px; }
+.ra-save-btn   { background:#4a148c; color:#fff; border:none; border-radius:5px; padding:6px 18px; cursor:pointer; font-weight:bold; }
+.ra-cancel-btn { background:#f5f5f5; color:#555; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; }
+.ra-hint { font-size:10px; color:#888; grid-column:1/-1; margin-top:-6px; }
+/* Sample loading status pill */
+#sample-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:bold; transition:background 0.4s, color 0.4s; }
+#sample-status.loading { background:#fff3e0; color:#e65100; }
+#sample-status.ready   { background:#e8f5e9; color:#2e7d32; }
+#sample-status.osc     { background:#f3e5f5; color:#6a1b9a; }
+
+/* ── Auth bar ── */
+#auth-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #1a237e; color: white;
+    padding: 8px 20px; border-radius: 10px 10px 0 0;
+    margin: -25px -25px 16px -25px;   /* bleed to container edges */
+    font-size: 13px;
+}
+#auth-bar .spacer { flex: 1; }
+.user-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+.user-name { font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.premium-badge {
+    background: #f9a825; color: #333; font-size: 11px;
+    font-weight: 700; padding: 2px 8px; border-radius: 10px;
+}
+.free-badge {
+    background: rgba(255,255,255,0.2); color: white; font-size: 11px;
+    padding: 2px 8px; border-radius: 10px;
+}
+.btn-google {
+    background: white; color: #333; border: none; border-radius: 6px;
+    padding: 8px 15px; cursor: pointer; font-weight: 600; font-size: 13px;
+}
+.btn-email-login {
+    background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 13px;
+}
+.btn-cloud {
+    background: #0288d1; color: white; border: none; border-radius: 6px;
+    cursor: pointer; font-weight: 600;
+}
+.btn-signout {
+    background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 11px;
+}
+.btn-save-cloud {
+    background-color: #00897b; color: white;
+}
+.btn-bhatkhande {
+    background-color: #6a1b9a; color: white;
+}
+
+/* ── Bhatkhande Notation popup ── */
+.bk-modal-box { max-width: 900px; }
+.bk-content { overflow-y: auto; flex: 1; font-family: 'Segoe UI', Tahoma, sans-serif; }
+.bk-page-title { font-size: 20px; font-weight: 600; color: #1a237e; margin-bottom: 2px; }
+.bk-page-sub { font-size: 13px; color: #666; margin-bottom: 14px; }
+.bk-adlib-note {
+    font-size: 12px; color: #8a6400; background: #fff8e1;
+    border: 1px solid #ffe082; border-radius: 6px; padding: 6px 10px;
+    margin-bottom: 14px;
+}
+.bk-empty { color: #888; font-style: italic; padding: 20px 0; }
+.bk-cycle { margin-bottom: 22px; }
+.bk-cycle-header {
+    font-size: 13px; font-weight: 600; color: #37474f; margin-bottom: 6px;
+}
+.bk-section-tag { font-weight: 400; color: #888; margin-left: 8px; }
+.bk-adlib-tag {
+    background: #fff3e0; color: #e65100; border-radius: 4px;
+    padding: 1px 5px; font-size: 11px; font-weight: 600;
+}
+table.bk-matrix {
+    border-collapse: collapse; width: 100%; table-layout: fixed;
+}
+table.bk-matrix th, table.bk-matrix td {
+    border: 1px solid #ddd; text-align: center; vertical-align: middle;
+    padding: 4px 2px;
+}
+.bk-beat-head {
+    background: #f5f5f5; font-size: 11px; color: #777; font-weight: 400;
+}
+.bk-beat-head.bk-sam { background: #e8eaf6; color: #1a237e; font-weight: 700; }
+.bk-beat-head.bk-khali { background: #fce4ec; color: #ad1457; font-weight: 700; }
+.bk-bol { font-size: 10px; color: #999; min-height: 12px; }
+.bk-marker { font-size: 13px; font-weight: 700; }
+.bk-swara-cell { font-size: 16px; min-height: 40px; }
+.bk-swara { display: inline-flex; flex-direction: column; align-items: center; line-height: 1; }
+.bk-oct-row { font-size: 9px; letter-spacing: 1px; color: #6a1b9a; height: 10px; }
+.bk-swara-text { font-weight: 600; color: #263238; }
+.bk-rest { color: #bbb; }
+.bk-sustain { color: #90a4ae; font-weight: 400; }
+.bk-meend { font-size: 11px; color: #6a1b9a; margin-left: 1px; }
+.bk-subsplit { color: #999; margin: 0 2px; font-weight: 300; }
+.bk-legend {
+    font-size: 11px; color: #888; border-top: 1px solid #eee;
+    margin-top: 14px; padding-top: 10px;
+}
+
+/* ── Modals (shared overlay) ── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55); z-index: 1000;
+    align-items: center; justify-content: center;
+}
+.modal-box {
+    background: white; border-radius: 14px;
+    padding: 28px; width: 90%; max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 85vh; display: flex; flex-direction: column;
+}
+.modal-box h3 { margin: 0 0 16px 0; color: #1a237e; }
+.modal-close {
+    float: right; background: none; border: none;
+    font-size: 20px; cursor: pointer; color: #888; margin-top: -4px;
+}
+
+/* ── Composition picker ── */
+#comp-list { overflow-y: auto; flex: 1; }
+.comp-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border-radius: 8px; margin-bottom: 6px;
+    border: 1px solid #eee; gap: 10px;
+}
+.comp-item:hover { background: #f5f5f5; }
+.active-comp { border-color: #0277bd; background: #e3f2fd; }
+.comp-info { flex: 1; overflow: hidden; }
+.comp-info strong { display: block; font-size: 14px; color: #222; }
+.comp-meta { font-size: 11px; color: #888; }
+.comp-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-load-comp {
+    background: #0277bd; color: white; border: none;
+    border-radius: 5px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+}
+.btn-del-comp {
+    background: #c62828; color: white; border: none;
+    border-radius: 5px; padding: 4px 10px; cursor: pointer; font-size: 12px;
+}
+.btn-new-comp {
+    background: #2e7d32; color: white; border: none; border-radius: 6px;
+    padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 13px;
+    margin-top: 12px; width: 100%;
+}
+
+/* ── Email login form ── */
+.email-field {
+    width: 100%; padding: 10px; border: 1px solid #ddd;
+    border-radius: 8px; font-size: 14px; margin-bottom: 10px;
+    box-sizing: border-box;
+}
+.btn-email-submit {
+    width: 100%; padding: 11px; background: #1a237e; color: white;
+    border: none; border-radius: 8px; cursor: pointer; font-size: 14px;
+    font-weight: 600; margin-bottom: 8px;
+}
+.auth-divider {
+    text-align: center; color: #aaa; font-size: 12px; margin: 10px 0;
+}
+
+/* ── Toast notification ── */
+#toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: #323232; color: white; padding: 10px 22px;
+    border-radius: 24px; font-size: 13px; font-weight: 500;
+    z-index: 2000; opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+
+/* ── Tab bar ── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TRANSCRIBE FROM AUDIO — panel above the song sheet (shown when the
+   toolbar "🎤 Transcribe" toggle is on). Lines it creates are ordinary
+   Composer lines; drafts get a dashed amber outline until accepted.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.btn-transcribe {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #00695c; color: #fff; padding: 8px 12px; border-radius: 6px;
+    font-weight: 600; font-size: 13px; cursor: pointer; user-select: none;
+}
+.btn-transcribe input { width: 15px; height: 15px; margin: 0; cursor: pointer; }
+.btn-transcribe.on { background: #e65100; }
+
+#sm-panel {
+    display: none; background: #fff; border: 1px solid #cfd8dc; border-radius: 8px;
+    padding: 12px 14px; margin: 12px 0 4px;
+}
+#sm-panel.open { display: block; }
+#sm-panel h3 {
+    margin: 0 0 10px; font-size: 13px; font-weight: 700; color: #00695c;
+    text-transform: uppercase; letter-spacing: 0.8px;
+}
+.sm-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 10px; }
+.sm-control { display: flex; flex-direction: column; gap: 4px; }
+.sm-control label { font-size: 11px; color: #555; font-weight: 600; }
+.sm-control input[readonly] { background: #f3f4f6; color: #555; }
+.sm-hint { font-size: 11px; color: #78909c; }
+#sm-section-info { font-size: 12px; color: #00695c; font-weight: 600; align-self: center; }
+#sm-section-info.warn { color: #e65100; }
+
+#sm-waveform-canvas {
+    width: 100%; height: 84px; background: #0a0a1e;
+    border-radius: 6px; cursor: crosshair; display: block;
+}
+.sm-btn { padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+.sm-btn-primary { background: #3949ab; color: #fff; }
+.sm-btn-neutral { background: #eceff1; color: #37474f; border: 1px solid #cfd8dc; }
+.sm-btn-success { background: #2e7d32; color: #fff; }
+.sm-btn-danger  { background: #c62828; color: #fff; }
+.sm-btn-accent  { background: #6a1b9a; color: #fff; }
+.sm-btn.playing { background: #e65100; color: #fff; border-color: #e65100; }
+.sm-status { font-size: 12px; color: #3949ab; min-height: 16px; }
+.sm-backend-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 8px 10px; background: #f5f7fa; border: 1px solid #e0e6ed; border-radius: 6px;
+}
+.sm-backend-row label { font-size: 12px; color: #37474f; cursor: pointer; }
+.sm-backend-row input[type=text], .sm-backend-row select { font-size: 12px; padding: 3px 6px; }
+
+/* Draft lines (detected, not yet accepted) */
+.line-container.draft-line {
+    border: 2px dashed #f9a825; background: #fffdf3;
+}
+.line-container.draft-line::after {
+    content: 'DRAFT'; position: absolute; top: 9px; left: 62px;
+    font-size: 10px; font-weight: 700; color: #e65100; letter-spacing: 1px;
+}
+
+/* Octave buttons in a single-note cell: 2 × 2 grid (˚˚ ˚ / • ••) */
+.note-unit .octave-controls { display: inline-grid; grid-template-columns: auto auto; gap: 1px; }
+
+/* Per-line audio tag (top strip of a transcribed line) */
+.line-container.has-audio { padding-top: 30px; }
+.line-audio {
+    position: absolute; top: 5px; left: 118px;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 6px; border-radius: 5px; background: #e0f2f1; border: 1px solid #b2dfdb;
+    font-size: 11px; color: #00695c; font-weight: 600;
+}
+.line-audio button { padding: 1px 7px; font-size: 11px; border-radius: 4px; background: #fff; border: 1px solid #80cbc4; color: #00695c; }
+.line-audio button:hover { background: #b2dfdb; }
+.line-audio button.playing { background: #e65100; color: #fff; border-color: #e65100; }
+
+/* Pitch-candidate chips under a beat (draft lines only) */
+.sm-cands { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.line-container .sm-cand {
+    font: 600 11px system-ui, sans-serif; padding: 0 5px; border-radius: 4px; line-height: 1.6;
+    background: #eef1f8; border: 1px solid #c5cbe0; color: #333; cursor: pointer;
+}
+.line-container .sm-cand:hover { border-color: #3949ab; }
+.line-container .sm-cand.cur { background: #e3f6ec; border-color: #57b98a; color: #1b6e46; }
+.line-container .sm-cand.komal { color: #c25a00; }
+.line-container .sm-cand i { font-style: normal; opacity: .6; font-size: 9px; margin-left: 2px; }
+
+/* Draft action bar — fixed at the bottom while drafts exist */
+#sm-draft-bar {
+    display: none; position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    z-index: 1500; background: #263238; color: #fff; border-radius: 10px;
+    padding: 8px 12px; box-shadow: 0 6px 24px rgba(0,0,0,.25);
+    align-items: center; gap: 8px; flex-wrap: wrap; max-width: calc(100vw - 32px);
+}
+#sm-draft-bar.open { display: flex; }
+#sm-draft-bar .sm-draft-info { font-size: 12px; font-weight: 600; margin-right: 4px; }
+#sm-draft-bar .sm-btn-neutral { background: #455a64; color: #fff; border-color: #546e7a; }
+#sm-draft-bar .sm-btn { padding: 6px 10px; font-size: 12px; }
+/* Gamak cards are narrow: show the •• (mandra-2) button there only when it is in use */
+.sub-cell-container:has(.note-unit + .note-unit) .octave-btn[data-oct="-2"]:not(.active) { display: none; }

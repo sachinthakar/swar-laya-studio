@@ -1,0 +1,840 @@
+Lajun Hasane
+Tonic (Sa): 415.00 Hz    Tempo: 144 BPM
+
+Legend
+------
+  Swara row   : Sa re Re ga Ga Ma Ma' Pa dha Dha ni Ni  (12 swaras), "-" = rest
+  ^Sa         : dot ABOVE note -> upper octave (taar saptak)
+  ,Sa         : dot BELOW note -> lower octave (mandra saptak)
+                (no prefix = middle octave / madhya saptak)
+  ~           : sustain -- same swara continues from the previous beat
+  a/b         : two sub-notes in one beat (an off-beat split), read left to right
+  _           : meend (glide) connecting this note to the next one
+                (not detected by the current model; reserved for manual use)
+  Bol row     : X = sam (the cycle's first/strong beat)
+                O = khali ("empty"/wave beat, played open-handed)
+                2,3.. = tali (clap) number, in the order it falls in the cycle
+  Lyrics row  : blank -- fill in by hand if desired
+
+========================================================================
+-- Line 1  (dadra, 6 beats/cycle)
+                                               
+-       -       -       -       ,Sa     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+0.0s    0.4s    0.8s    1.2s    1.7s    2.1s   
+
+-- Line 2  (dadra, 6 beats/cycle)
+                                               
+,,Ni    ,,Ma'   ~       ~       ~       ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+2.5s    2.9s    3.3s    3.8s    4.2s    4.6s   
+
+-- Line 3  (dadra, 6 beats/cycle)
+                                               
+~       ,,ga    -       -       -       ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+5.0s    5.4s    5.8s    6.2s    6.7s    7.1s   
+
+-- Line 4  (dadra, 6 beats/cycle)
+                                               
+~       ,,Ma'   ~       -       ,re     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+7.5s    7.9s    8.3s    8.8s    9.2s    9.6s   
+
+-- Line 5  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,,dha   ~       ,,Sa    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+10.0s   10.4s   10.8s   11.2s   11.7s   12.1s  
+
+-- Line 6  (dadra, 6 beats/cycle)
+                                               
+,re     -       ,re     ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+12.5s   12.9s   13.3s   13.8s   14.2s   14.6s  
+
+-- Line 7  (dadra, 6 beats/cycle)
+                                               
+~       ~       ~       ~       -       ,re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+15.0s   15.4s   15.8s   16.2s   16.7s   17.1s  
+
+-- Line 8  (dadra, 6 beats/cycle)
+                                               
+~       ,,ni    ,Sa     ,,re    -       ,,Dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+17.5s   17.9s   18.3s   18.8s   19.2s   19.6s  
+
+-- Line 9  (dadra, 6 beats/cycle)
+                                               
+,re     -       ,,dha   ,Sa     ,re     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+20.0s   20.4s   20.8s   21.2s   21.7s   22.1s  
+
+-- Line 10  (dadra, 6 beats/cycle)
+                                               
+~       ~       -       -       ,ga     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+22.5s   22.9s   23.3s   23.8s   24.2s   24.6s  
+
+-- Line 11  (dadra, 6 beats/cycle)
+                                               
+,Re     ,Ga     -       ,,Ma    ,Re     ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+25.0s   25.4s   25.8s   26.2s   26.7s   27.1s  
+
+-- Line 12  (dadra, 6 beats/cycle)
+                                               
+,Re     ,ga     ,re     ~       -       ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+27.5s   27.9s   28.3s   28.8s   29.2s   29.6s  
+
+-- Line 13  (dadra, 6 beats/cycle)
+                                               
+,,ni    ~       -       ,,dha   ,,ni    ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+30.0s   30.4s   30.8s   31.2s   31.7s   32.1s  
+
+-- Line 14  (dadra, 6 beats/cycle)
+                                               
+,,,Ma'  ,Sa     ,re     ,Sa     ~       ,,ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+32.5s   32.9s   33.3s   33.8s   34.2s   34.6s  
+
+-- Line 15  (dadra, 6 beats/cycle)
+                                               
+,,Re    ,,ga    ,Ga     ,ga     ,Ma     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+35.0s   35.4s   35.8s   36.2s   36.7s   37.1s  
+
+-- Line 16  (dadra, 6 beats/cycle)
+                                               
+,,ga    ~       -       -       ,dha    -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+37.5s   37.9s   38.3s   38.8s   39.2s   39.6s  
+
+-- Line 17  (dadra, 6 beats/cycle)
+                                               
+,,Ma    ~       -       ,Sa     ,,dha   ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+40.0s   40.4s   40.8s   41.2s   41.7s   42.1s  
+
+-- Line 18  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,ni    ~       ~       ,Sa     ,,Ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+42.5s   42.9s   43.3s   43.8s   44.2s   44.6s  
+
+-- Line 19  (dadra, 6 beats/cycle)
+                                               
+,,dha   ,,re    -       ,Re     ,ga     ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+45.0s   45.4s   45.8s   46.2s   46.7s   47.1s  
+
+-- Line 20  (dadra, 6 beats/cycle)
+                                               
+~       ~       ~       ,,re    ,ga     ,Pa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+47.5s   47.9s   48.3s   48.8s   49.2s   49.6s  
+
+-- Line 21  (dadra, 6 beats/cycle)
+                                               
+,Ma     ~       -       ,Sa     ~       ,,dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+50.0s   50.4s   50.8s   51.2s   51.7s   52.1s  
+
+-- Line 22  (dadra, 6 beats/cycle)
+                                               
+~       ,Sa     ,,ni    ~       ~       ,,Ma   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+52.5s   52.9s   53.3s   53.8s   54.2s   54.6s  
+
+-- Line 23  (dadra, 6 beats/cycle)
+                                               
+,,dha   ,,Re    -       ,ga     ,Ga     ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+55.0s   55.4s   55.8s   56.2s   56.7s   57.1s  
+
+-- Line 24  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,re     ~       ~       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+57.5s   57.9s   58.3s   58.8s   59.2s   59.6s  
+
+-- Line 25  (dadra, 6 beats/cycle)
+                                               
+-       ,Ga     ~       ,,Sa    ,,re    ,,Re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+60.0s   60.4s   60.8s   61.2s   61.7s   62.1s  
+
+-- Line 26  (dadra, 6 beats/cycle)
+                                               
+,,Ga    ~       ~       -       ,,re    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+62.5s   62.9s   63.3s   63.8s   64.2s   64.6s  
+
+-- Line 27  (dadra, 6 beats/cycle)
+                                               
+,,Ga    ,,Ma'   ~       ,,Ma    -       ,,Ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+65.0s   65.4s   65.8s   66.2s   66.7s   67.1s  
+
+-- Line 28  (dadra, 6 beats/cycle)
+                                               
+,,ga    -       -       -       -       ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+67.5s   67.9s   68.3s   68.8s   69.2s   69.6s  
+
+-- Line 29  (dadra, 6 beats/cycle)
+                                               
+-       ,,re    -       -       ,,Dha   -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+70.0s   70.4s   70.8s   71.2s   71.7s   72.1s  
+
+-- Line 30  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,Ni    ~       -       -       ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+72.5s   72.9s   73.3s   73.8s   74.2s   74.6s  
+
+-- Line 31  (dadra, 6 beats/cycle)
+                                               
+-       ,Sa     ~       ,,Pa    ,,re    ,,dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+75.0s   75.4s   75.8s   76.2s   76.7s   77.1s  
+
+-- Line 32  (dadra, 6 beats/cycle)
+                                               
+-       ,ga     ,Ma     ,Sa     ,re     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+77.5s   77.9s   78.3s   78.8s   79.2s   79.6s  
+
+-- Line 33  (dadra, 6 beats/cycle)
+                                               
+-       ,,ga    ,,dha   ~       ~       ,re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+80.0s   80.4s   80.8s   81.2s   81.7s   82.1s  
+
+-- Line 34  (dadra, 6 beats/cycle)
+                                               
+~       ,Pa     -       -       ,Pa     ,Ma    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+82.5s   82.9s   83.3s   83.8s   84.2s   84.6s  
+
+-- Line 35  (dadra, 6 beats/cycle)
+                                               
+,Ga     ,Ma     -       ,Ma     ~       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+85.0s   85.4s   85.8s   86.2s   86.7s   87.1s  
+
+-- Line 36  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,Ma     ~       ,,Ga    ,,Ma    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+87.5s   87.9s   88.3s   88.8s   89.2s   89.6s  
+
+-- Line 37  (dadra, 6 beats/cycle)
+                                               
+-       -       ,Re     ,dha    ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+90.0s   90.4s   90.8s   91.2s   91.7s   92.1s  
+
+-- Line 38  (dadra, 6 beats/cycle)
+                                               
+~       ,,Re    -       -       ,Pa     ,Ma'   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+92.5s   92.9s   93.3s   93.8s   94.2s   94.6s  
+
+-- Line 39  (dadra, 6 beats/cycle)
+                                               
+,Ga     ,,Ma    ,,Ma'   ,Ga     ~       ,Ma    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+95.0s   95.4s   95.8s   96.2s   96.7s   97.1s  
+
+-- Line 40  (dadra, 6 beats/cycle)
+                                               
+,re     -       -       -       ,Ma     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+97.5s   97.9s   98.3s   98.8s   99.2s   99.6s  
+
+-- Line 41  (dadra, 6 beats/cycle)
+                                               
+,Re     ,Ga     ~       ,Re     -       ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+100.0s  100.4s  100.8s  101.2s  101.7s  102.1s 
+
+-- Line 42  (dadra, 6 beats/cycle)
+                                               
+~       -       -       ,,Sa    ,re     ,Re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+102.5s  102.9s  103.3s  103.8s  104.2s  104.6s 
+
+-- Line 43  (dadra, 6 beats/cycle)
+                                               
+,Ma'    ,dha    ,Pa     ,Ma     ,Ga     ,Re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+105.0s  105.4s  105.8s  106.2s  106.7s  107.1s 
+
+-- Line 44  (dadra, 6 beats/cycle)
+                                               
+,Sa     -       ,Ga     ,,Ma    ~       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+107.5s  107.9s  108.3s  108.8s  109.2s  109.6s 
+
+-- Line 45  (dadra, 6 beats/cycle)
+                                               
+,ga     ,Ga     ~       ,Sa     ~       ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+110.0s  110.4s  110.8s  111.2s  111.7s  112.1s 
+
+-- Line 46  (dadra, 6 beats/cycle)
+                                               
+,,Ni    ,,Dha   ,,Pa    ,,re    ,Sa     ,Re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+112.5s  112.9s  113.3s  113.8s  114.2s  114.6s 
+
+-- Line 47  (dadra, 6 beats/cycle)
+                                               
+,Ma'    ,Pa     ,Ma     ~       ,Ga     ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+115.0s  115.4s  115.8s  116.2s  116.7s  117.1s 
+
+-- Line 48  (dadra, 6 beats/cycle)
+                                               
+,re     ~       ,Sa     ,,,Dha  -       ,,Dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+117.5s  117.9s  118.3s  118.8s  119.2s  119.6s 
+
+-- Line 49  (dadra, 6 beats/cycle)
+                                               
+-       ,,dha   ,Sa     ,,Ma    ,,Ga    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+120.0s  120.4s  120.8s  121.2s  121.7s  122.1s 
+
+-- Line 50  (dadra, 6 beats/cycle)
+                                               
+,,,Ma   ,,Ga    ,re     ~       ,,ni    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+122.5s  122.9s  123.3s  123.8s  124.2s  124.6s 
+
+-- Line 51  (dadra, 6 beats/cycle)
+                                               
+,,Dha   ,,dha   ,re     ,,Ma    ,,Ga    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+125.0s  125.4s  125.8s  126.2s  126.7s  127.1s 
+
+-- Line 52  (dadra, 6 beats/cycle)
+                                               
+-       -       -       ,re     -       ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+127.5s  127.9s  128.3s  128.8s  129.2s  129.6s 
+
+-- Line 53  (dadra, 6 beats/cycle)
+                                               
+,Ma'    ,ni     -       ,Pa     ,dha    ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+130.0s  130.4s  130.8s  131.2s  131.7s  132.1s 
+
+-- Line 54  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,re    ~       ,Ga     -       ,re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+132.5s  132.9s  133.3s  133.8s  134.2s  134.6s 
+
+-- Line 55  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,Pa    ~       ,Sa     ,,Dha   ,,ni   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+135.0s  135.4s  135.8s  136.2s  136.7s  137.1s 
+
+-- Line 56  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,Ga    -       ,,Ga    ,,Pa    ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+137.5s  137.9s  138.3s  138.8s  139.2s  139.6s 
+
+-- Line 57  (dadra, 6 beats/cycle)
+                                               
+-       ,Sa     ~       ~       -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+140.0s  140.4s  140.8s  141.2s  141.7s  142.1s 
+
+-- Line 58  (dadra, 6 beats/cycle)
+                                               
+-       -       ,Ma     ,re     ,Sa     ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+142.5s  142.9s  143.3s  143.8s  144.2s  144.6s 
+
+-- Line 59  (dadra, 6 beats/cycle)
+                                               
+,,dha   ,Sa     ,,ni    ~       ,re     ,,Ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+145.0s  145.4s  145.8s  146.2s  146.7s  147.1s 
+
+-- Line 60  (dadra, 6 beats/cycle)
+                                               
+,,Pa    ,,Ga    -       ,ga     ,Sa     ,re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+147.5s  147.9s  148.3s  148.8s  149.2s  149.6s 
+
+-- Line 61  (dadra, 6 beats/cycle)
+                                               
+,Sa     ~       ,,re    ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+150.0s  150.4s  150.8s  151.2s  151.7s  152.1s 
+
+-- Line 62  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,,Dha   ,,re    ~       ,,,Ma' 
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+152.5s  152.9s  153.3s  153.8s  154.2s  154.6s 
+
+-- Line 63  (dadra, 6 beats/cycle)
+                                               
+-       ,re     ,Sa     ,,re    ~       ,,ni   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+155.0s  155.4s  155.8s  156.2s  156.7s  157.1s 
+
+-- Line 64  (dadra, 6 beats/cycle)
+                                               
+,,Ma'   -       ,re     ,,Re    ~       ,,Ma'  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+157.5s  157.9s  158.3s  158.8s  159.2s  159.6s 
+
+-- Line 65  (dadra, 6 beats/cycle)
+                                               
+~       -       ,,ni    ,,Re    ,,re    -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+160.0s  160.4s  160.8s  161.2s  161.7s  162.1s 
+
+-- Line 66  (dadra, 6 beats/cycle)
+                                               
+,,re    ,Ga     ~       ,,Sa    -       ,,Re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+162.5s  162.9s  163.3s  163.8s  164.2s  164.6s 
+
+-- Line 67  (dadra, 6 beats/cycle)
+                                               
+-       ,Sa     ,,re    ~       ,,Ga    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+165.0s  165.4s  165.8s  166.2s  166.7s  167.1s 
+
+-- Line 68  (dadra, 6 beats/cycle)
+                                               
+,,Ma'   -       -       -       -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+167.5s  167.9s  168.3s  168.8s  169.2s  169.6s 
+
+-- Line 69  (dadra, 6 beats/cycle)
+                                               
+-       -       ,,Ma    ~       ,,Ma'   ,,Re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+170.0s  170.4s  170.8s  171.2s  171.7s  172.1s 
+
+-- Line 70  (dadra, 6 beats/cycle)
+                                               
+~       ,,,dha  ,,Ma'   ,,,dha  -       ,,Ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+172.5s  172.9s  173.3s  173.8s  174.2s  174.6s 
+
+-- Line 71  (dadra, 6 beats/cycle)
+                                               
+-       -       -       -       ,,,Ma   ,,re   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+175.0s  175.4s  175.8s  176.2s  176.7s  177.1s 
+
+-- Line 72  (dadra, 6 beats/cycle)
+                                               
+~       -       ,,re    ,,Ga    ,Ma     ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+177.5s  177.9s  178.3s  178.8s  179.2s  179.6s 
+
+-- Line 73  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,,re    ,Ma'    ,Ma     ,dha   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+180.0s  180.4s  180.8s  181.2s  181.7s  182.1s 
+
+-- Line 74  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,Sa     -       -       ,ni    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+182.5s  182.9s  183.3s  183.8s  184.2s  184.6s 
+
+-- Line 75  (dadra, 6 beats/cycle)
+                                               
+~       ,,Dha   -       -       -       ,Dha   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+185.0s  185.4s  185.8s  186.2s  186.7s  187.1s 
+
+-- Line 76  (dadra, 6 beats/cycle)
+                                               
+~       -       ,,re    ,Ga     -       ,,Sa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+187.5s  187.9s  188.3s  188.8s  189.2s  189.6s 
+
+-- Line 77  (dadra, 6 beats/cycle)
+                                               
+~       ,,re    ~       ,Pa     ,Ma     ,dha   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+190.0s  190.4s  190.8s  191.2s  191.7s  192.1s 
+
+-- Line 78  (dadra, 6 beats/cycle)
+                                               
+~       ,Pa     ,,re    ,Ma     ,Dha    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+192.5s  192.9s  193.3s  193.8s  194.2s  194.6s 
+
+-- Line 79  (dadra, 6 beats/cycle)
+                                               
+,ni     -       -       -       ,,ni    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+195.0s  195.4s  195.8s  196.2s  196.7s  197.1s 
+
+-- Line 80  (dadra, 6 beats/cycle)
+                                               
+,,,Ma'  ~       ,,,Ma   ,Ga     ,Dha    -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+197.5s  197.9s  198.3s  198.8s  199.2s  199.6s 
+
+-- Line 81  (dadra, 6 beats/cycle)
+                                               
+-       ,,dha   ,,ni    ,,Pa    -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+200.0s  200.4s  200.8s  201.2s  201.7s  202.1s 
+
+-- Line 82  (dadra, 6 beats/cycle)
+                                               
+,Ma'    -       ,,Ni    ,re     ,,ni    ,,Dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+202.5s  202.9s  203.3s  203.8s  204.2s  204.6s 
+
+-- Line 83  (dadra, 6 beats/cycle)
+                                               
+,,ni    ~       ,Sa     ,,dha   -       ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+205.0s  205.4s  205.8s  206.2s  206.7s  207.1s 
+
+-- Line 84  (dadra, 6 beats/cycle)
+                                               
+-       ,,Pa    ,Sa     ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+207.5s  207.9s  208.3s  208.8s  209.2s  209.6s 
+
+-- Line 85  (dadra, 6 beats/cycle)
+                                               
+-       ,,,Ma   ,Sa     -       ,,ni    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+210.0s  210.4s  210.8s  211.2s  211.7s  212.1s 
+
+-- Line 86  (dadra, 6 beats/cycle)
+                                               
+,re     ~       ~       -       ,Sa     ,,ni   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+212.5s  212.9s  213.3s  213.8s  214.2s  214.6s 
+
+-- Line 87  (dadra, 6 beats/cycle)
+                                               
+~       ,,Pa    ,re     ~       ,,ni    ,,Ma   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+215.0s  215.4s  215.8s  216.2s  216.7s  217.1s 
+
+-- Line 88  (dadra, 6 beats/cycle)
+                                               
+~       ~       ,re     ~       ,,ni    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+217.5s  217.9s  218.3s  218.8s  219.2s  219.6s 
+
+-- Line 89  (dadra, 6 beats/cycle)
+                                               
+~       ~       ~       ,,Ga    ,,Ma    ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+220.0s  220.4s  220.8s  221.2s  221.7s  222.1s 
+
+-- Line 90  (dadra, 6 beats/cycle)
+                                               
+-       ,ni     -       ,dha    ~       ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+222.5s  222.9s  223.3s  223.8s  224.2s  224.6s 
+
+-- Line 91  (dadra, 6 beats/cycle)
+                                               
+,re     -       ,,Sa    -       ,,Ga    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+225.0s  225.4s  225.8s  226.2s  226.7s  227.1s 
+
+-- Line 92  (dadra, 6 beats/cycle)
+                                               
+,,Pa    ,,dha   ,Sa     ,,Dha   ,,ni    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+227.5s  227.9s  228.3s  228.8s  229.2s  229.6s 
+
+-- Line 93  (dadra, 6 beats/cycle)
+                                               
+,,Ga    ,,dha   -       ,,re    ,Re     ,ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+230.0s  230.4s  230.8s  231.2s  231.7s  232.1s 
+
+-- Line 94  (dadra, 6 beats/cycle)
+                                               
+,Sa     ~       ~       ~       ,ga     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+232.5s  232.9s  233.3s  233.8s  234.2s  234.6s 
+
+-- Line 95  (dadra, 6 beats/cycle)
+                                               
+,,Ma    ~       ,Sa     ~       ,,Pa    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+235.0s  235.4s  235.8s  236.2s  236.7s  237.1s 
+
+-- Line 96  (dadra, 6 beats/cycle)
+                                               
+,Sa     -       ,,ni    ,Sa     ,,Ma    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+237.5s  237.9s  238.3s  238.8s  239.2s  239.6s 
+
+-- Line 97  (dadra, 6 beats/cycle)
+                                               
+-       ,Ga     ~       ,Sa     ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+240.0s  240.4s  240.8s  241.2s  241.7s  242.1s 
+
+-- Line 98  (dadra, 6 beats/cycle)
+                                               
+~       ,,re    -       ,,Sa    ~       ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+242.5s  242.9s  243.3s  243.8s  244.2s  244.6s 
+
+-- Line 99  (dadra, 6 beats/cycle)
+                                               
+,,Dha   ,,re    -       ,,re    -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+245.0s  245.4s  245.8s  246.2s  246.7s  247.1s 
+
+-- Line 100  (dadra, 6 beats/cycle)
+                                               
+-       ,,ga    ~       ,,Ma    ,,,Ma'  ,,,Ma  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+247.5s  247.9s  248.3s  248.8s  249.2s  249.6s 
+
+-- Line 101  (dadra, 6 beats/cycle)
+                                               
+-       -       ,,ga    -       ,,re    -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+250.0s  250.4s  250.8s  251.2s  251.7s  252.1s 
+
+-- Line 102  (dadra, 6 beats/cycle)
+                                               
+-       -       -       ,,re    ,,Ma'   -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+252.5s  252.9s  253.3s  253.8s  254.2s  254.6s 
+
+-- Line 103  (dadra, 6 beats/cycle)
+                                               
+,,Sa    ,re     -       -       -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+255.0s  255.4s  255.8s  256.2s  256.7s  257.1s 
+
+-- Line 104  (dadra, 6 beats/cycle)
+                                               
+-       -       ,Sa     ~       -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+257.5s  257.9s  258.3s  258.8s  259.2s  259.6s 
+
+-- Line 105  (dadra, 6 beats/cycle)
+                                               
+,re     ,Ga     -       ,Sa     ,re     ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+260.0s  260.4s  260.8s  261.2s  261.7s  262.1s 
+
+-- Line 106  (dadra, 6 beats/cycle)
+                                               
+,,Sa    ,,ga    -       ,Pa     ,dha    ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+262.5s  262.9s  263.3s  263.8s  264.2s  264.6s 
+
+-- Line 107  (dadra, 6 beats/cycle)
+                                               
+-       ,,re    -       ,Pa     ,Ma'    ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+265.0s  265.4s  265.8s  266.2s  266.7s  267.1s 
+
+-- Line 108  (dadra, 6 beats/cycle)
+                                               
+,Ma     -       ,Ga     ,Ma     ~       ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+267.5s  267.9s  268.3s  268.8s  269.2s  269.6s 
+
+-- Line 109  (dadra, 6 beats/cycle)
+                                               
+,Ga     ~       -       ,Ma     ,Sa     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+270.0s  270.4s  270.8s  271.2s  271.7s  272.1s 
+
+-- Line 110  (dadra, 6 beats/cycle)
+                                               
+,ga     -       ,Pa     ~       ,re     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+272.5s  272.9s  273.3s  273.8s  274.2s  274.6s 
+
+-- Line 111  (dadra, 6 beats/cycle)
+                                               
+,,Ga    ,Ma'    ,dha    ,Ma     ,Ga     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+275.0s  275.4s  275.8s  276.2s  276.7s  277.1s 
+
+-- Line 112  (dadra, 6 beats/cycle)
+                                               
+-       ,Ga     ~       ~       ,Sa     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+277.5s  277.9s  278.3s  278.8s  279.2s  279.6s 
+
+-- Line 113  (dadra, 6 beats/cycle)
+                                               
+-       ,,Ma'   ,Ma     ,ga     -       ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+280.0s  280.4s  280.8s  281.2s  281.7s  282.1s 
+
+-- Line 114  (dadra, 6 beats/cycle)
+                                               
+,re     ,Re     ~       ,Sa     ,,ni    ,,dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+282.5s  282.9s  283.3s  283.8s  284.2s  284.6s 
+
+-- Line 115  (dadra, 6 beats/cycle)
+                                               
+,Sa     ~       ,ga     ,Ma     ,Pa     ,Ma'   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+285.0s  285.4s  285.8s  286.2s  286.7s  287.1s 
+
+-- Line 116  (dadra, 6 beats/cycle)
+                                               
+~       ,Ga     ,re     ~       ,Ga     -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+287.5s  287.9s  288.3s  288.8s  289.2s  289.6s 
+
+-- Line 117  (dadra, 6 beats/cycle)
+                                               
+,,Ma    ~       ,ga     ~       ,Ga     ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+290.0s  290.4s  290.8s  291.2s  291.7s  292.1s 
+
+-- Line 118  (dadra, 6 beats/cycle)
+                                               
+,Re     ,ga     ,Sa     ,,ni    ,,Pa    ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+292.5s  292.9s  293.3s  293.8s  294.2s  294.6s 
+
+-- Line 119  (dadra, 6 beats/cycle)
+                                               
+-       ,Ga     ,Pa     -       -       -      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+295.0s  295.4s  295.8s  296.2s  296.7s  297.1s 
+
+-- Line 120  (dadra, 6 beats/cycle)
+                                               
+,Re     ,Sa     ~       ~       ~       ,,dha  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+297.5s  297.9s  298.3s  298.8s  299.2s  299.6s 
+
+-- Line 121  (dadra, 6 beats/cycle)
+                                               
+,Sa     ,,Pa    ,Sa     ,,ni    ,,Ga    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+300.0s  300.4s  300.8s  301.2s  301.7s  302.1s 
+
+-- Line 122  (dadra, 6 beats/cycle)
+                                               
+,,,Ma   ~       ,Sa     ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+302.5s  302.9s  303.3s  303.8s  304.2s  304.6s 
+
+-- Line 123  (dadra, 6 beats/cycle)
+                                               
+,,Pa    ~       ,Sa     ,,Ma    ,,Ga    ,,,Ma  
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+305.0s  305.4s  305.8s  306.2s  306.7s  307.1s 
+
+-- Line 124  (dadra, 6 beats/cycle)
+                                               
+~       -       -       ,Sa     ~       ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+307.5s  307.9s  308.3s  308.8s  309.2s  309.6s 
+
+-- Line 125  (dadra, 6 beats/cycle)
+                                               
+-       ,dha    -       ,dha    ,Ga     ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+310.0s  310.4s  310.8s  311.2s  311.7s  312.1s 
+
+-- Line 126  (dadra, 6 beats/cycle)
+                                               
+~       ~       -       ,re     ,Sa     ,,Pa   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+312.5s  312.9s  313.3s  313.8s  314.2s  314.6s 
+
+-- Line 127  (dadra, 6 beats/cycle)
+                                               
+~       ,Sa     ,,Dha   ,,ni    ,Sa     ,,Ga   
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+315.0s  315.4s  315.8s  316.2s  316.7s  317.1s 
+
+-- Line 128  (dadra, 6 beats/cycle)
+                                               
+,,Dha   ,Sa     ,,Pa    ,ga     ,,Re    ,re    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+317.5s  317.9s  318.3s  318.8s  319.2s  319.6s 
+
+-- Line 129  (dadra, 6 beats/cycle)
+                                               
+,Sa     ~       ~       ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+320.0s  320.4s  320.8s  321.2s  321.7s  322.1s 
+
+-- Line 130  (dadra, 6 beats/cycle)
+                                               
+~       ~       -       ,,Pa    ,Sa     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+322.5s  322.9s  323.3s  323.8s  324.2s  324.6s 
+
+-- Line 131  (dadra, 6 beats/cycle)
+                                               
+~       ~       ~       ~       ,ga     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+325.0s  325.4s  325.8s  326.2s  326.7s  327.1s 
+
+-- Line 132  (dadra, 6 beats/cycle)
+                                               
+-       ,ga     ,Ma     ,Re     ,ga     ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+327.5s  327.9s  328.3s  328.8s  329.2s  329.6s 
+
+-- Line 133  (dadra, 6 beats/cycle)
+                                               
+,,,Pa   -       ,,Sa    ,Ga     ,Ma     ,Sa    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+330.0s  330.4s  330.8s  331.2s  331.7s  332.1s 
+
+-- Line 134  (dadra, 6 beats/cycle)
+                                               
+~       ,,Pa    ,,Dha   -       ,,ni    ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+332.5s  332.9s  333.3s  333.8s  334.2s  334.6s 
+
+-- Line 135  (dadra, 6 beats/cycle)
+                                               
+,,Ga    ,,,Pa   ,Sa     ,Ga     ,ga     ,Ga    
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+335.0s  335.4s  335.8s  336.2s  336.7s  337.1s 
+
+-- Line 136  (dadra, 6 beats/cycle)
+                                               
+,Sa     ~       ~       ~       ~       ~      
+Dha(X)  Dhi     Na      Dha(O)  Tu      Na     
+337.5s  337.9s  338.3s  338.8s  339.2s  339.6s 
+
+-- Line 137  (dadra, 6 beats/cycle)
+               
+~       ~      
+Dha(X)  Dhi    
+340.0s  340.4s 

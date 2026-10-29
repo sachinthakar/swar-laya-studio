@@ -1,0 +1,4840 @@
+{
+  "title": "Zindagi milke bitayenge",
+  "scale": "138.59",
+  "bpm": 160,
+  "pre_roll": 0,
+  "lines": [
+    {
+      "section": "Prelude",
+      "line_instrument": "harmonium",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga",
+          "Re",
+          "dha"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Prelude",
+      "line_instrument": "harmonium",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga",
+          "Re",
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Prelude",
+      "line_instrument": "harmonium",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "5",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Pa",
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Dha",
+          "Dha"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Prelude",
+      "line_instrument": "harmonium",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Prelude",
+      "line_instrument": "harmonium",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "4",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Pa",
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Zin"
+        ],
+        [
+          "da"
+        ],
+        [
+          "gi"
+        ],
+        [
+          ""
+        ],
+        [
+          "mil"
+        ],
+        [
+          "ke"
+        ],
+        [
+          "bi"
+        ],
+        [
+          "ta"
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga",
+          "Re",
+          "dha"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Haal"
+        ],
+        [
+          "-e-"
+        ],
+        [
+          "dil"
+        ],
+        [
+          ""
+        ],
+        [
+          "gaa"
+        ],
+        [
+          "ke"
+        ],
+        [
+          "su"
+        ],
+        [
+          "naa"
+        ]
+      ],
+      "notes": [
+        [
+          "dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga",
+          "Re",
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Ham"
+        ],
+        [
+          ""
+        ],
+        [
+          "to"
+        ],
+        [
+          ""
+        ],
+        [
+          "saat"
+        ],
+        [
+          ""
+        ],
+        [
+          "rang"
+        ],
+        [
+          "hai"
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          ""
+        ],
+        [
+          "Pa",
+          "Ma",
+          "Pa"
+        ],
+        [
+          ""
+        ],
+        [
+          "Dha",
+          "Dha"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Mukhda",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "ye"
+        ],
+        [
+          ""
+        ],
+        [
+          "ja"
+        ],
+        [
+          "haan"
+        ],
+        [
+          "ran"
+        ],
+        [
+          "gin"
+        ],
+        [
+          "ba"
+        ],
+        [
+          "na"
+        ]
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          ""
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa",
+          "Ma",
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "mouthorgan",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "mouthorgan",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "7",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "dha"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "mouthorgan",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "mouthorgan",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "7",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "dha"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Pa"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Sa",
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "keyboard",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "12",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Re"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "keyboard",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ni",
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Sa"
+        ],
+        [
+          "ra"
+        ],
+        [
+          "gam"
+        ],
+        [
+          ""
+        ],
+        [
+          "ha"
+        ],
+        [
+          "ma"
+        ],
+        [
+          "se"
+        ],
+        [
+          "ba"
+        ]
+      ],
+      "notes": [
+        [
+          "Ga",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "ne"
+        ],
+        [
+          ""
+        ],
+        [
+          "ham"
+        ],
+        [
+          "a"
+        ],
+        [
+          "se"
+        ],
+        [
+          "ja"
+        ],
+        [
+          "waa"
+        ],
+        [
+          "n"
+        ]
+      ],
+      "notes": [
+        [
+          "Ga",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Jhu"
+        ],
+        [
+          "me"
+        ],
+        [
+          ""
+        ],
+        [
+          "a"
+        ],
+        [
+          "saa"
+        ],
+        [
+          "maan"
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          ""
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Are"
+        ],
+        [
+          ""
+        ],
+        [
+          "Ham"
+        ],
+        [
+          ""
+        ],
+        [
+          "hi"
+        ],
+        [
+          ""
+        ],
+        [
+          "to"
+        ],
+        [
+          "du"
+        ]
+      ],
+      "notes": [
+        [
+          "Sa",
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "ni"
+        ],
+        [
+          "ya"
+        ],
+        [
+          "ke"
+        ],
+        [
+          ""
+        ],
+        [
+          "saat"
+        ],
+        [
+          ""
+        ],
+        [
+          "a"
+        ],
+        [
+          "ju"
+        ]
+      ],
+      "notes": [
+        [
+          "Dha",
+          "ni",
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Re",
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "be"
+        ],
+        [
+          "hai"
+        ],
+        [
+          ""
+        ],
+        [
+          "ham"
+        ],
+        [
+          "se"
+        ],
+        [
+          "hai"
+        ],
+        [
+          "ja"
+        ],
+        [
+          "haa"
+        ]
+      ],
+      "notes": [
+        [
+          "Sa",
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa",
+          "Re",
+          "ni"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 1",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ]
+      ],
+      "notes": [
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          2
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "violin",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "trumpet",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "trumpet",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "ni"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re",
+          "Ga"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "whistle",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "~"
+        ],
+        [
+          "Ma",
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "whistle",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "8",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga",
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "dha"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          2
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "keyboard",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "12",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Re"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "re"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "ga"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Interlude",
+      "line_instrument": "keyboard",
+      "percussion": "mute",
+      "line_volume": 1,
+      "adlib": true,
+      "legato": true,
+      "line_bpm": 160,
+      "taal_key": "0",
+      "beats": "4",
+      "lyrics": [
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Ga"
+        ],
+        [
+          "Ma"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Ni",
+          "Pa"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          1
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Khu"
+        ],
+        [
+          "shi"
+        ],
+        [
+          "yaa"
+        ],
+        [
+          "n"
+        ],
+        [
+          "baa"
+        ],
+        [
+          "ten"
+        ],
+        [
+          "ge"
+        ],
+        [
+          "ham"
+        ]
+      ],
+      "notes": [
+        [
+          "Ga",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "har"
+        ],
+        [
+          ""
+        ],
+        [
+          "gam"
+        ],
+        [
+          ""
+        ],
+        [
+          "mi"
+        ],
+        [
+          "la"
+        ],
+        [
+          "ke"
+        ],
+        [
+          "sa"
+        ]
+      ],
+      "notes": [
+        [
+          "Ga",
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Pa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "hen"
+        ],
+        [
+          ""
+        ],
+        [
+          "Fir"
+        ],
+        [
+          ""
+        ],
+        [
+          "kyon"
+        ],
+        [
+          ""
+        ],
+        [
+          "an"
+        ],
+        [
+          "su"
+        ]
+      ],
+      "notes": [
+        [
+          "Sa"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          ""
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Ga"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma"
+        ]
+      ],
+      "octaves": [
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "ba"
+        ],
+        [
+          "hen"
+        ],
+        [
+          ""
+        ],
+        [
+          "Ban"
+        ],
+        [
+          ""
+        ],
+        [
+          "ke"
+        ],
+        [
+          "sa"
+        ],
+        [
+          "haa"
+        ]
+      ],
+      "notes": [
+        [
+          "Sa",
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "ra"
+        ],
+        [
+          "e"
+        ],
+        [
+          "k"
+        ],
+        [
+          "du"
+        ],
+        [
+          "je"
+        ],
+        [
+          "ka"
+        ],
+        [
+          "yu"
+        ],
+        [
+          "hi"
+        ]
+      ],
+      "notes": [
+        [
+          "Dha",
+          "ni",
+          "Sa"
+        ],
+        [
+          "Re"
+        ],
+        [
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "ni"
+        ],
+        [
+          "Re",
+          "Sa",
+          "ni"
+        ],
+        [
+          "Dha"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "cha"
+        ],
+        [
+          "la"
+        ],
+        [
+          "te"
+        ],
+        [
+          ""
+        ],
+        [
+          "ra"
+        ],
+        [
+          "hen"
+        ],
+        [
+          ""
+        ],
+        [
+          ""
+        ]
+      ],
+      "notes": [
+        [
+          "Sa",
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa"
+        ],
+        [
+          "Sa",
+          "Re",
+          "ni"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ],
+        [
+          "~"
+        ]
+      ],
+      "octaves": [
+        [
+          1,
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    },
+    {
+      "section": "Antara 2",
+      "line_instrument": "harmonium",
+      "percussion": "tabla",
+      "line_volume": 1,
+      "adlib": false,
+      "legato": true,
+      "line_bpm": null,
+      "taal_key": "8",
+      "beats": "8",
+      "lyrics": [
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ],
+        [
+          "Tu"
+        ],
+        [
+          "a"
+        ]
+      ],
+      "notes": [
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "Ma",
+          "Pa"
+        ],
+        [
+          "ni"
+        ]
+      ],
+      "octaves": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0
+        ]
+      ],
+      "meend": [
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false,
+          false
+        ],
+        [
+          false
+        ]
+      ]
+    }
+  ]
+}

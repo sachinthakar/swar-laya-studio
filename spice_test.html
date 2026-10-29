@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPICE pitch test — Swar-Laya</title>
+<style>
+  body{font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;margin:0;background:#faf8f4;color:#1a1a1a}
+  header{background:#fff;border-bottom:1px solid #e6e1d8;padding:16px 22px}
+  h1{font-size:18px;margin:0}
+  .sub{color:#6b6b6b;font-size:13px;margin-top:3px}
+  main{max-width:920px;margin:0 auto;padding:22px}
+  .card{background:#fff;border:1px solid #e6e1d8;border-radius:10px;padding:18px;margin-bottom:16px}
+  label{font-weight:600;font-size:13px;display:block;margin-bottom:4px}
+  input[type=text],input[type=number]{font:14px system-ui;padding:7px 9px;border:1px solid #ccc;border-radius:6px;width:120px}
+  button{font:600 14px system-ui;padding:9px 15px;border:0;border-radius:7px;background:#2b6cb0;color:#fff;cursor:pointer}
+  button:disabled{background:#9db4c7;cursor:default}
+  button.sec{background:#edf0f3;color:#1a1a1a;border:1px solid #ccc}
+  .row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+  #status{font-size:13px;color:#444;min-height:18px}
+  canvas{width:100%;height:220px;background:#0f1424;border-radius:8px;display:block}
+  table{border-collapse:collapse;font-size:13px;width:100%}
+  td,th{border:1px solid #e6e1d8;padding:4px 8px;text-align:left}
+  code{background:#f0ede8;padding:1px 5px;border-radius:4px}
+  .big{font-size:26px;font-weight:700}
+  .muted{color:#6b6b6b}
+</style>
+</head>
+<body>
+<header>
+  <h1>SPICE neural pitch — browser test</h1>
+  <div class="sub">Loads Google's SPICE model in TensorFlow.js and tracks pitch on your file — the same engine we'd wire into "Detect Notes". No server.</div>
+</header>
+<main>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>1. Audio file</label>
+        <input type="file" id="file" accept="audio/*">
+      </div>
+      <div>
+        <label>Sa (Hz or note, e.g. G#3)</label>
+        <input type="text" id="sa" value="auto">
+      </div>
+      <div>
+        <label>Confidence gate (0–1)</label>
+        <input type="number" id="conf" value="0.80" step="0.05" min="0" max="1">
+      </div>
+      <button id="run" disabled>Run SPICE</button>
+    </div>
+    <p id="status" style="margin:12px 0 0">Loading TensorFlow.js + SPICE model…</p>
+  </div>
+
+  <div class="card" id="results" style="display:none">
+    <div class="row" style="justify-content:space-between">
+      <div><div class="muted">Detected Sa</div><div class="big" id="saOut">—</div></div>
+      <div><div class="muted">Voiced frames</div><div class="big" id="voiced">—</div></div>
+      <div><div class="muted">Pitch range</div><div class="big" id="range">—</div></div>
+      <div style="align-self:center">
+        <button class="sec" id="playOrig">▶ Original</button>
+        <button class="sec" id="playPitch">♪ Detected pitch</button>
+        <button class="sec" id="stop">■ Stop</button>
+      </div>
+    </div>
+    <canvas id="plot" height="220"></canvas>
+    <div class="muted" style="font-size:12px;margin-top:6px">Pitch contour (cyan) over time. Horizontal lines = swara positions of the detected scale. Drag not enabled — this is a read-only check.</div>
+  </div>
+
+  <div class="card" id="diag" style="display:none">
+    <label>Diagnostics</label>
+    <div id="diagBody" style="font-size:13px"></div>
+  </div>
+
+  <div class="card">
+    <label>Model source</label>
+    <input type="text" id="modelUrl" style="width:100%;max-width:640px"
+      value="https://tfhub.dev/google/tfjs-model/spice/1/default/1">
+    <div class="muted" style="font-size:12px;margin-top:6px">
+      Default loads from TF Hub (needs internet, first load only). If it fails, download the SPICE tfjs model once and point this at a self-hosted <code>models/spice/model.json</code>.
+      <label style="display:inline;font-weight:400;margin-left:10px"><input type="checkbox" id="fromhub" checked> from TF Hub</label>
+      <label style="display:inline;font-weight:400;margin-left:10px"><input type="checkbox" id="swap"> swap pitch/uncertainty outputs</label>
+    </div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+<script>
+const SWARA=["Sa","re","Re","ga","Ga","Ma","ma","Pa","dha","Dha","ni","Ni"];
+const JI=[1,16/15,9/8,6/5,5/4,4/3,45/32,3/2,8/5,5/3,9/5,15/8];
+const JICENT=JI.map(r=>1200*Math.log2(r));
+const NOTE={C:261.63,"C#":277.18,D:293.66,"D#":311.13,E:329.63,F:349.23,"F#":369.99,G:392.00,"G#":415.30,A:440.00,"A#":466.16,B:493.88};
+let model=null, audioBuf=null, ctx=null, S={hz:null,conf:null,step:0.032}, saHz=null, playing=null;
+
+const $=id=>document.getElementById(id);
+const status=m=>{$("status").textContent=m;};
+
+function parseSa(t){
+  t=(t||"").trim(); if(!t||t.toLowerCase()==="auto")return null;
+  if(!isNaN(parseFloat(t))&&/^[0-9.]+$/.test(t))return parseFloat(t);
+  let m=t.toUpperCase().match(/^([A-G]#?)(\d)?$/); if(!m)return null;
+  let oc=m[2]?parseInt(m[2]):4; return NOTE[m[1]]*Math.pow(2,oc-4);
+}
+
+// ---- load model ----
+(async()=>{
+  try{
+    await tf.setBackend('webgl').catch(()=>tf.setBackend('cpu'));
+    await tf.ready();
+    await loadModel();
+    status("Model ready. Choose an audio file and press Run SPICE.");
+    $("run").disabled=false;
+  }catch(e){ status("Model load failed: "+e.message+"  (try unchecking 'from TF Hub' and self-hosting)"); }
+})();
+
+async function loadModel(){
+  const url=$("modelUrl").value.trim();
+  status("Loading SPICE model…");
+  model=await tf.loadGraphModel(url,{fromTFHub:$("fromhub").checked});
+  const ins=(model.inputs||[]).map(t=>`${t.name} [${t.shape}]`).join(", ");
+  const outs=(model.outputs||[]).map(t=>t.name).join(", ");
+  $("diag").style.display="block";
+  $("diagBody").innerHTML=`backend: <code>${tf.getBackend()}</code><br>inputs: <code>${ins}</code><br>outputs: <code>${outs}</code>`;
+}
+$("modelUrl").addEventListener("change",()=>{$("run").disabled=true;loadModel().then(()=>$("run").disabled=false).catch(e=>status("reload failed: "+e.message));});
+
+// ---- load audio ----
+$("file").addEventListener("change",async e=>{
+  const f=e.target.files[0]; if(!f)return;
+  status("Decoding audio…");
+  ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();
+  audioBuf=await ctx.decodeAudioData(await f.arrayBuffer());
+  status(`Loaded ${audioBuf.duration.toFixed(1)}s. Press Run SPICE.`);
+});
+
+// ---- resample to 16k mono ----
+function to16k(buf){
+  const sr=buf.sampleRate, n=buf.numberOfChannels;
+  let mono=buf.getChannelData(0);
+  if(n>1){const c1=buf.getChannelData(1);const m=new Float32Array(mono.length);for(let i=0;i<mono.length;i++)m[i]=(mono[i]+c1[i])*0.5;mono=m;}
+  const ratio=16000/sr, outLen=Math.floor(mono.length*ratio), out=new Float32Array(outLen);
+  for(let i=0;i<outLen;i++){const t=i/ratio, i0=Math.floor(t), frac=t-i0; out[i]=(mono[i0]||0)*(1-frac)+(mono[i0+1]||0)*frac;}
+  return out;
+}
+
+// ---- run SPICE ----
+$("run").addEventListener("click",async()=>{
+  if(!audioBuf){status("Load an audio file first.");return;}
+  if(!model){status("Model not loaded.");return;}
+  $("run").disabled=true; status("Resampling to 16 kHz…");
+  const s16=to16k(audioBuf);
+  status(`Running SPICE on ${(s16.length/16000).toFixed(1)}s … (this can take 10–60s)`);
+  await new Promise(r=>setTimeout(r,30));
+  const hz=[],conf=[];
+  const WIN=16000*20; // 20s windows to bound memory
+  for(let off=0; off<s16.length; off+=WIN){
+    const chunk=s16.subarray(off,Math.min(off+WIN,s16.length));
+    const res=tf.tidy(()=>{
+      const input=tf.tensor1d(chunk);
+      let out=model.execute(input); // may be array or single
+      if(!Array.isArray(out)) out=[out];
+      // SPICE: [pitch, uncertainty]; allow swap
+      let p=out[0],u=out[1]||out[0];
+      if($("swap").checked){const t=p;p=u;u=t;}
+      return [p.dataSync(), u.dataSync()];
+    });
+    const [p,u]=res;
+    for(let i=0;i<p.length;i++){
+      const cqt=p[i]*63.07+25.58;
+      hz.push(10*Math.pow(2,cqt/12));
+      conf.push(1-u[i]);
+    }
+    status(`SPICE… ${Math.round(100*Math.min(off+WIN,s16.length)/s16.length)}%`);
+    await new Promise(r=>setTimeout(r,0));
+  }
+  S.hz=hz; S.conf=conf; S.step=512/16000;
+  analyse();
+  $("run").disabled=false;
+});
+
+function analyse(){
+  const thr=parseFloat($("conf").value)||0.8;
+  const vhz=[]; for(let i=0;i<S.hz.length;i++) if(S.conf[i]>=thr && S.hz[i]>=80 && S.hz[i]<=1000) vhz.push(S.hz[i]);
+  if(!vhz.length){status("No confident pitch found — lower the confidence gate.");return;}
+  // Sa
+  const man=parseSa($("sa").value);
+  saHz = man || detectSa(vhz);
+  $("results").style.display="block";
+  $("saOut").textContent=saHz.toFixed(1)+" Hz";
+  $("voiced").textContent=Math.round(100*vhz.length/S.hz.length)+"%";
+  const mn=Math.min(...vhz),mx=Math.max(...vhz);
+  $("range").textContent=mn.toFixed(0)+"–"+mx.toFixed(0);
+  status("Done. Compare ▶ Original vs ♪ Detected pitch by ear.");
+  draw();
+}
+
+function detectSa(vhz){
+  const h=new Float32Array(1200);
+  vhz.forEach(f=>{let c=((1200*Math.log2(f/55))%1200+1200)%1200; h[Math.floor(c)]+=1;});
+  // circular smooth
+  const s=new Float32Array(1200);
+  for(let i=0;i<1200;i++){let a=0;for(let k=-8;k<=8;k++)a+=h[((i+k)%1200+1200)%1200];s[i]=a;}
+  let bi=0;for(let i=1;i<1200;i++)if(s[i]>s[bi])bi=i;
+  let sa=55*Math.pow(2,bi/1200); while(sa<150)sa*=2; return sa;
+}
+
+function draw(){
+  const cv=$("plot"),g=cv.getContext("2d");
+  const W=cv.width=cv.offsetWidth, H=cv.height;
+  g.fillStyle="#0f1424";g.fillRect(0,0,W,H);
+  // swara guide lines over ~2 octaves around Sa
+  g.font="10px system-ui";
+  for(let semi=-12; semi<=24; semi++){
+    const f=saHz*Math.pow(2,semi/12);
+    const y=hzToY(f,H);
+    if(y<0||y>H)continue;
+    const pc=((semi%12)+12)%12;
+    g.strokeStyle=(pc===0)?"#3a4d6b":"#20263a"; g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();
+    if(pc===0){g.fillStyle="#8fa6c8";g.fillText("Sa",4,y-2);}
+  }
+  g.strokeStyle="#38e0d0";g.lineWidth=1.4;g.beginPath();
+  const thr=parseFloat($("conf").value)||0.8;
+  let pen=false;
+  for(let i=0;i<S.hz.length;i++){
+    const x=W*i/S.hz.length;
+    if(S.conf[i]<thr||S.hz[i]<80){pen=false;continue;}
+    const y=hzToY(S.hz[i],H);
+    if(!pen){g.moveTo(x,y);pen=true;}else g.lineTo(x,y);
+  }
+  g.stroke();
+}
+function hzToY(f,H){const lo=saHz*Math.pow(2,-13/12),hi=saHz*Math.pow(2,25/12);
+  const t=(Math.log2(f)-Math.log2(lo))/(Math.log2(hi)-Math.log2(lo));return H-t*H;}
+
+// ---- playback ----
+function stop(){if(playing){try{playing.stop()}catch(e){}playing=null;}}
+$("stop").addEventListener("click",stop);
+$("playOrig").addEventListener("click",()=>{stop();const s=ctx.createBufferSource();s.buffer=audioBuf;s.connect(ctx.destination);s.start();playing=s;});
+$("playPitch").addEventListener("click",()=>{
+  stop();
+  const sr=ctx.sampleRate, dur=S.hz.length*S.step, buf=ctx.createBuffer(1,Math.ceil(dur*sr),sr), d=buf.getChannelData(0);
+  const thr=parseFloat($("conf").value)||0.8; let ph=0;
+  for(let i=0;i<d.length;i++){
+    const fi=Math.floor(i/sr/S.step);
+    const ok=fi<S.hz.length&&S.conf[fi]>=thr&&S.hz[fi]>=80;
+    if(ok){ph+=2*Math.PI*S.hz[fi]/sr; d[i]=0.5*Math.sin(ph)+0.15*Math.sin(2*ph);}else ph=0;
+  }
+  const s=ctx.createBufferSource();s.buffer=buf;s.connect(ctx.destination);s.start();playing=s;
+});
+$("conf").addEventListener("change",()=>{if(S.hz)analyse();});
+$("sa").addEventListener("change",()=>{if(S.hz)analyse();});
+</script>
+</body>
+</html>

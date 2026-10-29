@@ -616,6 +616,7 @@
         .sm-cell-pyin  { color: #88ccff; font-size: 11px; }
         .sm-cell-voiced{ color: #99ffaa; font-size: 11px; }
         .sm-cell-sustain{ color: #aaaaaa; }
+        .sm-cell-playing{ background: #ffdd00 !important; color: #111 !important; border-radius: 3px; }
         .sm-accepted-line {
             background: #0d1f0d; border: 1px solid #226622; border-radius: 6px;
             padding: 8px 10px; margin-bottom: 6px; font-size: 12px;
@@ -669,6 +670,8 @@
             border-radius: 4px; padding: 2px 3px; font-size: 12px;
             flex: 1; min-width: 0;
         }
+        /* Controls column: stacks oct-buttons row + meend button vertically */
+        .sm-sub-controls { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
         .sm-oct-btns { display: flex; gap: 2px; }
         .sm-oct-btn {
             padding: 2px 4px; border: 1px solid #3d3d6e; border-radius: 3px;
@@ -679,7 +682,7 @@
         .sm-sub-remove-btn {
             padding: 1px 5px; border: 1px solid #553333; border-radius: 3px;
             background: #2a1010; color: #cc6666; font-size: 11px; cursor: pointer;
-            line-height: 1.3; flex-shrink: 0;
+            line-height: 1.3; flex-shrink: 0; align-self: center;
         }
         .sm-sub-remove-btn:hover { background: #3a1818; color: #ff8888; }
         .sm-sub-add-btn {
@@ -688,10 +691,27 @@
             margin-top: 2px; text-align: center;
         }
         .sm-sub-add-btn:hover { background: #141428; color: #88aaee; border-color: #4a4a8a; }
+        .sm-meend-btn {
+            padding: 2px 4px; border: 1px solid #5a3a00; border-radius: 3px;
+            background: #1e1200; color: #aa7700; font-size: 10px; cursor: pointer;
+            font-style: italic; font-weight: bold; text-align: center;
+            width: 100%;   /* fills the column so it's always visible */
+        }
+        .sm-meend-btn:hover { background: #2a1a00; color: #ddaa00; }
+        .sm-meend-btn.active { background: #c07000; color: #fff; border-color: #ff9900; }
         .sm-action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
         .sm-status { font-size: 12px; color: #88aaff; margin-top: 6px; }
         .sm-error  { font-size: 12px; color: #ff6666; margin-top: 6px; }
     </style>
+<style id="slp-cand-css">
+.sm-cands{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px}
+.sm-cand{font:600 11px system-ui,sans-serif;padding:1px 6px;border-radius:5px;background:#2a3350;
+         border:1px solid #3d4a66;color:#cfe0ff;cursor:pointer;line-height:1.5}
+.sm-cand:hover{border-color:#5aa0ff}
+.sm-cand.cur{background:#123a2a;border-color:#57d9a3;color:#9ff0cf}
+.sm-cand.komal{color:#ffbf8f}
+.sm-cand i{font-style:normal;opacity:.6;font-size:9px;margin-left:2px}
+</style>
 </head>
 <body>
 <div class="container">
@@ -894,6 +914,20 @@
                     <label>Song Title</label>
                     <input type="text" id="sm-title" value="Transcription" style="width:160px;">
                 </div>
+                <div class="sm-control">
+                    <label title="Which octave the lead melody sits in, relative to the Sa dropdown value">Melody Octave</label>
+                    <select id="sm-oct-offset" title="Adjust if all notes come out one octave too high or low">
+                        <option value="0">Same as Sa (very deep bass)</option>
+                        <option value="1" selected>+1 oct — standard (most songs)</option>
+                        <option value="2">+2 oct — high soprano / taar</option>
+                    </select>
+                </div>
+                <div class="sm-control">
+                    <label title="Minimum RMS energy to attempt pitch detection. Raise to suppress tabla/noise frames.">Energy Gate</label>
+                    <input type="number" id="sm-rms-gate" value="0.010" min="0.001" max="0.100" step="0.001"
+                           style="width:78px;"
+                           title="Raise (e.g. 0.025) to ignore tabla/noise. Lower if soft notes are missed. No reload needed.">
+                </div>
             </div>
             <div id="sm-load-status" class="sm-status" style="margin-top:8px;"></div>
         </div>
@@ -944,8 +978,8 @@
             <h3>🎼 Detected Notation</h3>
             <div id="sm-notation-display"></div>
             <div class="sm-action-row">
-                <button class="sm-btn sm-btn-neutral" onclick="smPlaySynth()">🎹 Play Synth</button>
-                <button class="sm-btn sm-btn-neutral sm-play-orig-btn" onclick="smTogglePlay()">▶ Play Original</button>
+                <button id="sm-play-synth-btn" class="sm-btn sm-btn-neutral" onclick="smToggleSynth(false)">🎹 Play Synth</button>
+                <button id="sm-play-seg-btn"   class="sm-btn sm-btn-neutral" onclick="smToggleSegPlay()">▶ Play Original</button>
                 <button class="sm-btn sm-btn-success" onclick="smAccept()">✔ Accept</button>
                 <button class="sm-btn sm-btn-accent"  onclick="smToggleEdit()">✏ Edit</button>
                 <button class="sm-btn sm-btn-danger"  onclick="smSkip()">⏭ Skip</button>
@@ -953,13 +987,13 @@
             <!-- Edit grid (hidden by default) -->
             <div id="sm-edit-panel" style="display:none; margin-top:12px;">
                 <div style="font-size:12px; color:#88aaff; margin-bottom:8px;">
-                    Edit beats below. Prefix: <code style="color:#ffdd88;">.</code>=mandra &nbsp; <code style="color:#ffdd88;">'</code>=taar &nbsp; no prefix=madhya
+                    Edit beats below. Prefix: <code style="color:#ffdd88;">.</code>=mandra &nbsp; <code style="color:#ffdd88;">'</code>=taar &nbsp; madhya=default (tap active button again to reset) &nbsp;|&nbsp; <code style="color:#ffdd88;">meend →</code> marks the note that <em>starts</em> the glide — it slides into the next note
                 </div>
                 <div id="sm-edit-grid" class="sm-edit-grid"></div>
                 <div class="sm-action-row" style="margin-top:10px;">
                     <button class="sm-btn sm-btn-success" onclick="smAcceptEdited()">✔ Accept Edited</button>
                     <button class="sm-btn sm-btn-neutral" onclick="smToggleEdit()">✖ Cancel Edit</button>
-                    <button class="sm-btn sm-btn-neutral" onclick="smPlaySynth(true)">🎹 Play Edited</button>
+                    <button id="sm-play-edit-btn" class="sm-btn sm-btn-neutral" onclick="smToggleSynth(true)">🎹 Play Edited</button>
                 </div>
             </div>
             <div id="sm-result-status" class="sm-status"></div>
@@ -1297,7 +1331,9 @@ function findBestSample(instrument, targetHz) {
 }
 
 // Play one note from a sample; returns true if a sample was found and played
-function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false) {
+// toFreq > 0  → SOURCE meend: note's own sample, natural attack, pitch ramps OUT toward toFreq.
+// prevFreq > 0 → DEST meend (legacy / ~-meend): sample starts at prevFreq pitch, arrives at freq.
+function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato = false, toFreq = 0) {
     const buf = findBestSample(instrument, freq);
     if (!buf || !sampleBus) return false;
     const now = audioCtx.currentTime;
@@ -1305,12 +1341,18 @@ function triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevF
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
 
-    // Pitch: if meend (glide > ~20ms), ramp playbackRate from prevFreq to freq
-    const endRate   = freq / buf.baseHz;
-    const startRate = (glideTime > 0.02 && prevFreq) ? (prevFreq / buf.baseHz) : endRate;
-    src.playbackRate.setValueAtTime(startRate, now);
-    if (startRate !== endRate) {
-        src.playbackRate.exponentialRampToValueAtTime(endRate, now + glideTime);
+    const naturalRate = freq / buf.baseHz;
+    if (toFreq > 0) {
+        // SOURCE meend: start at natural pitch, ramp toward destination
+        src.playbackRate.setValueAtTime(naturalRate, now);
+        src.playbackRate.exponentialRampToValueAtTime(toFreq / buf.baseHz, now + glideTime);
+    } else {
+        // DEST meend (or no glide): optionally start at prevFreq pitch and arrive at naturalRate
+        const startRate = (glideTime > 0.02 && prevFreq) ? (prevFreq / buf.baseHz) : naturalRate;
+        src.playbackRate.setValueAtTime(startRate, now);
+        if (startRate !== naturalRate) {
+            src.playbackRate.exponentialRampToValueAtTime(naturalRate, now + glideTime);
+        }
     }
 
     const env = audioCtx.createGain();
@@ -1774,16 +1816,19 @@ function stopSynth() {
     if (mainGain) { mainGain.disconnect(); mainGain = null; }
 }
 
-function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false) {
+// toFreq > 0 → SOURCE meend: this note starts at its own pitch and glides TOWARD toFreq.
+function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato = false, toFreq = 0) {
     const vs = (volScale !== undefined) ? volScale : 1.0;
 
     // ── Sample-based playback (preferred when samples are loaded) ─────────────
-    const prevFreq = (glideTime > 0.02) ? lastPlayedFreq : null;
-    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato)) {
-        lastPlayedFreq = freq;
-        return;   // sample handled it; skip oscillator path
+    // For SOURCE meend (toFreq > 0) don't use prevFreq — the glide goes outward.
+    const prevFreq = (toFreq === 0 && glideTime > 0.02) ? lastPlayedFreq : null;
+    if (triggerSampledNote(freq, instrument, glideTime, noteDuration, vs, prevFreq, legato, toFreq)) {
+        // Update lastPlayedFreq to the pitch the note ENDS on (destination for meend)
+        lastPlayedFreq = toFreq > 0 ? toFreq : freq;
+        return;
     }
-    lastPlayedFreq = freq;
+    lastPlayedFreq = toFreq > 0 ? toFreq : freq;
 
     // ── Oscillator fallback (used until samples finish loading) ───────────────
     if (!mainOsc || !mainGain) return;
@@ -1791,13 +1836,19 @@ function triggerNote(freq, instrument, glideTime, noteDuration, volScale, legato
 
     // ── Frequency (with glide or near-instant snap) ────────────────────────
     for (const h of harmonics) {
-        const targetFreq = Math.max(freq * h.ratio, 1.0);
+        const thisFreq = Math.max(freq * h.ratio, 1.0);
         h.osc.frequency.cancelScheduledValues(now);
-        h.osc.frequency.setValueAtTime(h.osc.frequency.value || targetFreq, now);
-        // For meend the caller supplies a long glideTime; for normal notes it
-        // is only 8 ms — just enough to prevent a click, not audible as a slide.
-        h.osc.frequency.exponentialRampToValueAtTime(targetFreq,
-            now + Math.max(glideTime, 0.005));
+        if (toFreq > 0) {
+            // SOURCE meend: start at this note's pitch, ramp to destination
+            h.osc.frequency.setValueAtTime(thisFreq, now);
+            h.osc.frequency.exponentialRampToValueAtTime(
+                Math.max(toFreq * h.ratio, 1.0), now + glideTime);
+        } else {
+            // Normal or DEST meend: arrive at this note's pitch
+            h.osc.frequency.setValueAtTime(h.osc.frequency.value || thisFreq, now);
+            h.osc.frequency.exponentialRampToValueAtTime(thisFreq,
+                now + Math.max(glideTime, 0.005));
+        }
     }
 
     // ── Amplitude envelope (Attack → Sustain → Release) ───────────────────
@@ -2073,34 +2124,59 @@ function startPlayback(singleLineEl = null) {
                             const ratio   = SwaraMap[swara];
                             const isMeend = unit.querySelector('.meend-btn') &&
                                             unit.querySelector('.meend-btn').classList.contains('active');
-                            // Meend: glide over 88% of sub-beat. Normal: 8 ms snap.
-                            const glide   = isMeend ? (subMs / 1000) * 0.88 : 0.008;
 
                             // Duration = cover trailing '-'/'~' sub-beats in THIS cell
                             // (subDur) PLUS any full hold-beats that follow (holdBeats).
-                            // This fixes the bug where a single note in a 4-sub cell
-                            // rings for only beatMs/4 instead of the full beat.
                             let subDur = 1;
                             for (let k = si + 1; k < units.length; k++) {
                                 const sv = units[k].querySelector('.note-select').value;
                                 if (sv === '-' || sv === '~') subDur++;
                                 else break;
                             }
-                            // holdBeats applies when this note's trailing -/~ sub-beats
-                            // reach the end of the cell — meaning this note is the last
-                            // sounding one, regardless of whether it's literally the last
-                            // slot. e.g. [Sa, Ni, Sa, ~] next:[~][~] → Sa at si=2 gets
-                            // subDur=2 (covers the ~), si+subDur=4=units.length → reaches
-                            // end → holdBeats=2 → total = 2*subMs + 2*beatMs.
                             const reachesEnd = (si + subDur === units.length);
                             const holdBeats  = reachesEnd ? countSustains(targetLine, localIdx) : 0;
                             const noteDuration = (subDur * subMs + holdBeats * beatMs) / 1000;
+
+                            // SOURCE meend convention: this note glides TOWARD the next real note.
+                            // Look ahead in remaining sub-beats, then in subsequent cells.
+                            let glide  = 0.008;
+                            let toFreq = 0;
+                            if (isMeend) {
+                                let found = false;
+                                for (let k = si + subDur; k < units.length && !found; k++) {
+                                    const sv = units[k].querySelector('.note-select').value;
+                                    if (sv === '-' || sv === '~') continue;
+                                    const r = SwaraMap[sv];
+                                    if (r) {
+                                        toFreq = baseSa * r;
+                                        const ob = units[k].querySelector('.octave-btn.active');
+                                        if (ob) toFreq *= Math.pow(2, parseInt(ob.dataset.oct));
+                                        found = true;
+                                    }
+                                }
+                                for (let ci = localIdx + 1; ci < cells.length && !found; ci++) {
+                                    const nUnits = cells[ci].querySelectorAll('.note-unit');
+                                    for (const nu of nUnits) {
+                                        if (found) break;
+                                        const sv = nu.querySelector('.note-select')?.value;
+                                        if (!sv || sv === '-' || sv === '~') continue;
+                                        const r = SwaraMap[sv];
+                                        if (r) {
+                                            toFreq = baseSa * r;
+                                            const ob = nu.querySelector('.octave-btn.active');
+                                            if (ob) toFreq *= Math.pow(2, parseInt(ob.dataset.oct));
+                                            found = true;
+                                        }
+                                    }
+                                }
+                                if (toFreq > 0) glide = noteDuration * 0.92;
+                            }
 
                             if (ratio) {
                                 let freq = baseSa * ratio;
                                 const octBtn = unit.querySelector('.octave-btn.active');
                                 if (octBtn) freq *= Math.pow(2, parseInt(octBtn.dataset.oct));
-                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato);
+                                triggerNote(freq, inst, glide, noteDuration, lineVol, isLegato, toFreq);
                             } else {
                                 silenceNote();
                             }
@@ -4300,7 +4376,9 @@ const SM_COLS = 8;
 const SM = {
     audioCtx:    null,
     audioBuffer: null,     // decoded AudioBuffer
-    pitchTrack:  null,     // Float32Array, Hz per frame (0=unvoiced)
+    rawPitchTrack: null,   // Float32Array, raw YIN Hz per frame (no gate, no smoothing)
+    energyTrack:   null,   // Float32Array, RMS energy per frame
+    pitchTrack:  null,     // Float32Array, gated+smoothed Hz (rebuilt on each Detect)
     hopLen:      512,
     frameLen:    2048,
     sampleRate:  44100,
@@ -4322,6 +4400,13 @@ const SM = {
     editBeats:   null,     // copy for edit mode
     dragging:    false,
     dragStartX:  0,
+    // ── Synth-playback state (Play Synth / Play Edited) ──────────────────────
+    synthTimers:  [],      // setTimeout handles for beat-highlight scheduling
+    synthGain:    null,    // GainNode bus — set to 0 to silence all synth output instantly
+    synthPlaying: false,   // true while synth is playing
+    synthIsEdit:  false,   // which button triggered playback
+    // ── Segment play (result-panel "Play Original") ───────────────────────────
+    segPlaySource: null,   // AudioBufferSourceNode for detected-segment playback
 };
 
 // ── Tab switch ─────────────────────────────────────────────────────────────────
@@ -4363,9 +4448,9 @@ function yinDetectFrame(frame, sampleRate, threshold = 0.20) {
     const W     = Math.floor(frame.length / 2);
     const d     = yinDifference(frame, W);
     const cmnd  = yinCMND(d);
-    // Only search within the target pitch range (80–700 Hz)
-    const tauMin = Math.max(2, Math.ceil(sampleRate / 700));   // ≈31 at 22050 Hz
-    const tauMax = Math.min(W - 1, Math.floor(sampleRate / 80)); // ≈275 at 22050 Hz
+    // Search within melodic range 80–1200 Hz (covers mandra to taar+ octaves)
+    const tauMin = Math.max(2, Math.ceil(sampleRate / 1200)); // ≈19 at 22050 Hz → 1200 Hz upper
+    const tauMax = Math.min(W - 1, Math.floor(sampleRate / 80)); // ≈275 at 22050 Hz → 80 Hz lower
     // Find first dip below threshold within the musical pitch range
     for (let tau = tauMin; tau < tauMax; tau++) {
         if (cmnd[tau] < threshold) {
@@ -4378,7 +4463,7 @@ function yinDetectFrame(frame, sampleRate, threshold = 0.20) {
             const denom = 2 * (2 * curr - prev - next);
             const betterTau = (!denom || !isFinite(denom)) ? tau : tau + (prev - next) / denom;
             const hz = sampleRate / Math.max(1, betterTau);
-            return (hz >= 80 && hz <= 700) ? hz : 0;
+            return (hz >= 80 && hz <= 1200) ? hz : 0;
         }
     }
     return 0; // unvoiced
@@ -4486,7 +4571,9 @@ function smProcessSegment(startSec, nBeats) {
     const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
     const beatDur = 60.0 / bpm;
     const secPerFrame = SM.hopLen / SM.sampleRate;
-    const saHz = SM.saHz;
+    // Apply Melody Octave offset: +1 means the melody is one octave above the Sa dropdown value
+    const octOffset = parseInt(document.getElementById('sm-oct-offset')?.value) ?? 1;
+    const saHz = SM.saHz * Math.pow(2, octOffset);
     const track = SM.pitchTrack;
     const beats = [];
 
@@ -4535,17 +4622,31 @@ async function smLoadFile(event) {
 
     smSetStatus('sm-load-status', `⏳ Computing pitch track… (${SM.audioBuffer.duration.toFixed(1)}s audio)`);
 
-    // Extract mono samples
-    const raw = SM.audioBuffer.getChannelData(0);
-    // Downsample to ≤22050 Hz for speed if needed
-    let samples = raw;
+    // Extract mono — average both channels if stereo (reduces instrument bleed artefacts)
+    const ch0 = SM.audioBuffer.getChannelData(0);
+    const ch1 = SM.audioBuffer.numberOfChannels > 1 ? SM.audioBuffer.getChannelData(1) : null;
+    let mono;
+    if (ch1) {
+        mono = new Float32Array(ch0.length);
+        for (let i = 0; i < ch0.length; i++) mono[i] = (ch0[i] + ch1[i]) * 0.5;
+    } else {
+        mono = ch0;
+    }
+
+    // Downsample with box-FIR anti-alias filter (averaging N samples eliminates
+    // frequencies > Nyquist/2 before decimating, preventing aliasing artefacts)
+    let samples = mono;
     let sr = SM.sampleRate;
-    if (sr > 22050) {
-        // Simple 2x downsample (average pairs)
-        const ds = new Float32Array(Math.floor(raw.length / 2));
-        for (let i = 0; i < ds.length; i++) ds[i] = (raw[i*2] + raw[i*2+1]) * 0.5;
+    if (sr > 16000) {
+        const factor = Math.max(2, Math.round(sr / 11025));
+        const ds = new Float32Array(Math.floor(mono.length / factor));
+        for (let i = 0; i < ds.length; i++) {
+            let sum = 0;
+            for (let k = 0; k < factor; k++) sum += mono[i * factor + k] || 0;
+            ds[i] = sum / factor;
+        }
         samples = ds;
-        sr = Math.floor(sr / 2);
+        sr = Math.round(sr / factor);
         SM.sampleRate = sr;
     }
 
@@ -4560,10 +4661,11 @@ async function smLoadFile(event) {
 }
 
 async function smRunPitchAsync(samples, sr) {
-    const hop = SM.hopLen;
-    const frame = SM.frameLen;
+    const hop    = SM.hopLen;
+    const frame  = SM.frameLen;
     const nFrames = Math.floor((samples.length - frame) / hop) + 1;
-    const track = new Float32Array(nFrames);
+    const rawPitch = new Float32Array(nFrames);
+    const energy   = new Float32Array(nFrames);
     const hann = new Float32Array(frame);
     for (let i = 0; i < frame; i++) hann[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (frame - 1)));
 
@@ -4573,16 +4675,34 @@ async function smRunPitchAsync(samples, sr) {
         for (let f = fi; f < end; f++) {
             const start = f * hop;
             const buf = new Float32Array(frame);
-            for (let i = 0; i < frame; i++) buf[i] = samples[start + i] * hann[i];
-            const hz = yinDetectFrame(buf, sr);
-            track[f] = (hz >= 80 && hz <= 700) ? hz : 0;
+            let rmsSum = 0;
+            for (let i = 0; i < frame; i++) {
+                const v = samples[start + i] * hann[i];
+                buf[i] = v;
+                rmsSum += v * v;
+            }
+            energy[f]   = Math.sqrt(rmsSum / frame);
+            rawPitch[f] = yinDetectFrame(buf, sr); // stores 0 if unvoiced/out-of-range
         }
         // Yield to browser
         await new Promise(r => setTimeout(r, 0));
         const pct = Math.round(100 * end / nFrames);
         if (pct % 10 === 0) smSetStatus('sm-load-status', `⏳ Pitch tracking… ${pct}%`);
     }
-    SM.pitchTrack = smSmoothPitch(track);
+    SM.rawPitchTrack = rawPitch;
+    SM.energyTrack   = energy;
+    SM.pitchTrack    = smBuildPitchTrack(); // apply default gate + smoothing
+}
+
+// Build (or rebuild) the gated+smoothed pitch track from the raw data.
+// Called once after loading and again at each Detect so gate changes take effect immediately.
+function smBuildPitchTrack() {
+    if (!SM.rawPitchTrack) return null;
+    const rmsGate = parseFloat(document.getElementById('sm-rms-gate')?.value) || 0.010;
+    const gated = SM.rawPitchTrack.map((hz, i) =>
+        (SM.energyTrack[i] >= rmsGate && hz >= 80 && hz <= 1200) ? hz : 0
+    );
+    return smSmoothPitch(gated, 17); // wider window suppresses tabla transients
 }
 
 // ── Waveform canvas ────────────────────────────────────────────────────────────
@@ -4748,8 +4868,10 @@ function smInitWaveform() {
 
 // ── Detect ─────────────────────────────────────────────────────────────────────
 function smDetect() {
-    if (!SM.pitchTrack) { smSetStatus('sm-load-status', '❌ Load an audio file first.'); return; }
+    if (!SM.rawPitchTrack) { smSetStatus('sm-load-status', '❌ Load an audio file first.'); return; }
     smSetStatus('sm-result-status', '🔍 Detecting…');
+    // Rebuild pitch track with current Energy Gate — no reload needed when gate changes
+    SM.pitchTrack = smBuildPitchTrack();
     SM.saHz    = parseFloat(document.getElementById('sm-sa-select').value);
     SM.segStart = parseFloat(document.getElementById('sm-start-sec').value) || 0;
     SM.segEnd   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
@@ -4796,7 +4918,7 @@ function smDisplayNotation(beats) {
                 cell = b.notes.map((nn,j) => smOctPfx(b.octs[j]) + nn).join('/');
             }
             const cls = b.notes[0] === '~' ? 'sm-cell-sustain' : 'sm-cell-note';
-            html += `<td class="${cls}">${cell}</td>`;
+            html += `<td class="${cls}" data-beat="${i}">${cell}</td>`;
         }
         html += '</tr>';
 
@@ -4838,8 +4960,9 @@ function smToggleEdit() {
     const panel = document.getElementById('sm-edit-panel');
     if (panel.style.display === 'none') {
         SM.editBeats = SM.currentBeats.map(b =>
-            ({notes:[...b.notes], octs:[...b.octs], dom_hz:b.dom_hz,
-              voiced_pct:b.voiced_pct, clusters:b.clusters}));
+            ({notes:[...b.notes], octs:[...b.octs],
+              meend:[...(b.meend || b.notes.map(()=>false))],
+              dom_hz:b.dom_hz, voiced_pct:b.voiced_pct, clusters:b.clusters}));
         smBuildEditGrid(SM.editBeats);
         panel.style.display = 'block';
     } else {
@@ -4851,7 +4974,7 @@ function smBuildEditGrid(beats) {
     const grid = document.getElementById('sm-edit-grid');
     if (!grid) return;
     const allNotes = ['-', '~', ...SM_SWARA_NAMES];
-    const OCT_DEFS = [[-2,'‥'],[-1,'.'],[0,'—'],[1,"'"],[2,"''"]];
+    const OCT_DEFS = [[-2,'‥'],[-1,'.'],[1,"'"],[2,"''"]];
     let html = '';
 
     for (let i = 0; i < beats.length; i++) {
@@ -4862,19 +4985,27 @@ function smBuildEditGrid(beats) {
 
         // Render each sub-beat
         for (let si = 0; si < b.notes.length; si++) {
-            const note = b.notes[si];
-            const oct  = b.octs[si] !== undefined ? b.octs[si] : 0;
-            html += `<div class="sm-sub-beat">
+            const note   = b.notes[si];
+            const oct    = b.octs[si]  !== undefined ? b.octs[si]  : 0;
+            const isMeend = b.meend && b.meend[si] === true;
+            html += `<div class="sm-sub-beat">${smCandChips(i,si,note,oct,b.clusters)}
                 <select onchange="smEditSetNote(${i},${si},this.value)">`;
             allNotes.forEach(nn => {
                 html += `<option value="${nn}"${nn===note?' selected':''}>${nn}</option>`;
             });
-            html += `</select><div class="sm-oct-btns">`;
+            html += `</select>`;
+            // Column: oct buttons on top row, meend toggle below — always fully visible
+            html += `<div class="sm-sub-controls">`;
+            html += `<div class="sm-oct-btns">`;
             OCT_DEFS.forEach(([o, lbl]) => {
                 html += `<button class="sm-oct-btn${o===oct?' active':''}"
                             onclick="smEditSetOct(${i},${si},${o})">${lbl}</button>`;
             });
             html += `</div>`;
+            html += `<button class="sm-meend-btn${isMeend?' active':''}"
+                        title="Meend: glide FROM this note into the next note"
+                        onclick="smEditToggleMeend(${i},${si})">meend →</button>`;
+            html += `</div>`;   // .sm-sub-controls
             if (b.notes.length > 1) {
                 html += `<button class="sm-sub-remove-btn" title="Remove this note"
                             onclick="smEditRemoveSub(${i},${si})">×</button>`;
@@ -4895,16 +5026,52 @@ function smEditSetNote(beatIdx, subIdx, note) {
     smBuildEditGrid(SM.editBeats);
 }
 
+// ── Ranked candidate chips (ported from Swar-Lekh Note Picker) ──────────────
+function smOctMark(o){ return o>0 ? "'".repeat(o) : (o<0 ? ",".repeat(-o) : ""); }
+function smCandChips(beatIdx, subIdx, note, oct, clusters){
+    if(note==='-'||note==='~') return '';
+    const cands=[];
+    const idx=SM_SWARA_NAMES.indexOf(note);
+    if(idx>=0){
+        const base=oct*12+idx;                 // committed, komal/shuddha neighbours, octave alternates
+        [0,-1,1,12,-12].forEach(d=>{ const s=base+d;
+            cands.push({note:SM_SWARA_NAMES[((s%12)+12)%12], oct:Math.floor(s/12)}); });
+    }
+    (clusters||[]).forEach(c=>{ if(c.note && c.note!=='-') cands.push({note:c.note, oct:c.oct, pct:c.pct}); });
+    const seen={}, uniq=[];
+    cands.forEach(c=>{ const k=c.note+':'+c.oct; if(!seen[k]){ seen[k]=1; uniq.push(c); } });
+    let out='<div class="sm-cands" title="Likely pitches \u2014 click the one you hear">';
+    uniq.slice(0,6).forEach(c=>{
+        const cur=(c.note===note && c.oct===oct);
+        const komal=/^[a-z]/.test(c.note) && c.note!=='-' && c.note!=='~';
+        out+=`<button type="button" class="sm-cand${cur?' cur':''}${komal?' komal':''}" `+
+             `onclick="smEditPickCandidate(${beatIdx},${subIdx},'${c.note}',${c.oct})">`+
+             `${c.note}${smOctMark(c.oct)}${c.pct?`<i>${c.pct}%</i>`:''}</button>`;
+    });
+    return out+'</div>';
+}
+function smEditPickCandidate(beatIdx, subIdx, note, oct){
+    if(!SM.editBeats) return;
+    SM.editBeats[beatIdx].notes[subIdx]=note;
+    SM.editBeats[beatIdx].octs[subIdx]=oct;
+    smBuildEditGrid(SM.editBeats);
+}
+
 function smEditSetOct(beatIdx, subIdx, oct) {
     if (!SM.editBeats) return;
-    SM.editBeats[beatIdx].octs[subIdx] = oct;
+    // Clicking the already-active button resets to madhya (0) — no separate — button needed
+    const current = SM.editBeats[beatIdx].octs[subIdx];
+    SM.editBeats[beatIdx].octs[subIdx] = (current === oct) ? 0 : oct;
     smBuildEditGrid(SM.editBeats);
 }
 
 function smEditAddSub(beatIdx) {
     if (!SM.editBeats) return;
-    SM.editBeats[beatIdx].notes.push('-');
-    SM.editBeats[beatIdx].octs.push(0);
+    const b = SM.editBeats[beatIdx];
+    b.notes.push('-');
+    b.octs.push(0);
+    if (!b.meend) b.meend = b.notes.map(() => false);
+    else b.meend.push(false);
     smBuildEditGrid(SM.editBeats);
 }
 
@@ -4912,14 +5079,24 @@ function smEditRemoveSub(beatIdx, subIdx) {
     if (!SM.editBeats || SM.editBeats[beatIdx].notes.length <= 1) return;
     SM.editBeats[beatIdx].notes.splice(subIdx, 1);
     SM.editBeats[beatIdx].octs.splice(subIdx, 1);
+    if (SM.editBeats[beatIdx].meend) SM.editBeats[beatIdx].meend.splice(subIdx, 1);
+    smBuildEditGrid(SM.editBeats);
+}
+
+function smEditToggleMeend(beatIdx, subIdx) {
+    if (!SM.editBeats) return;
+    const b = SM.editBeats[beatIdx];
+    if (!b.meend) b.meend = b.notes.map(() => false);
+    b.meend[subIdx] = !b.meend[subIdx];
     smBuildEditGrid(SM.editBeats);
 }
 
 function smAcceptEdited() {
     if (!SM.editBeats) return;
     SM.currentBeats = SM.editBeats.map(b =>
-        ({notes:[...b.notes], octs:[...b.octs], dom_hz:b.dom_hz,
-          voiced_pct:b.voiced_pct, clusters:b.clusters}));
+        ({notes:[...b.notes], octs:[...b.octs],
+          meend:[...(b.meend || b.notes.map(()=>false))],
+          dom_hz:b.dom_hz, voiced_pct:b.voiced_pct, clusters:b.clusters}));
     document.getElementById('sm-edit-panel').style.display = 'none';
     smDisplayNotation(SM.currentBeats);
     smAccept();
@@ -4949,7 +5126,7 @@ function smAccept() {
         lyrics:  beats.map((_,i) => String(i+1)),
         notes:   beats.map(b => b.notes),
         octaves: beats.map(b => b.octs),
-        meend:   beats.map(b => b.notes.map(() => false))
+        meend:   beats.map(b => [...(b.meend || b.notes.map(()=>false))])
     };
 
     SM.acceptedLines.push(lineObj);
@@ -5054,7 +5231,8 @@ async function smPlayAcceptedLine(idx) {
     // into the beats array format smPlayBeats expects
     const beats = line.notes.map((nn, bi) => ({
         notes: nn,
-        octs:  line.octaves[bi]
+        octs:  line.octaves[bi],
+        meend: (line.meend && line.meend[bi]) ? [...line.meend[bi]] : nn.map(() => false)
     }));
     smPlayBeats(beats, beatDur, saHz, instr, t0);
 
@@ -5094,25 +5272,56 @@ function smRemoveAcceptedLine(idx) {
 }
 
 // ── Shared beat-playback helper ────────────────────────────────────────────────
-// Plays a beats array using the sample engine.
-// ~ (sustain) extends the duration of the preceding note instead of being silent.
-// Multi-note beats divide the beat duration equally among sub-notes.
+// Meend convention (SOURCE-based): the meend button is on the NOTE THAT STARTS the glide.
+//   e.g. dha♭(meend→) followed by Ma → dha♭'s sample plays and bends DOWN into Ma.
+// ~ sustain: extends the preceding note's duration.
+// Multi-note beats: divide beat duration equally; meend applies per sub-note.
 function smPlayBeats(beats, beatDur, saHz, instr, t0) {
+    // Helper: get Hz for first real note at beat index j (skips - and ~)
+    function nextRealHz(fromBeatIdx) {
+        for (let j = fromBeatIdx; j < beats.length; j++) {
+            const nb = beats[j];
+            for (let si = 0; si < nb.notes.length; si++) {
+                const nn = nb.notes[si];
+                if (nn && nn !== '-' && nn !== '~' && SwaraMap[nn]) {
+                    const o = nb.octs[si] !== undefined ? nb.octs[si] : 0;
+                    return saHz * SwaraMap[nn] * Math.pow(2, o);
+                }
+            }
+        }
+        return 0;
+    }
+
     let i = 0;
     while (i < beats.length) {
         const b         = beats[i];
         const beatStart = t0 + i * beatDur;
 
-        // ── Multi-note beat: equal subdivision, no cross-beat sustain ──────────
+        // ── Multi-note beat ────────────────────────────────────────────────────
         if (b.notes.length > 1) {
             const subDur = beatDur / b.notes.length;
             b.notes.forEach((note, si) => {
                 if (note === '-' || note === '~') return;
                 const ratio = SwaraMap[note];
                 if (!ratio) return;
-                const oct  = b.octs[si] !== undefined ? b.octs[si] : 0;
-                const freq = saHz * ratio * Math.pow(2, oct);
-                smPlaySampledNote(freq, instr, beatStart + si * subDur, subDur * 0.90);
+                const oct     = b.octs[si] !== undefined ? b.octs[si] : 0;
+                const freq    = saHz * ratio * Math.pow(2, oct);
+                const isMeend = b.meend && b.meend[si] === true;
+
+                // SOURCE meend: look for the next real sub-note (within beat, then next beat)
+                let toFreq = 0;
+                if (isMeend) {
+                    for (let sj = si + 1; sj < b.notes.length; sj++) {
+                        const nn = b.notes[sj];
+                        if (nn && nn !== '-' && nn !== '~' && SwaraMap[nn]) {
+                            const o = b.octs[sj] !== undefined ? b.octs[sj] : 0;
+                            toFreq = saHz * SwaraMap[nn] * Math.pow(2, o);
+                            break;
+                        }
+                    }
+                    if (!toFreq) toFreq = nextRealHz(i + 1);
+                }
+                smPlaySampledNote(freq, instr, beatStart + si * subDur, subDur * 0.90, 0, toFreq);
             });
             i++;
             continue;
@@ -5120,29 +5329,30 @@ function smPlayBeats(beats, beatDur, saHz, instr, t0) {
 
         // ── Single-note beat ───────────────────────────────────────────────────
         const note = b.notes[0];
-
-        if (note === '-') { i++; continue; }        // silence
-
-        if (note === '~') { i++; continue; }        // orphan sustain — no prior note, skip
-
+        if (note === '-') { i++; continue; }
+        if (note === '~') { i++; continue; }
         const ratio = SwaraMap[note];
         if (!ratio) { i++; continue; }
 
-        const oct  = b.octs[0] !== undefined ? b.octs[0] : 0;
-        const freq = saHz * ratio * Math.pow(2, oct);
+        const oct     = b.octs[0] !== undefined ? b.octs[0] : 0;
+        const freq    = saHz * ratio * Math.pow(2, oct);
+        const isMeend = b.meend && b.meend[0] === true;
 
-        // Look ahead: count consecutive ~ beats so we play one longer note
+        // Look ahead: absorb consecutive ~ sustain beats into one longer note
         let holdCount = 0;
         while (i + 1 + holdCount < beats.length) {
             const ahead = beats[i + 1 + holdCount];
             if (ahead.notes.length === 1 && ahead.notes[0] === '~') holdCount++;
             else break;
         }
-
         const totalDur = (1 + holdCount) * beatDur;
-        smPlaySampledNote(freq, instr, beatStart, totalDur * 0.96);
 
-        i += 1 + holdCount;     // advance past the note + all its sustain beats
+        // SOURCE meend: look past any held ~ beats to find the next real note
+        let toFreq = 0;
+        if (isMeend) toFreq = nextRealHz(i + 1 + holdCount);
+
+        smPlaySampledNote(freq, instr, beatStart, totalDur * 0.96, 0, toFreq);
+        i += 1 + holdCount;
     }
 }
 
@@ -5195,14 +5405,32 @@ function smAnimatePlayhead() {
     }
 }
 
-// Play one note using the shared Composer sample library (same engine, same timbre)
-function smPlaySampledNote(freq, instrument, startTime, duration) {
+// Play one note using the shared Composer sample library.
+// toFreq > 0  — SOURCE meend: note plays at its own pitch then glides TOWARD toFreq.
+//               Sample chosen = this note's best sample (natural attack, then pitch bends away).
+// fromFreq > 0 — DEST meend (legacy/compatibility): sample chosen = this note, starts at fromFreq.
+function smPlaySampledNote(freq, instrument, startTime, duration, fromFreq = 0, toFreq = 0) {
     // ── Sample-based (preferred) ──────────────────────────────────────────────
     const buf = findBestSample(instrument, freq);
     if (buf && audioCtx) {
         const src = audioCtx.createBufferSource();
         src.buffer = buf;
-        src.playbackRate.value = freq / buf.baseHz;
+
+        const naturalRate = freq / buf.baseHz;
+
+        if (toFreq > 0) {
+            // SOURCE meend: start at natural pitch, ramp toward destination
+            const destRate = toFreq / buf.baseHz;
+            src.playbackRate.setValueAtTime(naturalRate, startTime);
+            src.playbackRate.exponentialRampToValueAtTime(destRate, startTime + duration * 0.92);
+        } else if (fromFreq > 0) {
+            // DEST meend (legacy): start at fromFreq's rate, arrive at natural rate
+            const startRate = fromFreq / buf.baseHz;
+            src.playbackRate.setValueAtTime(startRate, startTime);
+            src.playbackRate.exponentialRampToValueAtTime(naturalRate, startTime + duration * 0.88);
+        } else {
+            src.playbackRate.value = naturalRate;
+        }
 
         const env = audioCtx.createGain();
         env.gain.setValueAtTime(0, startTime);
@@ -5211,28 +5439,91 @@ function smPlaySampledNote(freq, instrument, startTime, duration) {
         env.gain.linearRampToValueAtTime(0, startTime + duration + 0.04);
 
         src.connect(env);
-        env.connect(audioCtx.destination);
+        env.connect(SM.synthGain || audioCtx.destination);
         src.start(startTime);
         src.stop(startTime + duration + 0.08);
         return;
     }
-    // ── Sine fallback (only if samples not yet loaded) ────────────────────────
+    // ── Sine fallback ─────────────────────────────────────────────────────────
     const ctx2 = audioCtx || SM.audioCtx;
     if (!ctx2 || freq <= 0) return;
     const osc  = ctx2.createOscillator();
     const gain = ctx2.createGain();
     osc.type = 'sine';
-    osc.frequency.value = freq;
+    if (toFreq > 0) {
+        osc.frequency.setValueAtTime(freq, startTime);
+        osc.frequency.exponentialRampToValueAtTime(toFreq, startTime + duration * 0.92);
+    } else if (fromFreq > 0) {
+        osc.frequency.setValueAtTime(fromFreq, startTime);
+        osc.frequency.exponentialRampToValueAtTime(freq, startTime + duration * 0.88);
+    } else {
+        osc.frequency.value = freq;
+    }
     gain.gain.setValueAtTime(0, startTime);
     gain.gain.linearRampToValueAtTime(0.28, startTime + 0.02);
     gain.gain.linearRampToValueAtTime(0.22, startTime + duration * 0.75);
     gain.gain.linearRampToValueAtTime(0, startTime + duration);
-    osc.connect(gain); gain.connect(ctx2.destination);
+    osc.connect(gain); gain.connect(SM.synthGain || ctx2.destination);
     osc.start(startTime); osc.stop(startTime + duration + 0.04);
 }
 
+// ── Synth stop/toggle ─────────────────────────────────────────────────────────
+function smStopSynth() {
+    // Cancel all pending highlight timers
+    SM.synthTimers.forEach(t => clearTimeout(t));
+    SM.synthTimers = [];
+    // Silence the gain bus immediately (all scheduled notes connected to it go quiet)
+    if (SM.synthGain && audioCtx) {
+        try { SM.synthGain.gain.setValueAtTime(0, audioCtx.currentTime); } catch(e) {}
+    }
+    SM.synthGain    = null;
+    SM.synthPlaying = false;
+    // Clear beat highlights
+    document.querySelectorAll('.sm-cell-playing').forEach(el => el.classList.remove('sm-cell-playing'));
+    // Reset both synth buttons to their resting state
+    const b1 = document.getElementById('sm-play-synth-btn');
+    const b2 = document.getElementById('sm-play-edit-btn');
+    if (b1) { b1.textContent = '🎹 Play Synth';  b1.classList.replace('sm-btn-danger', 'sm-btn-neutral'); }
+    if (b2) { b2.textContent = '🎹 Play Edited'; b2.classList.replace('sm-btn-danger', 'sm-btn-neutral'); }
+}
+
+async function smToggleSynth(useEdit) {
+    if (SM.synthPlaying) { smStopSynth(); return; }
+    smStopSynth();          // clean slate before starting
+    await smPlaySynth(useEdit);
+}
+
+// ── Segment play (result-panel "Play Original") ───────────────────────────────
+// Plays only the detected segment (SM.segStart → SM.segEnd), independent of
+// the Waveform window's start/end fields.
+function smStopSegPlay() {
+    if (SM.segPlaySource) {
+        try { SM.segPlaySource.stop(); } catch(e) {}
+        SM.segPlaySource = null;
+    }
+    const btn = document.getElementById('sm-play-seg-btn');
+    if (btn) { btn.textContent = '▶ Play Original'; btn.classList.replace('sm-btn-danger', 'sm-btn-neutral'); }
+}
+
+function smToggleSegPlay() {
+    if (SM.segPlaySource) { smStopSegPlay(); return; }
+    if (!SM.audioBuffer) return;
+    if (!SM.audioCtx) SM.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = SM.audioCtx.createBufferSource();
+    src.buffer = SM.audioBuffer;
+    src.connect(SM.audioCtx.destination);
+    const start = SM.segStart;
+    const dur   = Math.max(0.1, SM.segEnd - SM.segStart);
+    src.start(0, start, dur);
+    src.onended = () => smStopSegPlay();
+    SM.segPlaySource = src;
+    const btn = document.getElementById('sm-play-seg-btn');
+    if (btn) { btn.textContent = '⏹ Stop'; btn.classList.replace('sm-btn-neutral', 'sm-btn-danger'); }
+}
+
+// ── Synth playback ────────────────────────────────────────────────────────────
 async function smPlaySynth(useEdit) {
-    smStopPlay();
+    smStopPlay();   // stop waveform playback if running
     const beats = useEdit ? SM.editBeats : SM.currentBeats;
     if (!beats) return;
 
@@ -5253,10 +5544,38 @@ async function smPlaySynth(useEdit) {
         smSetStatus('sm-result-status', '');
     }
 
+    // Create a dedicated gain bus so smStopSynth() can silence everything instantly.
+    SM.synthGain = audioCtx.createGain();
+    SM.synthGain.gain.value = 1;
+    SM.synthGain.connect(audioCtx.destination);
+    SM.synthPlaying = true;
+    SM.synthIsEdit  = !!useEdit;
+
+    // Flip the active button to "Stop"
+    const btnId = useEdit ? 'sm-play-edit-btn' : 'sm-play-synth-btn';
+    const btn   = document.getElementById(btnId);
+    if (btn) { btn.textContent = '⏹ Stop'; btn.classList.replace('sm-btn-neutral', 'sm-btn-danger'); }
+
     // SM.saHz is stored at half the Composer's baseSa (C3 vs C4 convention).
     // Multiply ×2 so notes play at the same octave as the Composer tab.
     const saHz = SM.saHz * 2;
     const t0   = audioCtx.currentTime + 0.05;
+
+    // Schedule beat-highlight setTimeouts so the yellow marker jumps beat-by-beat.
+    SM.synthTimers = [];
+    for (let i = 0; i < beats.length; i++) {
+        const delayMs = (t0 - audioCtx.currentTime + i * beatDur) * 1000;
+        const beatIdx = i;
+        SM.synthTimers.push(setTimeout(() => {
+            if (!SM.synthPlaying) return;
+            document.querySelectorAll('.sm-cell-playing').forEach(el => el.classList.remove('sm-cell-playing'));
+            const cell = document.querySelector(`[data-beat="${beatIdx}"]`);
+            if (cell) cell.classList.add('sm-cell-playing');
+        }, delayMs));
+    }
+    // Auto-reset after playback ends
+    const totalMs = (t0 - audioCtx.currentTime + beats.length * beatDur + 0.3) * 1000;
+    SM.synthTimers.push(setTimeout(() => smStopSynth(), totalMs));
 
     smPlayBeats(beats, beatDur, saHz, instr, t0);
 }

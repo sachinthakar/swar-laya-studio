@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Swar-Laya Studio v5</title>
+    <!-- Firebase SDK (compat v10) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <!-- Render deployment: Firebase config lives in /config.js (ragas and user songs are both in Firestore) -->
+    <script src="/config.js"></script>
+    <link rel="stylesheet" href="v5/studio.css">
+</head>
+<body>
+<div class="container">
+    <!-- Auth bar — updates dynamically once Firebase auth state resolves -->
+    <div id="auth-bar">
+        <span style="font-weight:700; letter-spacing:0.5px;">🎵 Swar-Laya Studio</span>
+        <span style="font-size:11px; opacity:0.55; margin-left:6px;">Professional Suite</span>
+        <div class="spacer"></div>
+        <span style="font-size:11px; opacity:0.6;">Loading…</span>
+    </div>
+
+    <div id="sticky-header">
+    <div class="controls">
+
+        <!-- ── Group 1: Song Identity ─────────────────────────────────────── -->
+        <div class="control-item">
+            <label>Song Title</label>
+            <input type="text" id="song-title" value="Untitled" style="width:140px;">
+        </div>
+        <div class="control-item">
+            <label>Scale (Sa)</label>
+            <select id="scale-select" onchange="updateTanpura()">
+                <option value="261.63">Pandhri 1 (C)</option>
+                <option value="277.18">Kali 1 (C#)</option>
+                <option value="293.67">Pandhri 2 (D)</option>
+                <option value="311.13">Kali 2 (D#)</option>
+                <option value="329.63">Pandhri 3 (E)</option>
+                <option value="349.23">Pandhri 4 (F)</option>
+                <option value="370.00">Kali 3 (F#)</option>
+                <option value="392.00">Pandhri 5 (G)</option>
+                <option value="415.30">Kali 4 (G#)</option>
+                <option value="440.00">Pandhri 6 (A)</option>
+                <option value="466.16">Kali 5 (A#)</option>
+                <option value="493.88">Pandhri 7 (B)</option>
+            </select>
+        </div>
+        <div class="control-item">
+            <label>Taal</label>
+            <select id="taal-select">
+                <option value="" disabled selected>— choose taal —</option>
+                <option value="4">Keherwa (4)</option>
+                <option value="8">Keherwa (8)</option>
+                <option value="8_bhajani">Bhajani (8)</option>
+                <option value="6">Dadra (6)</option>
+                <option value="7">Rupak (7)</option>
+                <option value="10">Jhaptaal (10)</option>
+                <option value="12">Ektaal (12)</option>
+                <option value="12_chautaal">Chautaal (12)</option>
+                <option value="14">Dhamar (14)</option>
+                <option value="16">Teentaal (16)</option>
+            </select>
+        </div>
+
+        <span class="ctrl-sep"></span>
+
+        <!-- ── Group 2: Sound & Mix ────────────────────────────────────────── -->
+        <div class="control-item">
+            <label>Master BPM</label>
+            <input type="number" id="bpm" value="90" style="width:65px;" min="30" max="300">
+        </div>
+        <div class="control-item">
+            <label>Tabla Vol</label>
+            <input type="range" id="tabla-vol" min="0" max="1" step="0.05" value="0.7" style="width:75px;">
+        </div>
+        <div class="control-item">
+            <label>Reverb (Wet)</label>
+            <input type="range" id="reverb-wet" min="0" max="0.75" step="0.05" value="0.25" style="width:75px;" oninput="updateReverbMix()">
+        </div>
+        <div class="control-item">
+            <label>Master Vol <span id="master-vol-display" style="font-weight:600;">1.0×</span></label>
+            <input type="range" id="master-vol" min="0" max="10" step="0.1" value="1.0" style="width:75px;" oninput="updateMasterVol()">
+        </div>
+
+        <span class="ctrl-sep"></span>
+
+        <!-- ── Group 3: Playback ───────────────────────────────────────────── -->
+        <div class="control-item">
+            <label>Start Beat</label>
+            <input type="number" id="start-beat" min="1" value="1" style="width:55px;">
+        </div>
+        <div class="control-item">
+            <label>Pre-roll</label>
+            <select id="pre-roll-select" style="width:80px;">
+                <option value="0">Off</option>
+                <option value="2">2 Beats</option>
+                <option value="4" selected>4 Beats</option>
+                <option value="8">8 Beats</option>
+            </select>
+        </div>
+        <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
+        <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
+        <div class="control-item" title="Loop: repeat continuously. Off = play once and stop.">
+            <label>Loop</label>
+            <input type="checkbox" id="loop-toggle" style="width:16px; cursor:pointer;">
+        </div>
+
+        <span class="ctrl-sep"></span>
+
+        <!-- ── Group 4: Composition Tools ─────────────────────────────────── -->
+        <button class="btn-add" onclick="addLine()">+ Add Line</button>
+        <button class="btn-ai"  onclick="openAICompose()">✨ AI Compose</button>
+        <label class="btn-transcribe" id="transcribe-label" title="Transcribe a song from an audio file into this sheet">
+            <input type="checkbox" id="transcribe-toggle" onchange="smToggleTranscribe(this.checked)"> 🎤 Transcribe
+        </label>
+        <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullscreen()" title="Maximise screen space (hides browser chrome)">⛶ Full Screen</button>
+        <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
+        <div class="control-item">
+            <label class="raga-label">Raga Mode</label>
+            <!-- Checkbox + dropdown in one fixed-width item — visibility toggle
+                 keeps layout stable (no reflow when enabling/disabling). -->
+            <div style="display:flex; align-items:center; gap:5px;">
+                <input type="checkbox" id="raga-mode-toggle" style="width:18px; flex-shrink:0; margin:0;"
+                       title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
+                <select id="raga-select" style="width:108px; visibility:hidden; pointer-events:none;">
+                    <option value="">— choose —</option>
+                </select>
+            </div>
+        </div>
+
+        <span class="ctrl-sep"></span>
+
+        <!-- ── Group 5: File & Cloud ───────────────────────────────────────── -->
+        <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
+        <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
+        <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
+        <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
+        <button class="btn-bhatkhande" onclick="openBhatkhandeView()" title="Show this song in traditional Bhatkhande notation (read-only)">&#9834; Bhatkhande View</button>
+        <span id="sample-status" class="osc" title="Instrument audio mode">♪ Synth</span>
+        <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
+
+    </div>
+
+    <!-- Raga info bar (shown when Raga Mode is on) -->
+    <div id="raga-info-bar">
+        <span id="raga-bar-name"></span>
+        <div id="raga-info-badges"></div>
+        <span class="raga-info-meta" id="raga-bar-aroha"></span>
+        <span class="raga-info-meta" id="raga-bar-avaroha"></span>
+        <span class="raga-info-meta">Vadi: <b id="raga-bar-vadi" style="color:#e65100;"></b></span>
+        <span class="raga-info-meta">Samvadi: <b id="raga-bar-samvadi" style="color:#1565c0;"></b></span>
+        <span class="raga-info-meta" style="white-space:nowrap">Pakkad:</span>
+        <div id="raga-pakkad-chips"></div>
+        <select id="raga-instrument" style="padding:2px 5px; font-size:11px; border-radius:4px; border:1px solid #d0c4e8; background:#fff; color:#4a148c; outline:none; margin-right:4px;">
+            <option value="harmonium">Harmonium</option>
+            <option value="flute">Flute</option>
+            <option value="sitar">Sitar</option>
+            <option value="violin">Violin</option>
+            <option value="piano">Piano</option>
+            <option value="bellpad">Bellpad</option>
+        </select>
+        <button id="raga-pakkad-play" onclick="playPakkad()">▶ Play</button>
+    </div>
+
+    <!-- Taal ruler — shared beat strip, shown once for the whole sheet -->
+    <div id="taal-ruler"></div>
+
+    </div><!-- /#sticky-header -->
+
+    <!-- ── Transcribe from audio (toolbar "🎤 Transcribe") ──────────────────
+         Sa, Taal (= beats per line) and BPM come from the toolbar above.
+         Detect writes DRAFT lines into the song sheet below. -->
+    <div id="sm-panel">
+        <h3>🎤 Transcribe from audio <span class="sm-hint" style="text-transform:none; letter-spacing:0; font-weight:400;">— Sa, Taal (beats per line) and BPM are taken from the toolbar</span></h3>
+        <div class="sm-row">
+            <div class="sm-control">
+                <label>Audio file (MP3 / WAV / OGG)</label>
+                <input type="file" id="sm-file-input" accept="audio/*" onchange="smLoadFile(event)">
+            </div>
+            <div class="sm-control">
+                <label title="Octave of the lead melody relative to the toolbar Sa">Melody octave</label>
+                <select id="sm-oct-offset" title="Change if every note comes out one octave too high or too low">
+                    <option value="-1">One below Sa (low voice)</option>
+                    <option value="0" selected>Same as Sa (most songs)</option>
+                    <option value="1">One above Sa (high voice)</option>
+                </select>
+            </div>
+            <div class="sm-control">
+                <label title="Minimum loudness (RMS) for pitch detection. Raise to ignore tabla/noise; lower if soft notes are missed.">Energy gate</label>
+                <input type="number" id="sm-rms-gate" value="0.010" min="0.001" max="0.100" step="0.001" style="width:78px;"
+                       title="Raise (e.g. 0.025) to ignore tabla/noise. Lower if soft notes are missed. Applies on the next Detect.">
+            </div>
+            <div id="sm-load-status" class="sm-status" style="align-self:center;"></div>
+        </div>
+        <div id="sm-wave-wrap" style="display:none;">
+            <canvas id="sm-waveform-canvas" height="84"></canvas>
+            <div class="sm-hint">Click: section start &nbsp;|&nbsp; Shift+click or drag: section length (whole lines) &nbsp;|&nbsp; green band = accepted lines, amber = draft</div>
+        </div>
+        <div class="sm-row" style="margin-top:10px;">
+            <div class="sm-control">
+                <label>Start (sec)</label>
+                <input type="number" id="sm-start-sec" value="0" min="0" step="0.1" style="width:80px;">
+            </div>
+            <div class="sm-control">
+                <label title="Free-tempo ad-lib/alap before beat 1. Becomes its own first line; Taal lines start at Start + Ad-lib.">Ad-lib (sec)</label>
+                <input type="number" id="sm-adlib-sec" value="0" min="0" step="0.1" style="width:70px;"
+                       title="Free-tempo ad-lib/alap before beat 1. Becomes its own first line; Taal lines start at Start + Ad-lib.">
+            </div>
+            <div class="sm-control">
+                <label title="Number of Taal cycles (lines) in this section">Lines in section</label>
+                <input type="number" id="sm-seg-lines" value="1" min="0" max="64" style="width:60px;">
+            </div>
+            <div class="sm-control">
+                <label title="Start + Ad-lib + Lines × beats per line × 60 / BPM">End (sec) — auto</label>
+                <input type="number" id="sm-end-sec" value="0" step="0.01" style="width:80px;" readonly
+                       title="Start + Ad-lib + Lines × beats per line × 60 / BPM">
+            </div>
+            <div class="sm-control">
+                <label>Section label</label>
+                <input type="text" id="sm-section" value="Mukhda" style="width:110px;">
+            </div>
+            <div class="sm-control" style="flex-direction:row; align-items:center; gap:6px;">
+                <input type="checkbox" id="sm-mute-perc" style="width:16px; height:16px; margin:0;">
+                <label for="sm-mute-perc" style="cursor:pointer;" title="Set percussion to Mute on the lines this section creates">Mute percussion</label>
+            </div>
+            <button class="sm-btn sm-btn-primary" onclick="smDetect()">🔍 Detect Notes</button>
+            <button class="sm-btn sm-btn-neutral" onclick="smToggleSectionOriginal(this)">▶ Play Original</button>
+            <span id="sm-section-info"></span>
+        </div>
+        <div class="sm-backend-row">
+            <label><input type="checkbox" id="sm-use-backend" style="width:15px;height:15px;vertical-align:middle;"> AI backend (CREPE)</label>
+            <input type="text" id="sm-backend-url" value="http://127.0.0.1:8000" title="Backend URL" style="width:150px;">
+            <select id="sm-backend-model" title="full = accurate, tiny = fast"><option value="full">full (accurate)</option><option value="tiny">tiny (fast)</option></select>
+            <label title="Separate the vocal from the accompaniment (runs once per file)"><input type="checkbox" id="sm-backend-demucs" checked style="width:15px;height:15px;vertical-align:middle;"> separate vocal</label>
+            <button class="sm-btn sm-btn-neutral" onclick="SMB.analyze()" title="Pre-compute whole-file pitch so every Detect is instant" style="font-size:12px;padding:4px 8px;">⚡ Pre-analyze</button>
+            <span id="sm-backend-status" class="sm-status"></span>
+        </div>
+        <div id="sm-status" class="sm-status" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="song-sheet" style="padding-top:16px;"></div>
+
+    <!-- Draft action bar (fixed at the bottom while detected lines await review) -->
+    <div id="sm-draft-bar">
+        <span class="sm-draft-info" id="sm-draft-info"></span>
+        <button class="sm-btn sm-btn-neutral" onclick="smToggleDraftPlay()" title="Play the draft lines with the Composer engine (click again to stop)">▶ Play draft</button>
+        <button class="sm-btn sm-btn-neutral" onclick="smPlayDraftOriginal(this)" title="Play the same part of the original recording">▶ Original</button>
+        <button class="sm-btn sm-btn-success" onclick="smAcceptDraft()">✔ Accept</button>
+        <button class="sm-btn sm-btn-accent"  onclick="smAICleanup()" title="Ask the AI model set in ✨ AI Compose to fix detection errors">✨ AI Cleanup</button>
+        <button class="sm-btn sm-btn-danger"  onclick="smDiscardDraft()">✖ Discard</button>
+        <button class="sm-btn sm-btn-neutral" id="sm-draft-skip" onclick="smSkipSection()" title="Discard and move Start past this section">⏭ Skip section</button>
+    </div>
+</div><!-- /.container -->
+
+<!-- ── AI Compose Modal ── -->
+<div id="ai-compose-modal" class="modal-overlay">
+  <div class="modal-box" style="max-width:560px;">
+    <h3>✨ AI Composition
+      <button class="modal-close" onclick="closeAICompose()">✕</button>
+    </h3>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Raga</label>
+        <select id="ai-raga-select" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="">— choose raga —</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Taal</label>
+        <select id="ai-taal-select" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="8">Keherwa (8 beats)</option>
+          <option value="16">Teentaal (16 beats)</option>
+          <option value="12">Ektaal (12 beats)</option>
+          <option value="6">Dadra (6 beats)</option>
+          <option value="7">Rupak (7 beats)</option>
+          <option value="8_bhajani">Bhajani (8 beats)</option>
+          <option value="10">Jhaptaal (10 beats)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Lines to generate</label>
+        <select id="ai-lines-count" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="2">2 lines (Sthayi)</option>
+          <option value="4" selected>4 lines (Sthayi + Antara)</option>
+          <option value="6">6 lines</option>
+          <option value="8">8 lines</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Instrument</label>
+        <select id="ai-instrument" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;">
+          <option value="harmonium">Harmonium</option>
+          <option value="flute">Flute</option>
+          <option value="sitar">Sitar</option>
+          <option value="violin">Violin</option>
+          <option value="bellpad">Bellpad</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">AI Model</label>
+      <select id="ai-model" onchange="aiUpdateKeyLabel()" style="width:100%;padding:7px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+        <optgroup label="── Google Gemini (key: aistudio.google.com)">
+          <option value="gemini-2.0-flash">gemini-2.0-flash ✦ free tier · recommended</option>
+          <option value="gemini-1.5-flash">gemini-1.5-flash ✦ free tier · stable</option>
+          <option value="gemini-1.5-flash-8b">gemini-1.5-flash-8b ✦ free tier · fastest</option>
+          <option value="gemini-1.5-pro">gemini-1.5-pro · best quality · slower</option>
+        </optgroup>
+        <optgroup label="── Mistral AI (key: console.mistral.ai)">
+          <option value="mistral-small-latest">mistral-small-latest ✦ free tier</option>
+          <option value="open-mistral-7b">open-mistral-7b ✦ free tier</option>
+          <option value="open-mixtral-8x7b">open-mixtral-8x7b ✦ free tier · larger</option>
+          <option value="mistral-large-latest">mistral-large-latest · best Mistral quality</option>
+        </optgroup>
+        <optgroup label="── OpenRouter — completely free models (key: openrouter.ai)">
+          <option value="mistral/mistral-7b-instruct:free">mistral-7b-instruct ✦ free · via OpenRouter</option>
+          <option value="meta-llama/llama-3.1-8b-instruct:free">llama-3.1-8b ✦ free · via OpenRouter</option>
+          <option value="google/gemma-2-9b-it:free">gemma-2-9b ✦ free · via OpenRouter</option>
+          <option value="microsoft/phi-3-mini-128k-instruct:free">phi-3-mini ✦ free · via OpenRouter</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Emotion / Subject / Intention (optional)</label>
+      <textarea id="ai-emotion" rows="2"
+        placeholder="e.g. 'Morning devotion', 'Longing for rain', 'Peaceful evening', 'Romantic yearning'…"
+        style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+    </div>
+
+    <!-- Lyrics generation option -->
+    <div style="margin-bottom:12px;padding:12px;background:#f3e5f5;border-radius:8px;border:1px solid #ce93d8;">
+      <label style="font-size:13px;color:#4a148c;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="ai-gen-lyrics" onchange="toggleAILyricsOptions()" style="width:16px;height:16px;accent-color:#6a1b9a;cursor:pointer;">
+        ✍️ Also generate lyrics with AI
+      </label>
+      <div id="ai-lyrics-options" style="display:none;margin-top:10px;">
+        <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">Lyrics Language</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Hindi" checked style="accent-color:#6a1b9a;">
+            Hindi <span style="font-size:11px;color:#888;">(हिंदी)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Marathi" style="accent-color:#6a1b9a;">
+            Marathi <span style="font-size:11px;color:#888;">(मराठी)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:7px 10px;border:2px solid #ce93d8;border-radius:6px;background:white;">
+            <input type="radio" name="ai-lyrics-lang" value="Sanskrit" style="accent-color:#6a1b9a;">
+            Sanskrit <span style="font-size:11px;color:#888;">(संस्कृत)</span>
+          </label>
+        </div>
+        <p style="font-size:11px;color:#777;margin:6px 0 0 0;">
+          Lyrics will be generated to match the notation's beat structure and emotion.
+        </p>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label style="font-size:12px;color:#555;display:block;margin-bottom:4px;">
+        <span id="ai-key-label-text">Google Gemini API Key</span>
+        <a id="ai-key-link" href="https://aistudio.google.com/app/apikey" target="_blank"
+           style="color:#6a1b9a;font-size:11px;margin-left:6px;">Get free key ↗</a>
+      </label>
+      <input type="password" id="ai-api-key" placeholder="AIza…"
+        style="width:100%;padding:8px;border-radius:6px;border:1px solid #ccc;font-size:13px;box-sizing:border-box;">
+      <label style="font-size:11px;color:#888;margin-top:4px;display:block;">
+        <input type="checkbox" id="ai-save-key" checked style="vertical-align:middle;margin-right:4px;">
+        Remember on this device (saved separately per provider)
+      </label>
+    </div>
+
+    <button id="ai-generate-btn" onclick="doAICompose()"
+      style="width:100%;padding:11px;background:#6a1b9a;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+      ✨ Generate Composition
+    </button>
+    <div id="ai-status" style="margin-top:10px;font-size:13px;color:#555;min-height:20px;text-align:center;"></div>
+  </div>
+</div>
+
+<!-- ── Composition Picker Modal ── -->
+<div id="comp-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3>☁ My Compositions
+            <button class="modal-close" onclick="document.getElementById('comp-modal').style.display='none'">✕</button>
+        </h3>
+        <div id="comp-list"></div>
+        <button class="btn-new-comp" onclick="newComposition()">+ New Composition</button>
+    </div>
+</div>
+
+<!-- ── Bhatkhande Notation Modal (read-only) ── -->
+<div id="bhatkhande-modal" class="modal-overlay">
+    <div class="modal-box bk-modal-box">
+        <h3>&#9834; Bhatkhande View
+            <button class="modal-close" onclick="closeBhatkhandeView()">✕</button>
+        </h3>
+        <div id="bhatkhande-content" class="bk-content"></div>
+    </div>
+</div>
+
+<!-- ── Email Login Modal ── -->
+<div id="email-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:380px;">
+        <h3>Sign in / Register
+            <button class="modal-close" onclick="document.getElementById('email-modal').style.display='none'">✕</button>
+        </h3>
+        <p style="font-size:13px;color:#666;margin:0 0 16px 0;">
+            Enter your email and password. A new account is created automatically if you don't have one.
+        </p>
+        <input type="email"    id="email-input" class="email-field" placeholder="Email address">
+        <input type="password" id="pass-input"  class="email-field" placeholder="Password (min 6 characters)">
+        <button class="btn-email-submit" onclick="emailSignIn()">Continue with Email</button>
+        <div class="auth-divider">— or —</div>
+        <button class="btn-google" style="width:100%;padding:10px;"
+                onclick="signInGoogle(); document.getElementById('email-modal').style.display='none';">
+            Sign in with Google
+        </button>
+    </div>
+</div>
+
+<!-- ── Login Prompt Modal (shown when cloud action requires auth) ── -->
+<div id="login-modal" class="modal-overlay">
+    <div class="modal-box" style="max-width:360px; text-align:center;">
+        <h3>Sign in to use cloud features</h3>
+        <p style="font-size:13px;color:#666;margin:0 0 20px 0;">
+            Save your compositions to the cloud and access them on any device.
+        </p>
+        <button class="btn-google" style="width:100%;padding:11px;margin-bottom:10px;font-size:14px;"
+                onclick="signInGoogle(); document.getElementById('login-modal').style.display='none';">
+            Sign in with Google
+        </button>
+        <button class="btn-email-login" style="width:100%;padding:11px;font-size:14px;"
+                onclick="document.getElementById('login-modal').style.display='none'; document.getElementById('email-modal').style.display='flex';">
+            Sign in with Email
+        </button>
+        <button class="modal-close" style="display:block;margin-top:14px;font-size:13px;color:#888;"
+                onclick="document.getElementById('login-modal').style.display='none'">
+            Maybe later
+        </button>
+    </div>
+</div>
+
+<!-- ── Raga Admin Panel ── -->
+<div id="raga-admin-modal">
+    <div id="raga-admin-box">
+        <h2>🎵 Raga Database
+            <span style="font-size:12px;font-weight:normal;color:#888;">Admin only</span>
+        </h2>
+        <div class="ra-toolbar">
+            <button class="ra-btn-add"    onclick="raAdminNew()">+ Add Raga</button>
+            <button class="ra-btn-seed"   onclick="raAdminSeed()">⬆ Seed from Built-in</button>
+            <button class="ra-btn-export" onclick="raAdminExport()">⬇ Export JSON</button>
+            <button class="ra-btn-close"  onclick="closeRagaAdmin()">✕ Close</button>
+        </div>
+        <div class="ra-search-bar">
+            <input type="text" id="raga-admin-search" placeholder="🔍 Search by name, key or thaat…"
+                   oninput="raAdminRefreshTable()">
+            <span class="ra-search-count" id="raga-admin-count"></span>
+        </div>
+
+        <!-- Add / Edit form (hidden until triggered) -->
+        <div id="raga-edit-form">
+            <input type="hidden" id="ra-edit-key-original">
+            <div>
+                <label>Key (ID) — e.g. yaman</label>
+                <input type="text" id="ra-key" placeholder="yaman">
+            </div>
+            <div>
+                <label>Display Name</label>
+                <input type="text" id="ra-name" placeholder="Yaman">
+            </div>
+            <div>
+                <label>Thaat</label>
+                <input type="text" id="ra-thaat" placeholder="Kalyan">
+            </div>
+            <div>
+                <label>Sort Order (number)</label>
+                <input type="number" id="ra-order" placeholder="10">
+            </div>
+            <div class="full">
+                <label>Allowed Swaras (space-separated, e.g. Sa Re Ga ma Pa Dha Ni)</label>
+                <input type="text" id="ra-allowed" placeholder="Sa Re Ga ma Pa Dha Ni">
+            </div>
+            <div>
+                <label>Vadi</label>
+                <input type="text" id="ra-vadi" placeholder="Ga">
+            </div>
+            <div>
+                <label>Samvadi</label>
+                <input type="text" id="ra-samvadi" placeholder="Ni">
+            </div>
+            <div class="full">
+                <label>Aroha (space-separated, use Ṡa for upper Sa)</label>
+                <input type="text" id="ra-aroha" placeholder="Sa Re Ga ma Pa Dha Ni Ṡa">
+            </div>
+            <div class="full">
+                <label>Avaroha</label>
+                <input type="text" id="ra-avaroha" placeholder="Ṡa Ni Dha Pa ma Ga Re Sa">
+            </div>
+            <div class="full">
+                <label>Pakkad — use <code>Sa'</code> for upper octave, <code>Sa,</code> for lower</label>
+                <input type="text" id="ra-pakkad" placeholder="Ni, Re Ga ma Ga Re Sa">
+            </div>
+            <p class="ra-hint">Pakkad format: regular note = middle octave · add <b>'</b> after for upper (e.g. <b>Sa'</b>) · add <b>,</b> after for lower (e.g. <b>Ni,</b>)</p>
+            <div>
+                <label>Jaati (Aroha-Avaroha note count)</label>
+                <select id="ra-jaati" style="width:100%;padding:5px 8px;border:1px solid #d0c4e8;border-radius:4px;font-size:12px;">
+                    <option value="">— select —</option>
+                    <option>ODAV-ODAV</option><option>ODAV-SHADAV</option><option>ODAV-SAMPURNA</option>
+                    <option>SHADAV-ODAV</option><option>SHADAV-SHADAV</option><option>SHADAV-SAMPURNA</option>
+                    <option>SAMPURNA-ODAV</option><option>SAMPURNA-SHADAV</option><option>SAMPURNA-SAMPURNA</option>
+                </select>
+            </div>
+            <div>
+                <label>Time of Day</label>
+                <select id="ra-time" style="width:100%;padding:5px 8px;border:1px solid #d0c4e8;border-radius:4px;font-size:12px;">
+                    <option value="">— select —</option>
+                    <option>Morning</option><option>Late Morning</option><option>Afternoon</option>
+                    <option>Late Afternoon</option><option>Evening</option><option>Night</option>
+                    <option>Late Night</option><option>Early Morning</option>
+                </select>
+            </div>
+            <div>
+                <label>Rasa (mood)</label>
+                <input type="text" id="ra-rasa" placeholder="Shant, Karuna, Veer…">
+            </div>
+            <div>
+                <label>Skipped in Aroha</label>
+                <input type="text" id="ra-skipped-aaroh" placeholder="e.g. R D">
+            </div>
+            <div>
+                <label>Skipped in Avaroha</label>
+                <input type="text" id="ra-skipped-avaroh" placeholder="e.g. G N">
+            </div>
+            <div class="ra-form-actions full">
+                <button class="ra-save-btn"   onclick="raAdminSave()">💾 Save</button>
+                <button class="ra-cancel-btn" onclick="raAdminCancelEdit()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Raga table -->
+        <table id="raga-admin-table">
+            <thead>
+                <tr>
+                    <th>Key</th><th>Name</th><th>Thaat</th>
+                    <th>Vadi</th><th>Samvadi</th><th>Jaati</th><th>Time</th><th>Pakkad notes</th><th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="raga-admin-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ── Toast notification ── -->
+<div id="toast"></div>
+
+<!-- Scripts load in this order and share globals (classic scripts, no bundler) -->
+<script src="v5/engine.js"></script>
+<script src="v5/raga.js"></script>
+<script src="v5/sheet.js"></script>
+<script src="v5/cloud.js"></script>
+<script src="v5/ai.js"></script>
+<script src="v5/transcribe.js"></script>
+<script src="v5/bhatkhande.js"></script>
+</body>
+</html>

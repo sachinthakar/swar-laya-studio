@@ -652,6 +652,20 @@
         .sm-edit-grid {
             display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
         }
+        /* Composer-style editor: one .line-container per Taal line */
+        .sm-edit-grid.sm-edit-lines { display: block; }
+        .sm-edit-grid .line-container { padding-top: 28px; margin-bottom: 10px; color: #222; }
+        .sm-edit-grid .line-badge { color: #555; font-size: 11px; }
+        .sm-edit-grid .line-badge .sm-line-t { color: #888; font-weight: 400; margin-left: 6px; }
+        .sm-edit-grid .sm-beatnum-cell {
+            text-align: center; font-size: 11px; font-weight: 700; color: #888;
+            border-color: transparent; padding: 0 3px;
+        }
+        .sm-edit-grid .sm-beatnum-cell.sam { color: #c62828; }
+        .sm-edit-grid .sm-cands { margin: 3px 0 0; }
+        .sm-edit-grid .sm-cand { background: #eef1f8; border-color: #c5cbe0; color: #333; }
+        .sm-edit-grid .sm-cand.cur { background: #e3f6ec; border-color: #57b98a; color: #1b6e46; }
+        .sm-edit-grid .sm-cand.komal { color: #c25a00; }
         .sm-edit-cell {
             background: #111128; border: 1px solid #3d3d6e; border-radius: 6px;
             padding: 6px; min-width: 72px; text-align: center;
@@ -934,21 +948,31 @@
 
         <!-- Waveform panel -->
         <div class="sm-panel" id="sm-waveform-panel" style="display:none;">
-            <h3>📊 Waveform — Click to set Start, Shift+Click to set End</h3>
+            <h3>📊 Waveform — Click to set Start; End is computed from Lines × Beats per Line × BPM</h3>
             <canvas id="sm-waveform-canvas" height="80"></canvas>
-            <div class="sm-waveform-hint">Click: set segment start &nbsp;|&nbsp; Shift+click: set segment end &nbsp;|&nbsp; Drag: select region</div>
+            <div class="sm-waveform-hint">Click: set section start &nbsp;|&nbsp; Shift+click or Drag: set length (snapped to whole lines)</div>
             <div style="margin-top:10px; display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
                 <div class="sm-control">
                     <label>Start (sec)</label>
                     <input type="number" id="sm-start-sec" value="0" min="0" step="0.1" style="width:80px;">
                 </div>
                 <div class="sm-control">
-                    <label>End (sec)</label>
-                    <input type="number" id="sm-end-sec" value="4" min="0" step="0.1" style="width:80px;">
+                    <label title="Free-tempo ad-lib/alap before the beats begin. Becomes its own first line; Taal lines start at Start + Ad-lib.">Ad-lib (sec)</label>
+                    <input type="number" id="sm-adlib-sec" value="0" min="0" step="0.1" style="width:70px;"
+                           title="Free-tempo ad-lib/alap before the beats begin. Becomes its own first line; Taal lines start at Start + Ad-lib.">
                 </div>
                 <div class="sm-control">
-                    <label>Beats in segment</label>
-                    <input type="number" id="sm-seg-beats" value="8" min="1" max="32" style="width:60px;">
+                    <label title="Number of lines (Taal cycles) in this section. Each line = Beats per Line (Setup).">Lines in section</label>
+                    <input type="number" id="sm-seg-lines" value="1" min="0" max="64" style="width:60px;">
+                </div>
+                <div class="sm-control">
+                    <label title="Auto-computed: Start + Ad-lib + Lines × Beats per Line × 60 / BPM">End (sec) — auto</label>
+                    <input type="number" id="sm-end-sec" value="4" min="0" step="0.01" style="width:80px; opacity:0.75;" readonly
+                           title="Auto-computed: Start + Lines × Beats per Line × 60 / BPM">
+                    <input type="hidden" id="sm-seg-beats" value="8">
+                </div>
+                <div class="sm-control" style="align-self:flex-end;">
+                    <span id="sm-section-info" style="font-size:11px; color:#8fe; white-space:nowrap;"></span>
                 </div>
                 <div class="sm-control">
                     <label>Section label</label>
@@ -996,7 +1020,7 @@
             <!-- Edit grid (hidden by default) -->
             <div id="sm-edit-panel" style="display:none; margin-top:12px;">
                 <div style="font-size:12px; color:#88aaff; margin-bottom:8px;">
-                    Edit beats below. Prefix: <code style="color:#ffdd88;">.</code>=mandra &nbsp; <code style="color:#ffdd88;">'</code>=taar &nbsp; madhya=default (tap active button again to reset) &nbsp;|&nbsp; <code style="color:#ffdd88;">meend →</code> marks the note that <em>starts</em> the glide — it slides into the next note
+                    Same layout as the Composer: one box per line. &nbsp;<code style="color:#ffdd88;">˚˚</code>/<code style="color:#ffdd88;">˚</code>=taar &nbsp; <code style="color:#ffdd88;">•</code>/<code style="color:#ffdd88;">••</code>=mandra (click the active button again for madhya) &nbsp;|&nbsp; <code style="color:#ffdd88;">m</code>=meend: glide from this note into the next &nbsp;|&nbsp; <code style="color:#ffdd88;">+</code> adds a sub-note (gamak). Chips under a note are likely alternative pitches — click to pick.
                 </div>
                 <div id="sm-edit-grid" class="sm-edit-grid"></div>
                 <div class="sm-action-row" style="margin-top:10px;">
@@ -4577,9 +4601,9 @@ function smAggregateBeat(pitchSlice, saHz, minSubFrac = 0.25) {
 }
 
 // ── Process a segment (start_sec, nBeats) ─────────────────────────────────────
-function smProcessSegment(startSec, nBeats) {
+function smProcessSegment(startSec, nBeats, beatDurOverride) {
     const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
-    const beatDur = 60.0 / bpm;
+    const beatDur = beatDurOverride || 60.0 / bpm;
     const secPerFrame = SM.hopLen / SM.sampleRate;
     // Apply Melody Octave offset: +1 means the melody is one octave above the Sa dropdown value
     const octOffset = parseInt(document.getElementById('sm-oct-offset')?.value) ?? 1;
@@ -4666,7 +4690,7 @@ async function smLoadFile(event) {
     await smRunPitchAsync(samples, sr);
 
     document.getElementById('sm-waveform-panel').style.display = 'block';
-    document.getElementById('sm-end-sec').value = Math.min(4, SM.audioBuffer.duration).toFixed(1);
+    smSyncSectionEnd();
     smDrawWaveform();
     smInitWaveform();
     smSetStatus('sm-load-status', `✅ Ready — ${SM.audioBuffer.duration.toFixed(1)}s, ${SM.pitchTrack.length} frames`);
@@ -4800,6 +4824,17 @@ function smDrawWaveform() {
     ctx.beginPath(); ctx.moveTo(xs, 0); ctx.lineTo(xs, H); ctx.stroke();
     ctx.strokeStyle = '#ff9944';
     ctx.beginPath(); ctx.moveTo(xe, 0); ctx.lineTo(xe, H); ctx.stroke();
+    // Ad-lib part (orange) + beat-start marker
+    if (SM.segAdlibSec > 0) {
+        const xa = ((SM.segStart + SM.segAdlibSec) / dur) * W;
+        ctx.fillStyle = 'rgba(255,153,68,0.18)';
+        ctx.fillRect(xs, 0, xa - xs, H);
+        ctx.setLineDash([3, 3]); ctx.strokeStyle = '#ffaa44'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(xa, 0); ctx.lineTo(xa, H); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ffaa44'; ctx.font = '10px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('ad-lib', xs + 3, H - 6);
+    }
     // Start/end time labels
     ctx.fillStyle = '#4a9aff';
     ctx.font = '10px monospace';
@@ -4812,7 +4847,8 @@ function smDrawWaveform() {
 
     // ── Accepted-lines position cursor (green dashed) ───────────────────────────
     const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
-    const posT = SM.acceptedLines.reduce((acc, _) => acc + (SM.segBeats || 8) * 60 / bpm, 0);
+    const lastAcc = SM.acceptedLines[SM.acceptedLines.length - 1];
+    const posT = (lastAcc && lastAcc._segEnd !== undefined) ? lastAcc._segEnd : 0;
     if (posT > 0 && posT < dur) {
         const xp = (posT / dur) * W;
         ctx.strokeStyle = '#22cc55';
@@ -4859,27 +4895,113 @@ function smInitWaveform() {
         SM.dragStartX = e.offsetX;
         const t = (e.offsetX / canvas.offsetWidth) * SM.audioBuffer.duration;
         if (e.shiftKey) {
-            SM.segEnd = +t.toFixed(2);
-            document.getElementById('sm-end-sec').value = SM.segEnd;
+            smSetLinesFromEndTime(t);
         } else {
-            SM.segStart = +t.toFixed(2);
-            document.getElementById('sm-start-sec').value = SM.segStart;
+            SM.dragging = false;   // plain click sets Start only; End follows from Lines
+            document.getElementById('sm-start-sec').value = +t.toFixed(2);
+            smSyncSectionEnd();
         }
         smDrawWaveform();
     });
     canvas.addEventListener('mousemove', e => {
         if (!SM.dragging || !SM.audioBuffer) return;
         const t = (e.offsetX / canvas.offsetWidth) * SM.audioBuffer.duration;
-        SM.segEnd = +Math.max(SM.segStart + 0.1, t).toFixed(2);
-        document.getElementById('sm-end-sec').value = SM.segEnd;
-        smDrawWaveform();
+        smSetLinesFromEndTime(t);
     });
     canvas.addEventListener('mouseup', () => { SM.dragging = false; });
     canvas.addEventListener('mouseleave', () => { SM.dragging = false; });
 }
 
+// ── Section timing ─────────────────────────────────────────────────────────────
+// A section = N lines; each line = "Beats per Line" (Setup) beats.
+//   End = Start + N × BeatsPerLine × 60 / BPM
+// After Accept/Skip the next section starts at previous End + SM_SECTION_GAP.
+const SM_SECTION_GAP = 0.1;   // seconds
+function smBeatsPerLine() {
+    return Math.max(1, parseInt(document.getElementById('sm-beats-per-line').value) || 8);
+}
+function smSectionLines() {
+    const v = parseInt(document.getElementById('sm-seg-lines').value);
+    return Math.max(0, isNaN(v) ? 1 : v);
+}
+function smAdlibSec() {
+    return Math.max(0, parseFloat(document.getElementById('sm-adlib-sec').value) || 0);
+}
+// Row/line layout of the current section: optional ad-lib line, then Taal lines.
+// Each range: {s, e (beat indices), adlib, t0, t1 (seconds), beatDur}
+function smLineRanges(total) {
+    const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const beatDur = 60 / bpm;
+    const nA      = Math.min(SM.segAdlibBeats || 0, total);
+    const bpl     = SM.segBpl || total || 1;
+    const out = [];
+    let t = SM.segStart || 0;
+    if (nA > 0) {
+        const aDur = SM.segAdlibSec / nA;
+        out.push({ s: 0, e: nA, adlib: true, t0: t, t1: t + SM.segAdlibSec, beatDur: aDur });
+        t += SM.segAdlibSec;
+    }
+    for (let s0 = nA; s0 < total; s0 += bpl) {
+        const e0 = Math.min(s0 + bpl, total);
+        out.push({ s: s0, e: e0, adlib: false, t0: t, t1: t + (e0 - s0) * beatDur, beatDur });
+        t += (e0 - s0) * beatDur;
+    }
+    return out;
+}
+function smSyncSectionEnd() {
+    const bpm   = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const bpl   = smBeatsPerLine();
+    const adlib = smAdlibSec();
+    let lines   = smSectionLines();
+    if (adlib <= 0 && lines < 1) { lines = 1; document.getElementById('sm-seg-lines').value = 1; }
+    const start = Math.max(0, parseFloat(document.getElementById('sm-start-sec').value) || 0);
+    const beats = lines * bpl;
+    const dur   = beats * 60 / bpm;
+    // Ad-lib slots: same spacing as a beat (min 1); its own Line BPM makes them fill the ad-lib time
+    const nA    = adlib > 0 ? Math.max(1, Math.round(adlib * bpm / 60)) : 0;
+    const end   = start + adlib + dur;
+    document.getElementById('sm-seg-beats').value = nA + beats;
+    document.getElementById('sm-end-sec').value   = end.toFixed(2);
+    SM.segStart      = +start.toFixed(2);
+    SM.segEnd        = +end.toFixed(2);
+    SM.segBeats      = nA + beats;
+    SM.segBpl        = bpl;
+    SM.segAdlibSec   = adlib;
+    SM.segAdlibBeats = nA;
+    const info = document.getElementById('sm-section-info');
+    if (info) {
+        let txt = (nA ? `Ad-lib ${adlib.toFixed(2)}s (${nA} slots) + ` : '') +
+                  `${lines} × ${bpl} = ${beats} beats · ${dur.toFixed(2)}s @ ${bpm} BPM` +
+                  (nA ? ` · beats start ${(start + adlib).toFixed(2)}s` : '');
+        let col = '#8fe';
+        if (SM.audioBuffer && end > SM.audioBuffer.duration + 0.01) {
+            txt += ` · ⚠ ends past audio (${SM.audioBuffer.duration.toFixed(2)}s)`;
+            col = '#ffaa44';
+        }
+        info.textContent = txt;
+        info.style.color = col;
+    }
+    if (SM.audioBuffer) smDrawWaveform();
+}
+// Shift-click / drag on the waveform: choose the whole number of lines closest to time t
+function smSetLinesFromEndTime(t) {
+    const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
+    const lineDur = smBeatsPerLine() * 60 / bpm;
+    const start   = (parseFloat(document.getElementById('sm-start-sec').value) || 0) + smAdlibSec();
+    const lines   = Math.max(smAdlibSec() > 0 ? 0 : 1, Math.round((t - start) / lineDur));
+    document.getElementById('sm-seg-lines').value = lines;
+    smSyncSectionEnd();
+}
+function smAdvanceToNextSection() {
+    document.getElementById('sm-start-sec').value = (SM.segEnd + SM_SECTION_GAP).toFixed(2);
+    document.getElementById('sm-adlib-sec').value = 0;
+    if (smSectionLines() < 1) document.getElementById('sm-seg-lines').value = 1;
+    smSyncSectionEnd();
+}
+
 // ── Detect ─────────────────────────────────────────────────────────────────────
 function smDetect() {
+    smSyncSectionEnd();
     if (typeof SMB !== 'undefined' && SMB.enabled()) { SMB.detect(); return; }
     if (!SM.rawPitchTrack) { smSetStatus('sm-load-status', '❌ Load an audio file first.'); return; }
     smSetStatus('sm-result-status', '🔍 Detecting…');
@@ -4890,7 +5012,9 @@ function smDetect() {
     SM.segEnd   = parseFloat(document.getElementById('sm-end-sec').value)   || 4;
     SM.segBeats = parseInt(document.getElementById('sm-seg-beats').value)   || 8;
 
-    const raw = smProcessSegment(SM.segStart, SM.segBeats);
+    const nA  = SM.segAdlibBeats || 0;
+    const raw = (nA ? smProcessSegment(SM.segStart, nA, SM.segAdlibSec / nA) : [])
+        .concat(smProcessSegment(SM.segStart + (SM.segAdlibSec || 0), SM.segBeats - nA));
     SM.currentBeats = smApplySustain(raw, SM.carryNote, SM.carryOct);
 
     document.getElementById('sm-result-panel').style.display = 'block';
@@ -4910,14 +5034,19 @@ function smDisplayNotation(beats) {
     const div = document.getElementById('sm-notation-display');
     if (!div) return;
     const n = beats.length;
+    const ranges = smLineRanges(n);
+    const multi  = ranges.length > 1;
     let html = '<table class="sm-notation-table">';
 
-    for (let rowS = 0; rowS < n; rowS += SM_COLS) {
-        const rowE = Math.min(rowS + SM_COLS, n);
+    for (let ri = 0; ri < ranges.length; ri++) {
+        const rowS = ranges[ri].s, rowE = ranges[ri].e;
+        const lineNo = ri + 1 - (ranges[0].adlib ? 1 : 0);
+        const lbl = ranges[ri].adlib ? '<b style="color:#ffaa44;">Ad-lib</b>'
+                  : (multi ? `<b style="color:#8fe;">Line ${lineNo}</b>` : 'Beat');
 
-        // Beat number header
-        html += '<tr><td class="sm-row-label">Beat</td>';
-        for (let i = rowS; i < rowE; i++) html += `<td style="color:#666;font-size:11px;">${i+1}</td>`;
+        // Beat number header (multi-line section: "Line k" label, beats renumbered per line)
+        html += `<tr><td class="sm-row-label">${lbl}</td>`;
+        for (let i = rowS; i < rowE; i++) html += `<td style="color:#666;font-size:11px;">${multi ? i - rowS + 1 : i + 1}</td>`;
         html += '</tr>';
 
         // Note row
@@ -4986,51 +5115,69 @@ function smToggleEdit() {
 function smBuildEditGrid(beats) {
     const grid = document.getElementById('sm-edit-grid');
     if (!grid) return;
+    grid.classList.add('sm-edit-lines');
     const allNotes = ['-', '~', ...SM_SWARA_NAMES];
-    const OCT_DEFS = [[-2,'‥'],[-1,'.'],[1,"'"],[2,"''"]];
+    // Composer button order and symbols; •• (mandra-2) kept so detected data is never lost
+    const OCT_DEFS = [[2,'&#730;&#730;','Taar+1'],[1,'&#730;','Taar'],[-1,'&#x2022;','Mandra'],[-2,'&#x2022;&#x2022;','Mandra-2']];
+    const ranges = smLineRanges(beats.length);
+
+    // Keep scroll positions across rebuilds (every click re-renders the grid)
+    const prevScroll = [...grid.querySelectorAll('.line-container')].map(el => el.scrollLeft);
+
     let html = '';
+    for (let ri = 0; ri < ranges.length; ri++) {
+        const { s: ls, e: le, adlib, t0: tS, t1: tE } = ranges[ri];
+        const lineNo = ri + 1 - (ranges[0].adlib ? 1 : 0);
+        html += `<div class="line-container${adlib ? ' adlib-line' : ''}">
+            <span class="line-badge">${adlib ? 'Ad-lib / Alap' : `Line ${lineNo}`}<span class="sm-line-t">${tS.toFixed(2)}s – ${tE.toFixed(2)}s${adlib ? ' · free tempo, tabla muted' : ''}</span></span>`;
 
-    for (let i = 0; i < beats.length; i++) {
-        const b          = beats[i];
-        const multiSub   = b.notes.length > 1;
-        html += `<div class="sm-edit-cell">
-            <div class="sm-beat-num">Beat ${i+1}${multiSub ? ` <span style="color:#88aaff;font-weight:400;">(${b.notes.length} notes)</span>` : ''}</div>`;
-
-        // Render each sub-beat
-        for (let si = 0; si < b.notes.length; si++) {
-            const note   = b.notes[si];
-            const oct    = b.octs[si]  !== undefined ? b.octs[si]  : 0;
-            const isMeend = b.meend && b.meend[si] === true;
-            html += `<div class="sm-sub-beat">${smCandChips(i,si,note,oct,b.clusters)}
-                <select onchange="smEditSetNote(${i},${si},this.value)">`;
-            allNotes.forEach(nn => {
-                html += `<option value="${nn}"${nn===note?' selected':''}>${nn}</option>`;
-            });
-            html += `</select>`;
-            // Column: oct buttons on top row, meend toggle below — always fully visible
-            html += `<div class="sm-sub-controls">`;
-            html += `<div class="sm-oct-btns">`;
-            OCT_DEFS.forEach(([o, lbl]) => {
-                html += `<button class="sm-oct-btn${o===oct?' active':''}"
-                            onclick="smEditSetOct(${i},${si},${o})">${lbl}</button>`;
-            });
-            html += `</div>`;
-            html += `<button class="sm-meend-btn${isMeend?' active':''}"
-                        title="Meend: glide FROM this note into the next note"
-                        onclick="smEditToggleMeend(${i},${si})">meend →</button>`;
-            html += `</div>`;   // .sm-sub-controls
-            if (b.notes.length > 1) {
-                html += `<button class="sm-sub-remove-btn" title="Remove this note"
-                            onclick="smEditRemoveSub(${i},${si})">×</button>`;
-            }
-            html += `</div>`;   // .sm-sub-beat
+        // Beat-number row
+        html += `<div class="grid-row"><div class="row-label">Beat</div>`;
+        for (let i = ls; i < le; i++) {
+            html += `<div class="cell sm-beatnum-cell${i === ls ? ' sam' : ''}">${i - ls + 1}</div>`;
         }
+        html += `</div>`;
 
-        // Add-note button
-        html += `<button class="sm-sub-add-btn" onclick="smEditAddSub(${i})">＋ add note</button>`;
-        html += `</div>`;   // .sm-edit-cell
+        // Notes row — Composer cell: stacked note-units + "+" add button
+        html += `<div class="grid-row"><div class="row-label">Notes</div>`;
+        for (let i = ls; i < le; i++) {
+            const b     = beats[i];
+            const multi = b.notes.length > 1;
+            html += `<div class="cell" data-beat-idx="${i}"><div class="sub-cell-container">`;
+            for (let si = 0; si < b.notes.length; si++) {
+                const note    = b.notes[si];
+                const oct     = b.octs[si] !== undefined ? b.octs[si] : 0;
+                const isMeend = b.meend && b.meend[si] === true;
+                const hold    = note === '~';
+                html += `<div class="note-unit"><select class="note-select" onchange="smEditSetNote(${i},${si},this.value)">`;
+                allNotes.forEach(nn => { html += `<option value="${nn}"${nn === note ? ' selected' : ''}>${nn}</option>`; });
+                html += `</select><span class="octave-controls">`;
+                OCT_DEFS.forEach(([o, lbl, ttl]) => {
+                    // •• only shown when already in use, to keep the Composer look
+                    if (o === -2 && oct !== -2) return;
+                    html += `<button class="octave-btn${o === oct ? ' active' : ''}" data-oct="${o}" title="${ttl}"` +
+                            `${hold ? ' disabled style="opacity:0.25"' : ''} onclick="smEditSetOct(${i},${si},${o})">${lbl}</button>`;
+                });
+                html += `</span>`;
+                html += `<button class="meend-btn${isMeend ? ' active' : ''}" title="Meend: glide FROM this note into the next note"` +
+                        ` onclick="smEditToggleMeend(${i},${si})">m</button>`;
+                html += `<button class="rem-sub-btn" title="Remove sub-note" style="visibility:${multi ? 'visible' : 'hidden'}"` +
+                        ` onclick="smEditRemoveSub(${i},${si})">&#x2715;</button>`;
+                html += `</div>`;   // .note-unit
+            }
+            html += `</div>`;       // .sub-cell-container
+            html += `<button class="add-sub-btn" title="Add sub-note (gamak / taan)" onclick="smEditAddSub(${i})">+</button>`;
+            // Candidate pitch chips (single-note beats only, to keep gamak cells compact)
+            if (!multi) {
+                const o0 = b.octs[0] !== undefined ? b.octs[0] : 0;
+                html += smCandChips(i, 0, b.notes[0], o0, b.clusters);
+            }
+            html += `</div>`;       // .cell
+        }
+        html += `</div></div>`;     // .grid-row, .line-container
     }
     grid.innerHTML = html;
+    grid.querySelectorAll('.line-container').forEach((el, k) => { if (prevScroll[k]) el.scrollLeft = prevScroll[k]; });
 }
 
 function smEditSetNote(beatIdx, subIdx, note) {
@@ -5123,26 +5270,35 @@ function smAccept() {
     const instr   = document.getElementById('sm-instrument').value         || 'harmonium';
     const adlib   = document.getElementById('sm-adlib').checked;
     const bpm     = parseInt(document.getElementById('sm-bpm').value)       || 90;
-    const beatsN  = SM.segBeats;
+    const beatDur = 60.0 / bpm;
+    const bpl     = SM.segBpl || beats.length;
 
-    // Build line object matching v3 JSON schema
-    // _segStart/_segEnd are internal metadata for review/replace — stripped on export
-    const lineObj = {
-        _segStart: SM.segStart,
-        _segEnd:   SM.segEnd,
-        section,
-        line_instrument: instr,
-        tabla_mute: adlib,
-        line_volume: 1.0,
-        taal_key: String(beatsN),
-        beats: String(beatsN),
-        lyrics:  beats.map((_,i) => String(i+1)),
-        notes:   beats.map(b => b.notes),
-        octaves: beats.map(b => b.octs),
-        meend:   beats.map(b => [...(b.meend || b.notes.map(()=>false))])
-    };
-
-    SM.acceptedLines.push(lineObj);
+    // A section may span several lines: optional ad-lib line, then one line object per Taal cycle.
+    // Build line objects matching v3 JSON schema.
+    // _-prefixed fields are internal metadata for review/replace — stripped on export
+    for (const rg of smLineRanges(beats.length)) {
+        const chunk = beats.slice(rg.s, rg.e);
+        const tS    = rg.t0;
+        const extra = rg.adlib
+            ? { adlib: true, percussion: 'mute', line_bpm: Math.max(10, Math.round(60 / rg.beatDur)),
+                _adlibSec: SM.segAdlibSec }
+            : {};
+        SM.acceptedLines.push({
+            _segStart: +tS.toFixed(2),
+            _segEnd:   +rg.t1.toFixed(2),
+            section,
+            line_instrument: instr,
+            tabla_mute: rg.adlib || adlib,
+            line_volume: 1.0,
+            ...extra,
+            taal_key: String(rg.adlib ? bpl : chunk.length),
+            beats: String(chunk.length),
+            lyrics:  chunk.map((_,i) => String(i+1)),
+            notes:   chunk.map(b => b.notes),
+            octaves: chunk.map(b => b.octs),
+            meend:   chunk.map(b => [...(b.meend || b.notes.map(()=>false))])
+        });
+    }
 
     // Update carry note
     const lastBeat = beats[beats.length - 1];
@@ -5152,11 +5308,8 @@ function smAccept() {
         SM.carryOct  = lastBeat.octs[lastBeat.octs.length - 1];
     }
 
-    // Advance waveform position
-    SM.segStart = SM.segEnd;
-    SM.segEnd   = +(SM.segStart + beatsN * 60 / bpm).toFixed(2);
-    document.getElementById('sm-start-sec').value = SM.segStart;
-    document.getElementById('sm-end-sec').value   = SM.segEnd;
+    // Next section starts where this one ended + gap; End re-derived from Lines
+    smAdvanceToNextSection();
 
     SM.currentBeats = null;
     document.getElementById('sm-result-panel').style.display = 'none';
@@ -5167,12 +5320,7 @@ function smAccept() {
 }
 
 function smSkip() {
-    const bpm    = parseInt(document.getElementById('sm-bpm').value) || 90;
-    const beatsN = SM.segBeats;
-    SM.segStart = SM.segEnd;
-    SM.segEnd   = +(SM.segStart + beatsN * 60 / bpm).toFixed(2);
-    document.getElementById('sm-start-sec').value = SM.segStart;
-    document.getElementById('sm-end-sec').value   = SM.segEnd;
+    smAdvanceToNextSection();
     SM.currentBeats = null;
     document.getElementById('sm-result-panel').style.display = 'none';
     smDrawWaveform();
@@ -5194,7 +5342,7 @@ function smRenderAcceptedLines() {
             : '';
         html += `<div class="sm-accepted-line" id="sm-aline-${idx}">
             <div class="sm-line-header">
-                <span class="sm-line-meta">${idx+1}. <b>${line.section}</b> — ${line.line_instrument} — ${line.beats} beats ${timeRange}</span>
+                <span class="sm-line-meta">${idx+1}. <b>${line.section}</b>${line.adlib ? ' <b style="color:#ffaa44;">(ad-lib)</b>' : ''} — ${line.line_instrument} — ${line.beats} beats ${timeRange}</span>
                 <div class="sm-line-actions">
                     <button class="sm-line-play-btn" id="sm-playbtn-${idx}"
                             onclick="smPlayAcceptedLine(${idx})">▶ Play</button>
@@ -5228,7 +5376,7 @@ async function smPlayAcceptedLine(idx) {
     if (SampleLoadState[instr] !== 'done') await ensureSamplesLoaded(instr);
 
     const bpm     = parseInt(document.getElementById('sm-bpm').value) || 90;
-    const beatDur = 60.0 / bpm;
+    const beatDur = line._adlibSec ? line._adlibSec / line.notes.length : 60.0 / (line.line_bpm || bpm);
     const saHz    = SM.saHz * 2;   // ×2 to match Composer octave convention
     const t0      = audioCtx.currentTime + 0.05;
 
@@ -5266,11 +5414,10 @@ function smRemoveAcceptedLine(idx) {
 
     // Restore the segment boundaries so the user can re-detect immediately
     if (line._segStart !== undefined) {
-        SM.segStart = line._segStart;
-        SM.segEnd   = line._segEnd;
-        document.getElementById('sm-start-sec').value  = SM.segStart;
-        document.getElementById('sm-end-sec').value    = SM.segEnd;
-        document.getElementById('sm-seg-beats').value  = line.beats;
+        document.getElementById('sm-start-sec').value  = line._segStart;
+        document.getElementById('sm-adlib-sec').value  = line._adlibSec || 0;
+        document.getElementById('sm-seg-lines').value  = line._adlibSec ? 0 : 1;
+        smSyncSectionEnd();
         document.getElementById('sm-section').value    = line.section;
         document.getElementById('sm-instrument').value = line.line_instrument;
     }
@@ -5576,8 +5723,12 @@ async function smPlaySynth(useEdit) {
 
     // Schedule beat-highlight setTimeouts so the yellow marker jumps beat-by-beat.
     SM.synthTimers = [];
+    const ranges = smLineRanges(beats.length);
+    const segT0  = ranges.length ? ranges[0].t0 : 0;
+    const beatOffset = i => { const rg = ranges.find(r => i >= r.s && i < r.e) || { s: 0, t0: segT0, beatDur };
+                              return rg.t0 - segT0 + (i - rg.s) * rg.beatDur; };
     for (let i = 0; i < beats.length; i++) {
-        const delayMs = (t0 - audioCtx.currentTime + i * beatDur) * 1000;
+        const delayMs = (t0 - audioCtx.currentTime + beatOffset(i)) * 1000;
         const beatIdx = i;
         SM.synthTimers.push(setTimeout(() => {
             if (!SM.synthPlaying) return;
@@ -5587,10 +5738,16 @@ async function smPlaySynth(useEdit) {
         }, delayMs));
     }
     // Auto-reset after playback ends
-    const totalMs = (t0 - audioCtx.currentTime + beats.length * beatDur + 0.3) * 1000;
+    const lastR   = ranges[ranges.length - 1];
+    const totalSec = lastR ? lastR.t1 - segT0 : beats.length * beatDur;
+    const totalMs = (t0 - audioCtx.currentTime + totalSec + 0.3) * 1000;
     SM.synthTimers.push(setTimeout(() => smStopSynth(), totalMs));
 
-    smPlayBeats(beats, beatDur, saHz, instr, t0);
+    if (ranges.length && ranges[0].adlib) {
+        ranges.forEach(rg => smPlayBeats(beats.slice(rg.s, rg.e), rg.beatDur, saHz, instr, t0 + rg.t0 - segT0));
+    } else {
+        smPlayBeats(beats, beatDur, saHz, instr, t0);
+    }
 }
 
 // ── Export ─────────────────────────────────────────────────────────────────────
@@ -5603,7 +5760,7 @@ function smBuildOutput() {
         scale: String(saHz),
         bpm,
         // Strip internal _seg* metadata fields before export
-        lines: SM.acceptedLines.map(({ _segStart, _segEnd, ...rest }) => rest)
+        lines: SM.acceptedLines.map(l => Object.fromEntries(Object.entries(l).filter(([k]) => !k.startsWith('_'))))
     };
 }
 
@@ -5755,21 +5912,26 @@ const SMB = {
     const c = this.cfg();
     if (!SM.audioFile) { smSetStatus('sm-result-status', '❌ Load an audio file first.'); return; }
     if (!SM.sessionId) { this.status('⏳ backend not ready — opening…'); await this.openSession(SM.audioFile); if (!SM.sessionId) return; }
+    smSyncSectionEnd();
     SM.saHz    = parseFloat(document.getElementById('sm-sa-select').value);
-    SM.segStart = parseFloat(document.getElementById('sm-start-sec').value) || 0;
-    SM.segBeats = parseInt(document.getElementById('sm-seg-beats').value) || 8;
     const bpm  = parseInt(document.getElementById('sm-bpm').value) || 90;
     smSetStatus('sm-result-status', '🔍 Detecting via backend…');
     try {
-      const fd = new FormData();
-      fd.append('session_id', SM.sessionId);
-      fd.append('start', SM.segStart); fd.append('beats', SM.segBeats);
-      fd.append('bpm', bpm); fd.append('sa', this.trueSa());
-      fd.append('model', c.model); fd.append('device', c.device);
-      const r = await fetch(c.url + '/segment', { method: 'POST', body: fd });
-      if (!r.ok) throw new Error(await r.text());
-      const data = await r.json();
-      const raw = data.beats.map(b => ({ notes: b.notes, octs: b.octs, dom_hz: 0, voiced_pct: b.voiced_pct || 0, clusters: [] }));
+      const seg = async (start, beats, segBpm) => {
+        const fd = new FormData();
+        fd.append('session_id', SM.sessionId);
+        fd.append('start', start); fd.append('beats', beats);
+        fd.append('bpm', segBpm); fd.append('sa', this.trueSa());
+        fd.append('model', c.model); fd.append('device', c.device);
+        const r = await fetch(c.url + '/segment', { method: 'POST', body: fd });
+        if (!r.ok) throw new Error(await r.text());
+        return r.json();
+      };
+      const nA = SM.segAdlibBeats || 0, nT = SM.segBeats - nA;
+      let cells = [], data = { sa: '?' };
+      if (nA) { data = await seg(SM.segStart, nA, 60 * nA / SM.segAdlibSec); cells = cells.concat(data.beats); }
+      if (nT) { data = await seg(SM.segStart + (SM.segAdlibSec || 0), nT, bpm); cells = cells.concat(data.beats); }
+      const raw = cells.map(b => ({ notes: b.notes, octs: b.octs, dom_hz: 0, voiced_pct: b.voiced_pct || 0, clusters: [] }));
       SM.currentBeats = smApplySustain(raw, SM.carryNote, SM.carryOct);
       document.getElementById('sm-result-panel').style.display = 'block';
       document.getElementById('sm-edit-panel').style.display   = 'none';
@@ -5789,6 +5951,8 @@ function smAddManualLine() {
   const n   = parseInt(document.getElementById('sm-beats-per-line').value) || 6;
   const bpm = parseInt(document.getElementById('sm-bpm').value) || 90;
   SM.segBeats = n;
+  SM.segBpl   = n;
+  SM.segAdlibBeats = 0; SM.segAdlibSec = 0;
   SM.segStart = parseFloat(document.getElementById('sm-start-sec').value) || 0;
   SM.segEnd   = +(SM.segStart + n * 60 / bpm).toFixed(2);
   SM.currentBeats = Array.from({ length: n }, () =>
@@ -5799,27 +5963,17 @@ function smAddManualLine() {
   smToggleEdit();   // open the note editor on the blank cycle
 }
 
-// ── One-cycle-per-Detect workflow ───────────────────────────────────────────
-// "Beats in segment" auto-follows "Beats per Line" (the taal cycle), and End
-// auto-derives from Start — so each Detect grabs exactly one cycle and you only
-// ever move Start (or click the waveform), then Detect → Accept → repeat.
-(function wireOneCycle() {
-  const bpl   = document.getElementById('sm-beats-per-line');
-  const segB  = document.getElementById('sm-seg-beats');
-  const start = document.getElementById('sm-start-sec');
-  const endEl = document.getElementById('sm-end-sec');
-  const bpmEl = document.getElementById('sm-bpm');
-  if (!bpl || !segB) return;
-  const beat = () => 60 / (parseInt(bpmEl.value) || 90);
-  const syncBeats = () => { segB.value = bpl.value; };            // 1 cycle per detect
-  const syncEnd   = () => {
-    if (start && endEl) endEl.value = (parseFloat(start.value || 0) + (parseInt(segB.value) || 6) * beat()).toFixed(2);
-  };
-  syncBeats(); syncEnd();
-  segB.title = 'Auto-set to "Beats per Line" — one Taal cycle per Detect';
-  bpl.addEventListener('input', () => { syncBeats(); syncEnd(); });
-  if (start) start.addEventListener('input', syncEnd);
-  if (bpmEl) bpmEl.addEventListener('input', syncEnd);
+// ── Section-per-Detect workflow ─────────────────────────────────────────────
+// Enter Start + "Lines in section"; End = Start + Lines × Beats per Line × 60 / BPM.
+// Detect → Accept splits the section into lines; the next section starts at End + 0.1 s.
+(function wireSections() {
+  ['sm-beats-per-line', 'sm-start-sec', 'sm-adlib-sec', 'sm-bpm', 'sm-seg-lines'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input',  smSyncSectionEnd);
+    el.addEventListener('change', smSyncSectionEnd);
+  });
+  smSyncSectionEnd();
 })();
 </script>
 
