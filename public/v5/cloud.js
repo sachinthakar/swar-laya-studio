@@ -225,6 +225,7 @@ async function openCompositions() {
                 </div>
                 <div class="comp-actions">
                     <button onclick="loadFromCloud('${doc.id}')" class="btn-load-comp">Load</button>
+                    <button onclick="shareComposition('${doc.id}')" class="btn-load-comp" title="Copy a read-only link anyone can open to listen — no account needed">&#128279; Share</button>
                     <button onclick="deleteComp('${doc.id}', this)" class="btn-del-comp">Delete</button>
                 </div>`;
             list.appendChild(div);
@@ -243,23 +244,14 @@ async function loadFromCloud(docId) {
         if (!doc.exists) { alert('Composition not found.'); return; }
 
         const d = doc.data();
-        if (d.title) document.getElementById('song-title').value = d.title;
-        if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            let closestOpt = '';
-            let minDiff = Infinity;
-            document.querySelectorAll('#scale-select option').forEach(opt => {
-                const diff = Math.abs(parseFloat(opt.value) - sv);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestOpt = opt.value;
-                }
-            });
-            document.getElementById('scale-select').value = closestOpt || sv;
-        }
-        if (d.bpm)   document.getElementById('bpm').value = d.bpm;
-        document.getElementById('song-sheet').innerHTML = '';
-        (d.lines || []).forEach(line => addLine(line));
+        // applyCompositionData() (sheet.js) also restores pre-roll, which this
+        // hand-rolled version used to skip, and brackets the swap with a
+        // history snapshot so Undo can bring back whatever was open before.
+        if (typeof historySnapshotNow === 'function') historySnapshotNow();
+        if (typeof window !== 'undefined') window._histSuspend = true;
+        applyCompositionData(d);
+        if (typeof window !== 'undefined') window._histSuspend = false;
+        if (typeof historySnapshotNow === 'function') historySnapshotNow();
 
         currentCompId = docId;
         document.getElementById('comp-modal').style.display = 'none';
@@ -283,15 +275,54 @@ async function deleteComp(docId, btn) {
     }
 }
 
+// ── Share a read-only link to a saved composition (no account needed to view) ─
+// Copies the composition's data into a separate "shared" Firestore collection
+// (public read, write only by a signed-in owner -- see firestore.rules) under
+// the SAME document id as the private song, so re-sharing after an edit just
+// overwrites the same link instead of minting a new one.
+async function shareComposition(docId) {
+    if (!currentUser) return;
+    try {
+        const songDoc = await db.collection('compositions')
+            .doc(currentUser.uid).collection('songs').doc(docId).get();
+        if (!songDoc.exists) { alert('Composition not found.'); return; }
+        const d = songDoc.data();
+
+        await db.collection('shared').doc(docId).set({
+            title:    d.title || 'Untitled',
+            scale:    d.scale,
+            bpm:      d.bpm,
+            pre_roll: d.pre_roll || 0,
+            lines:    d.lines || [],
+            ownerUid: currentUser.uid,
+            sharedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const url = `${location.origin}/?share=${docId}`;
+        try {
+            await navigator.clipboard.writeText(url);
+            showToast('Share link copied ✓');
+        } catch (clipErr) {
+            // Clipboard permission can be denied (older browsers, some mobile
+            // webviews) -- fall back to showing the link for manual copying.
+            prompt('Copy this link to share (read-only, no sign-in needed):', url);
+        }
+    } catch (e) {
+        alert('Share failed: ' + e.message);
+    }
+}
+
 // ── New composition (clears the editor) ───────────────────────────────────────
 function newComposition() {
     if (!confirm('Start a new composition? Unsaved changes will be lost.')) return;
+    if (typeof historySnapshotNow === 'function') historySnapshotNow();
     document.getElementById('song-title').value = 'Untitled';
     document.getElementById('song-sheet').innerHTML = '';
     currentCompId = null;
     addLine();
     document.getElementById('comp-modal').style.display = 'none';
     showToast('New composition started');
+    if (typeof historySnapshotNow === 'function') historySnapshotNow();
 }
 
 // ── Toast notification helper ─────────────────────────────────────────────────

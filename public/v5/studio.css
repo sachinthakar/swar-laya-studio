@@ -306,6 +306,29 @@ a.btn-bhatkhande {
     text-decoration: none;
     box-sizing: border-box;
 }
+/* Undo/Redo: same grey secondary style as the rest, just narrow since
+   each is a single icon with no label text. */
+.btn-undo-redo { padding: 8px 11px; font-size: 15px; }
+
+/* ── Shared read-only link view (share.js adds "shared-view" to <body>) ──
+   Hides composition-editing controls; keeps transport/volumes usable so a
+   visitor can actually listen. */
+.shared-view-banner {
+    background: #4a148c; color: #fff; text-align: center;
+    padding: 9px 14px; font-size: 13px; font-weight: 600;
+}
+.shared-view-banner a { color: #fff; text-decoration: underline; }
+.shared-view-banner.shared-view-error { background: #b71c1c; }
+.shared-view .controls .ctrl-row:nth-child(3) { display: none; }   /* file-ops row */
+.shared-view .btn-add,
+.shared-view .btn-ai,
+.shared-view .btn-transcribe,
+.shared-view .btn-undo-redo { display: none; }
+.shared-view .ctrl-chip:has(#raga-mode-toggle) { display: none; }
+.shared-view #song-sheet input,
+.shared-view #song-sheet select,
+.shared-view #song-sheet button { pointer-events: none; }
+
 /* ── Toolbar color system ──────────────────────────────────────────────
    One primary color (header navy) marks the 3 main authoring actions.
    One neutral grey covers every secondary/utility action. Color is

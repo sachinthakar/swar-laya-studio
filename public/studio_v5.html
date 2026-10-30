@@ -105,6 +105,8 @@
 
         <!-- ── Row 2: Transport (Loop, Play, Stop), and Composition/View tools ── -->
         <div class="ctrl-row">
+            <button class="btn-fullscreen btn-undo-redo" onclick="historyUndo()" title="Undo last change (Ctrl+Z)">&#8630;</button>
+            <button class="btn-fullscreen btn-undo-redo" onclick="historyRedo()" title="Redo (Ctrl+Shift+Z or Ctrl+Y)">&#8631;</button>
             <div class="ctrl-chip" title="Loop: repeat continuously. Off = play once and stop.">
                 <input type="checkbox" id="loop-toggle">
                 <label for="loop-toggle">Loop</label>
@@ -134,6 +136,7 @@
         <div class="ctrl-row">
             <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import Song</button>
             <button class="btn-save"       onclick="downloadFile()">&#128190; Export Song</button>
+            <button class="btn-save"       onclick="exportAudio()" title="Record this composition playing through once and download it as an audio file">&#127911; Export Audio</button>
             <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
             <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
             <button class="btn-bhatkhande" onclick="openBhatkhandeView()" title="Show this song in traditional Bhatkhande notation (read-only)">&#9834; Bhatkhande View</button>
@@ -579,5 +582,8 @@
 <script src="v5/ai.js"></script>
 <script src="v5/transcribe.js"></script>
 <script src="v5/bhatkhande.js"></script>
+<script src="v5/history.js"></script>
+<script src="v5/export.js"></script>
+<script src="v5/share.js"></script>
 </body>
 </html>

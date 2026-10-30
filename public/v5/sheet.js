@@ -456,29 +456,42 @@ function downloadFile() {
     a.click();
 }
 
+// Shared by Import Song, Undo/Redo and the shared-link viewer (share.js) --
+// replaces the whole editor (title/scale/bpm/pre-roll/lines) with the given
+// composition-data object (same shape buildCompositionData() returns).
+function applyCompositionData(d) {
+    if (d.title)    document.getElementById('song-title').value = d.title;
+    if (d.scale) {
+        const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
+        let closestOpt = '';
+        let minDiff = Infinity;
+        document.querySelectorAll('#scale-select option').forEach(opt => {
+            const diff = Math.abs(parseFloat(opt.value) - sv);
+            if (diff < minDiff) {
+                minDiff = diff;
+                closestOpt = opt.value;
+            }
+        });
+        document.getElementById('scale-select').value = closestOpt || sv;
+    }
+    if (d.bpm)      document.getElementById('bpm').value = d.bpm;
+    if (d.pre_roll !== undefined)
+                    document.getElementById('pre-roll-select').value = d.pre_roll;
+    document.getElementById('song-sheet').innerHTML = '';
+    (d.lines || []).forEach(line => addLine(line));
+}
+
 function loadJsonFile(e) {
     const reader = new FileReader();
     reader.onload = ev => {
         const d = JSON.parse(ev.target.result);
-        if (d.title)    document.getElementById('song-title').value = d.title;
-        if (d.scale) {
-            const sv = parseFloat(d.scale) < 256 ? parseFloat(d.scale) * 2 : parseFloat(d.scale);
-            let closestOpt = '';
-            let minDiff = Infinity;
-            document.querySelectorAll('#scale-select option').forEach(opt => {
-                const diff = Math.abs(parseFloat(opt.value) - sv);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestOpt = opt.value;
-                }
-            });
-            document.getElementById('scale-select').value = closestOpt || sv;
-        }
-        if (d.bpm)      document.getElementById('bpm').value = d.bpm;
-        if (d.pre_roll !== undefined)
-                        document.getElementById('pre-roll-select').value = d.pre_roll;
-        document.getElementById('song-sheet').innerHTML = '';
-        (d.lines || []).forEach(line => addLine(line));
+        // Snapshot the pre-import state so Undo can bring it back, then the
+        // post-import state, so one Ctrl+Z after an Import reverts it cleanly.
+        if (typeof historySnapshotNow === 'function') historySnapshotNow();
+        if (typeof window !== 'undefined') window._histSuspend = true;
+        applyCompositionData(d);
+        if (typeof window !== 'undefined') window._histSuspend = false;
+        if (typeof historySnapshotNow === 'function') historySnapshotNow();
     };
     reader.readAsText(e.target.files[0]);
     e.target.value = '';

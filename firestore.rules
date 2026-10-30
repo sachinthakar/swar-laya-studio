@@ -25,5 +25,16 @@ service cloud.firestore {
     match /compositions/{userId}/songs/{songId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // ── Shared (read-only public links) ───────────────────────────────────────
+    // cloud.js's "Share" button copies a composition here so the "?share=<id>"
+    // link anyone can open without signing in. Anyone can read; only a
+    // signed-in user can create one, and only the original owner can
+    // overwrite (re-share) or remove it.
+    match /shared/{shareId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+    }
   }
 }
