@@ -288,13 +288,23 @@ input[type="range"] { border: none; cursor: pointer; }
     transform: scale(1.03);
     transition: all 0.08s;
 }
-button {
+button, a.btn-bhatkhande {
     padding: 8px 15px;
     cursor: pointer;
     border: none;
     border-radius: 6px;
     font-weight: 600;
     font-size: 13px;
+}
+/* a.btn-bhatkhande: the User Guide link reuses the Bhatkhande View button's
+   look (same class), but <a> doesn't inherit the bare "button" rule above
+   the way a real <button> does -- restated here so it matches exactly. */
+a.btn-bhatkhande {
+    display: inline-flex;
+    align-items: center;
+    font-family: inherit;
+    text-decoration: none;
+    box-sizing: border-box;
 }
 /* ── Toolbar color system ──────────────────────────────────────────────
    One primary color (header navy) marks the 3 main authoring actions.
