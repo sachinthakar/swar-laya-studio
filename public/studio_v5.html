@@ -24,121 +24,121 @@
     <div id="sticky-header">
     <div class="controls">
 
-        <!-- ── Group 1: Song Identity ─────────────────────────────────────── -->
-        <div class="control-item">
-            <label>Song Title</label>
-            <input type="text" id="song-title" value="Untitled" style="width:140px;">
-        </div>
-        <div class="control-item">
-            <label>Scale (Sa)</label>
-            <select id="scale-select" onchange="updateTanpura()">
-                <option value="261.63">Pandhri 1 (C)</option>
-                <option value="277.18">Kali 1 (C#)</option>
-                <option value="293.67">Pandhri 2 (D)</option>
-                <option value="311.13">Kali 2 (D#)</option>
-                <option value="329.63">Pandhri 3 (E)</option>
-                <option value="349.23">Pandhri 4 (F)</option>
-                <option value="370.00">Kali 3 (F#)</option>
-                <option value="392.00">Pandhri 5 (G)</option>
-                <option value="415.30">Kali 4 (G#)</option>
-                <option value="440.00">Pandhri 6 (A)</option>
-                <option value="466.16">Kali 5 (A#)</option>
-                <option value="493.88">Pandhri 7 (B)</option>
-            </select>
+        <!-- ── Row 1: Song Identity + Rhythm + Sound & Volume, Full Screen at right ── -->
+        <div class="ctrl-row">
+            <div class="control-item">
+                <label>Song Title</label>
+                <input type="text" id="song-title" value="Untitled" style="width:140px;">
+            </div>
+            <div class="control-item">
+                <label>Scale (Sa)</label>
+                <select id="scale-select" onchange="updateTanpura()">
+                    <option value="261.63">Pandhri 1 (C)</option>
+                    <option value="277.18">Kali 1 (C#)</option>
+                    <option value="293.67">Pandhri 2 (D)</option>
+                    <option value="311.13">Kali 2 (D#)</option>
+                    <option value="329.63">Pandhri 3 (E)</option>
+                    <option value="349.23">Pandhri 4 (F)</option>
+                    <option value="370.00">Kali 3 (F#)</option>
+                    <option value="392.00">Pandhri 5 (G)</option>
+                    <option value="415.30">Kali 4 (G#)</option>
+                    <option value="440.00">Pandhri 6 (A)</option>
+                    <option value="466.16">Kali 5 (A#)</option>
+                    <option value="493.88">Pandhri 7 (B)</option>
+                </select>
+            </div>
+
+            <span class="ctrl-sep"></span>
+
+            <div class="control-item">
+                <label>Taal</label>
+                <select id="taal-select">
+                    <option value="" disabled selected>— choose taal —</option>
+                    <option value="4">Keherwa (4)</option>
+                    <option value="8">Keherwa (8)</option>
+                    <option value="8_bhajani">Bhajani (8)</option>
+                    <option value="6">Dadra (6)</option>
+                    <option value="7">Rupak (7)</option>
+                    <option value="10">Jhaptaal (10)</option>
+                    <option value="12">Ektaal (12)</option>
+                    <option value="12_chautaal">Chautaal (12)</option>
+                    <option value="14">Dhamar (14)</option>
+                    <option value="16">Teentaal (16)</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label>Master BPM</label>
+                <input type="number" id="bpm" value="90" style="width:65px;" min="30" max="300">
+            </div>
+            <div class="control-item">
+                <label>Start Beat</label>
+                <input type="number" id="start-beat" min="1" value="1" style="width:55px;">
+            </div>
+            <div class="control-item">
+                <label>Pre-roll</label>
+                <select id="pre-roll-select" style="width:80px;">
+                    <option value="0">Off</option>
+                    <option value="2">2 Beats</option>
+                    <option value="4" selected>4 Beats</option>
+                    <option value="8">8 Beats</option>
+                </select>
+            </div>
+
+            <span class="ctrl-sep"></span>
+
+            <div class="control-item">
+                <label>Master Vol <span id="master-vol-display" style="font-weight:600;">1.0×</span></label>
+                <input type="range" id="master-vol" min="0" max="10" step="0.1" value="1.0" style="width:75px;" oninput="updateMasterVol()">
+            </div>
+            <div class="control-item">
+                <label>Tabla Vol</label>
+                <input type="range" id="tabla-vol" min="0" max="1" step="0.05" value="0.7" style="width:75px;">
+            </div>
+            <div class="control-item">
+                <label>Reverb (Wet)</label>
+                <input type="range" id="reverb-wet" min="0" max="0.75" step="0.05" value="0.25" style="width:75px;" oninput="updateReverbMix()">
+            </div>
+            <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
+
+            <button class="btn-fullscreen ctrl-row-push" id="btn-fullscreen" onclick="toggleFullscreen()" title="Maximise screen space (hides browser chrome)">⛶ Full Screen</button>
         </div>
 
-        <span class="ctrl-sep"></span>
+        <!-- ── Row 2: Transport + Add Line, and Composition/View tools ──────── -->
+        <div class="ctrl-row">
+            <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
+            <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
+            <div class="ctrl-chip" title="Loop: repeat continuously. Off = play once and stop.">
+                <input type="checkbox" id="loop-toggle">
+                <label for="loop-toggle">Loop</label>
+            </div>
+            <button class="btn-add" onclick="addLine()">+ Add Line</button>
 
-        <!-- ── Group 2: Rhythm ─────────────────────────────────────────────── -->
-        <div class="control-item">
-            <label>Taal</label>
-            <select id="taal-select">
-                <option value="" disabled selected>— choose taal —</option>
-                <option value="4">Keherwa (4)</option>
-                <option value="8">Keherwa (8)</option>
-                <option value="8_bhajani">Bhajani (8)</option>
-                <option value="6">Dadra (6)</option>
-                <option value="7">Rupak (7)</option>
-                <option value="10">Jhaptaal (10)</option>
-                <option value="12">Ektaal (12)</option>
-                <option value="12_chautaal">Chautaal (12)</option>
-                <option value="14">Dhamar (14)</option>
-                <option value="16">Teentaal (16)</option>
-            </select>
-        </div>
-        <div class="control-item">
-            <label>Master BPM</label>
-            <input type="number" id="bpm" value="90" style="width:65px;" min="30" max="300">
-        </div>
-        <div class="control-item">
-            <label>Start Beat</label>
-            <input type="number" id="start-beat" min="1" value="1" style="width:55px;">
-        </div>
-        <div class="control-item">
-            <label>Pre-roll</label>
-            <select id="pre-roll-select" style="width:80px;">
-                <option value="0">Off</option>
-                <option value="2">2 Beats</option>
-                <option value="4" selected>4 Beats</option>
-                <option value="8">8 Beats</option>
-            </select>
+            <span class="ctrl-sep"></span>
+
+            <div class="ctrl-chip" title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
+                <input type="checkbox" id="raga-mode-toggle">
+                <label for="raga-mode-toggle">Raga Mode</label>
+                <!-- visibility toggle (not display) keeps layout stable: no reflow when enabling/disabling -->
+                <select id="raga-select" style="width:108px; visibility:hidden; pointer-events:none;">
+                    <option value="">— choose —</option>
+                </select>
+            </div>
+            <button class="btn-ai"  onclick="openAICompose()">✨ AI Compose</button>
+            <label class="btn-transcribe" id="transcribe-label" title="Transcribe a song from an audio file into this sheet">
+                <input type="checkbox" id="transcribe-toggle" onchange="smToggleTranscribe(this.checked)"> 🎤 Transcribe
+            </label>
+            <span id="sample-status" class="osc" title="Instrument audio mode">♪ Synth</span>
         </div>
 
-        <span class="ctrl-sep"></span>
-
-        <!-- ── Group 3: Sound & Volume ─────────────────────────────────────── -->
-        <div class="control-item">
-            <label>Master Vol <span id="master-vol-display" style="font-weight:600;">1.0×</span></label>
-            <input type="range" id="master-vol" min="0" max="10" step="0.1" value="1.0" style="width:75px;" oninput="updateMasterVol()">
+        <!-- ── Row 3: File Operations ────────────────────────────────────────── -->
+        <div class="ctrl-row">
+            <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
+            <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
+            <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
+            <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
+            <button class="btn-bhatkhande" onclick="openBhatkhandeView()" title="Show this song in traditional Bhatkhande notation (read-only)">&#9834; Bhatkhande View</button>
+            <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
         </div>
-        <div class="control-item">
-            <label>Tabla Vol</label>
-            <input type="range" id="tabla-vol" min="0" max="1" step="0.05" value="0.7" style="width:75px;">
-        </div>
-        <div class="control-item">
-            <label>Reverb (Wet)</label>
-            <input type="range" id="reverb-wet" min="0" max="0.75" step="0.05" value="0.25" style="width:75px;" oninput="updateReverbMix()">
-        </div>
-        <button class="btn-tanpura" id="tanpuraBtn" onclick="toggleTanpura()">🪕 Tanpura: OFF</button>
-
-        <span class="ctrl-sep"></span>
-
-        <!-- ── Group 4: Transport ──────────────────────────────────────────── -->
-        <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
-        <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
-        <div class="ctrl-chip" title="Loop: repeat continuously. Off = play once and stop.">
-            <input type="checkbox" id="loop-toggle">
-            <label for="loop-toggle">Loop</label>
-        </div>
-
-        <span class="ctrl-sep"></span>
-
-        <!-- ── Group 5: Composition & View Tools ────────────────────────────── -->
-        <button class="btn-add" onclick="addLine()">+ Add Line</button>
-        <button class="btn-ai"  onclick="openAICompose()">✨ AI Compose</button>
-        <label class="btn-transcribe" id="transcribe-label" title="Transcribe a song from an audio file into this sheet">
-            <input type="checkbox" id="transcribe-toggle" onchange="smToggleTranscribe(this.checked)"> 🎤 Transcribe
-        </label>
-        <span id="sample-status" class="osc" title="Instrument audio mode">♪ Synth</span>
-        <button class="btn-fullscreen" id="btn-fullscreen" onclick="toggleFullscreen()" title="Maximise screen space (hides browser chrome)">⛶ Full Screen</button>
-        <div class="ctrl-chip" title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
-            <input type="checkbox" id="raga-mode-toggle">
-            <label for="raga-mode-toggle">Raga Mode</label>
-            <!-- visibility toggle (not display) keeps layout stable: no reflow when enabling/disabling -->
-            <select id="raga-select" style="width:108px; visibility:hidden; pointer-events:none;">
-                <option value="">— choose —</option>
-            </select>
-        </div>
-
-        <span class="ctrl-sep"></span>
-
-        <!-- ── Group 6: File Operations ─────────────────────────────────────── -->
-        <button class="btn-load"       onclick="document.getElementById('file-input').click()">&#128194; Import JSON</button>
-        <button class="btn-save"       onclick="downloadFile()">&#128190; Export JSON</button>
-        <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
-        <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
-        <button class="btn-bhatkhande" onclick="openBhatkhandeView()" title="Show this song in traditional Bhatkhande notation (read-only)">&#9834; Bhatkhande View</button>
-        <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
 
     </div>
 

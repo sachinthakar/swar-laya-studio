@@ -21,15 +21,24 @@ body {
 }
 .controls {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
     margin-bottom: 0;
     background-color: #fdfdfd;
     padding: 16px;
     border-radius: 0;
-    align-items: flex-end;
     border-bottom: 1px solid #ddd;
 }
+/* Each toolbar row is its own explicit group boundary -- deliberate
+   placement, not whatever the flex-wrap happened to produce. */
+.ctrl-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    width: 100%;
+}
+.ctrl-row-push { margin-left: auto; }
 /* Taal ruler — shows beat structure once for the whole sheet */
 #taal-ruler {
     display: none;
