@@ -19,6 +19,15 @@ uvicorn server:app --host 127.0.0.1 --port 8000
 Check it: http://127.0.0.1:8000/health   (shows torch version, `cuda`, `demucs`).
 First run with Demucs downloads its model (~a few hundred MB) once.
 
+To Run trained model at the same port, and use it locally: 
+
+uvicorn server_model:app --host 127.0.0.1 --port 8000
+
+So in practice: run server.py locally for either engine, 
+or run server_model.py locally for a lighter trained-model-only setup 
+— whichever is running at the time determines which Engine selection actually works, 
+since the frontend has no way to know which one is live.
+
 ## How the button uses it
 1. **Open a file** → `POST /session` (upload once; optional Demucs). Returns a
    `job_id`; poll `GET /job/{id}` until it returns `{session_id, duration}`.

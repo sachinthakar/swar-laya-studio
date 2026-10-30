@@ -62,6 +62,25 @@ body {
     margin: 0 4px;
     border-radius: 1px;
 }
+
+/* Anchored pill for a loose checkbox+label control (Loop, Raga Mode) so it
+   reads as one grouped chip instead of floating between buttons. */
+.ctrl-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eceff1;
+    border: 1px solid #cfd8dc;
+    border-radius: 20px;
+    padding: 7px 12px;
+    align-self: center;
+}
+.ctrl-chip label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.3px; color: #546e7a; margin: 0; cursor: pointer;
+}
+.ctrl-chip input[type=checkbox] { width: 15px; height: 15px; margin: 0; cursor: pointer; }
+.ctrl-chip select { margin: 0; }
 .line-container {
     border: 1px solid #ccc;
     padding: 14px;
@@ -267,15 +286,18 @@ button {
     font-weight: 600;
     font-size: 13px;
 }
-.btn-tanpura { background-color: #ef6c00; color: white; }
-.btn-play    { background-color: #0277bd; color: white; }
-.btn-stop    { background-color: #455a64; color: white; }
-.btn-add     { background-color: #2e7d32; color: white; }
-.btn-save    { background-color: #4a148c; color: white; }
-.btn-load    { background-color: #37474f; color: white; }
-.btn-ai         { background-color: #6a1b9a; color: white; }
-.btn-fullscreen { background-color: #263238; color: white; }
-.btn-fullscreen:hover { background-color: #37474f; }
+/* ── Toolbar color system ──────────────────────────────────────────────
+   One primary color (header navy) marks the 3 main authoring actions.
+   One neutral grey covers every secondary/utility action. Color is
+   otherwise reserved for state (Tanpura on vs off). */
+.btn-play, .btn-add, .btn-save-cloud { background-color: #1a237e; color: white; }
+.btn-stop, .btn-save, .btn-load, .btn-ai, .btn-fullscreen, .btn-cloud, .btn-bhatkhande {
+    background-color: #546e7a; color: white;
+}
+.btn-stop:hover, .btn-save:hover, .btn-load:hover, .btn-ai:hover,
+.btn-fullscreen:hover, .btn-cloud:hover, .btn-bhatkhande:hover { background-color: #455a64; }
+.btn-tanpura    { background-color: #78909c; color: white; }   /* off = neutral */
+.btn-tanpura.on { background-color: #2e7d32; color: white; }   /* on = active/green */
 .btn-remove  {
     position: absolute; top: 6px; right: 6px;
     background: #c62828; color: white;
@@ -428,7 +450,7 @@ button {
 #sample-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:bold; transition:background 0.4s, color 0.4s; }
 #sample-status.loading { background:#fff3e0; color:#e65100; }
 #sample-status.ready   { background:#e8f5e9; color:#2e7d32; }
-#sample-status.osc     { background:#f3e5f5; color:#6a1b9a; }
+#sample-status.osc     { background:#f3e5f5; color:#6a1b9a; border:1px solid #e1bee7; padding:4px 10px; }
 
 /* ── Auth bar ── */
 #auth-bar {
@@ -461,19 +483,13 @@ button {
     border-radius: 6px; padding: 8px 15px; cursor: pointer; font-size: 13px;
 }
 .btn-cloud {
-    background: #0288d1; color: white; border: none; border-radius: 6px;
-    cursor: pointer; font-weight: 600;
+    border: none; border-radius: 6px; cursor: pointer; font-weight: 600;
 }
 .btn-signout {
     background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.3);
     border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 11px;
 }
-.btn-save-cloud {
-    background-color: #00897b; color: white;
-}
-.btn-bhatkhande {
-    background-color: #6a1b9a; color: white;
-}
+
 
 /* ── Bhatkhande Notation popup ── */
 .bk-modal-box { max-width: 900px; }

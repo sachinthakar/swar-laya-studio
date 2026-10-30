@@ -1207,6 +1207,7 @@ function toggleTanpura() {
     initAudio();
     isTanpuraOn = !isTanpuraOn;
     const btn = document.getElementById('tanpuraBtn');
+    btn.classList.toggle('on', isTanpuraOn);
     if (isTanpuraOn) {
         btn.textContent = '🪕 Tanpura: ON';
         startTanpura();
