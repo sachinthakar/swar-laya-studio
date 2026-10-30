@@ -10,6 +10,10 @@
       {
         "source": "/",
         "destination": "/studio_v5.html"
+      },
+      {
+        "source": "/index.html",
+        "destination": "/studio_v5.html"
       }
     ],
     "headers": [
