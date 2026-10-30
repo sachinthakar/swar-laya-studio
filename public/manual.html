@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swar-Laya Studio — User Guide</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --sub:#444; --bg:#ffffff; --panel:#f7f5fb;
+    --accent:#4a148c; --accent2:#6a1b9a; --line:#e3ddee;
+    --gold:#e65100; --blue:#1565c0; --green:#2e7d32;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.65; font-size:17px;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding:28px 22px 90px;}
+  header.top{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; padding:36px 22px 30px; text-align:center;
+  }
+  header.top h1{margin:0 0 6px; font-size:30px; font-weight:800; letter-spacing:.3px;}
+  header.top p{margin:0; opacity:.92; font-size:16px;}
+  nav.toc{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:18px 22px; margin:28px 0 36px;
+  }
+  nav.toc h2{margin:0 0 10px; font-size:15px; text-transform:uppercase; letter-spacing:.6px; color:var(--accent);}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:28px;}
+  nav.toc li{margin-bottom:6px; font-size:15px;}
+  nav.toc a{color:var(--ink); text-decoration:none; border-bottom:1px dotted #999;}
+  nav.toc a:hover{color:var(--accent2);}
+  h2.section{
+    font-size:24px; font-weight:800; color:var(--accent); margin:48px 0 14px;
+    padding-bottom:8px; border-bottom:3px solid var(--accent);
+  }
+  h3{font-size:19px; font-weight:700; color:#2a2a2a; margin:28px 0 10px;}
+  p{color:var(--sub); margin:0 0 14px;}
+  strong{color:var(--ink);}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin:16px 0;
+  }
+  .card h4{margin:0 0 8px; font-size:16px; color:var(--accent2); font-weight:700;}
+  .steps{margin:0; padding-left:0; list-style:none; counter-reset:step;}
+  .steps li{
+    counter-increment:step; margin:0 0 14px; padding-left:46px; position:relative;
+    color:var(--sub);
+  }
+  .steps li::before{
+    content:counter(step); position:absolute; left:0; top:-2px;
+    width:30px; height:30px; border-radius:50%; background:var(--accent);
+    color:#fff; font-weight:700; font-size:14px; display:flex;
+    align-items:center; justify-content:center;
+  }
+  table{width:100%; border-collapse:collapse; margin:14px 0;}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); font-size:15px; vertical-align:top;}
+  th{color:var(--accent); font-weight:700; background:var(--panel);}
+  td.feat{white-space:nowrap; font-weight:600; color:var(--ink);}
+  kbd.btn{
+    display:inline-block; background:#546e7a; color:#fff; font-weight:600;
+    font-size:13px; padding:3px 9px; border-radius:6px; font-family:inherit;
+  }
+  kbd.btn.play{background:#1a237e;}
+  kbd.btn.stop{background:#455a64;}
+  .pill{
+    display:inline-block; background:#eceff1; border:1px solid #cfd8dc;
+    border-radius:20px; padding:3px 11px; font-size:13px; font-weight:600;
+  }
+  .note{
+    background:#fff8e1; border-left:4px solid #f9a825; padding:12px 16px;
+    border-radius:0 8px 8px 0; margin:16px 0; font-size:15px; color:#5d4a00;
+  }
+  .tip{
+    background:#e8f5e9; border-left:4px solid var(--green); padding:12px 16px;
+    border-radius:0 8px 8px 0; margin:16px 0; font-size:15px; color:#1b4a1f;
+  }
+  .idea{
+    background:#f3e5f5; border-left:4px solid var(--accent2); padding:14px 18px;
+    border-radius:0 8px 8px 0; margin:18px 0;
+  }
+  .idea h4{margin:0 0 6px; color:var(--accent2); font-size:16px;}
+  .idea p{margin:0; color:#444;}
+  .gloss dt{font-weight:700; color:var(--ink); margin-top:10px;}
+  .gloss dd{margin:2px 0 0 0; color:var(--sub);}
+  a.back-top{
+    position:fixed; bottom:20px; right:20px; background:var(--accent);
+    color:#fff; text-decoration:none; padding:10px 16px; border-radius:30px;
+    font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.25);
+  }
+  .rowgroup{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0;}
+  footer{text-align:center; color:#999; font-size:13px; margin-top:60px;}
+  @media (max-width:600px){
+    nav.toc ol{columns:1;}
+    header.top h1{font-size:24px;}
+    .wrap{padding:20px 14px 90px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>🎵 Swar-Laya Studio — User Guide</h1>
+  <p>How to write, play, learn and record Indian classical &amp; light music — no technical background needed.</p>
+</header>
+
+<div class="wrap">
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#what-is-it">What this app is for</a></li>
+    <li><a href="#quick-start">Quick start — your first melody in 3 steps</a></li>
+    <li><a href="#toolbar">The toolbar, explained line by line</a></li>
+    <li><a href="#grid">Writing music in the note grid</a></li>
+    <li><a href="#line-tools">Per-line tools (instrument, rhythm, mood of each line)</a></li>
+    <li><a href="#modes">The different ways to use this studio</a></li>
+    <li><a href="#raga-mode">Raga Mode — composing and checking within a raga</a></li>
+    <li><a href="#transcribe">Transcribe — turning a recording into notation</a></li>
+    <li><a href="#ai-compose">AI Compose — let the computer write a tune for you</a></li>
+    <li><a href="#saving">Saving, loading and sharing your work</a></li>
+    <li><a href="#bhatkhande">Bhatkhande View — traditional printed notation</a></li>
+    <li><a href="#tips">Tips, shortcuts &amp; troubleshooting</a></li>
+    <li><a href="#glossary">Glossary of terms used in the app</a></li>
+  </ol>
+</nav>
+
+<!-- ───────────────────────────────────────────── 1. WHAT IS IT ───────────────────────────────────────────── -->
+<h2 class="section" id="what-is-it">1. What this app is for</h2>
+<p>
+Swar-Laya Studio is a notebook that <strong>plays back what you write</strong>. Instead of writing swaras
+(Sa Re Ga Ma Pa Dha Ni) on paper and imagining how they sound, you type them into a grid and press
+<kbd class="btn play">▶ Play</kbd> — the Studio sings the notes back to you on a chosen instrument,
+with a tabla or dholak keeping the beat underneath.
+</p>
+<p>It is built around four everyday needs of an Indian-music artist:</p>
+<table>
+  <tr><td class="feat">Compose</td><td>Write a new bandish, bhajan or film-style tune, swara by swara, and hear it immediately.</td></tr>
+  <tr><td class="feat">Learn / Practice</td><td>Pick a raga and see which notes are its vadi, samvadi and signature phrase (pakkad) — and hear that phrase played.</td></tr>
+  <tr><td class="feat">Transcribe</td><td>Feed in a recording of a song (yours or someone else's) and get the swara notation back automatically.</td></tr>
+  <tr><td class="feat">Save &amp; share</td><td>Keep every composition safely in the cloud, open it on any device, or export it as a file to send to someone.</td></tr>
+</table>
+<p>No musical software experience is assumed anywhere in this guide — every term is explained the first time it's used, and there's a full glossary at the end.</p>
+
+<!-- ───────────────────────────────────────────── 2. QUICK START ───────────────────────────────────────────── -->
+<h2 class="section" id="quick-start">2. Quick start — your first melody in 3 steps</h2>
+<ol class="steps">
+  <li><strong>Choose your scale and rhythm.</strong> At the top left, pick a <span class="pill">Scale (Sa)</span> — this is simply which pitch "Sa" (the home note) will sound at, same idea as picking a key on a harmonium. Then pick a <span class="pill">Taal</span> (rhythm cycle) — Keherwa (8 beats) is the simplest and most common for beginners.</li>
+  <li><strong>Type your first notes.</strong> Scroll down to the empty grid under the toolbar. Each beat has a small dropdown — click it and choose a swara (Sa, Re, Ga…). Do this for as many beats as you like.</li>
+  <li><strong>Press Play.</strong> Click <kbd class="btn play">▶ Play</kbd>. You'll hear your notes played on the harmonium sound, with a tabla keeping Keherwa underneath. Click <kbd class="btn stop">■ Stop</kbd> any time.</li>
+</ol>
+<div class="tip">That's the whole idea. Everything else in this guide is extra power on top of those three steps — different instruments, rhythms, raga checking, AI help, recording-to-notation, and ways to save your work.</div>
+
+<!-- ───────────────────────────────────────────── 3. TOOLBAR ───────────────────────────────────────────── -->
+<h2 class="section" id="toolbar">3. The toolbar, explained line by line</h2>
+<p>The toolbar sits at the top of the screen in three rows. Row 1 sets up the song itself; Row 2 is for playing and composing; Row 3 is for files and the cloud.</p>
+
+<h3>Row 1 — Song setup</h3>
+<table>
+  <tr><th>Control</th><th>What it does, in plain words</th></tr>
+  <tr><td class="feat">Song Title</td><td>Just a name for your composition — used when you save it.</td></tr>
+  <tr><td class="feat">Scale (Sa)</td><td>Sets the pitch of your home note, "Sa". Changing this transposes everything you play — useful for matching a singer's comfortable range.</td></tr>
+  <tr><td class="feat">Taal</td><td>The rhythm cycle (how many beats repeat, and where the strong/empty beats fall). Choose before you start writing a line — it decides how many beat-boxes appear per row.</td></tr>
+  <tr><td class="feat">Master BPM</td><td>Overall speed, in beats per minute. Raise it for a faster, livelier feel; lower it for a slow, meditative one.</td></tr>
+  <tr><td class="feat">Start Beat</td><td>Which beat number playback begins from — handy for rehearsing from the middle of a long piece instead of the start.</td></tr>
+  <tr><td class="feat">Pre-roll</td><td>A short count-in (silent beats of tabla only) before the melody starts, like a conductor's "1, 2, ready, go". Off by default; turn it on if you find yourself coming in late.</td></tr>
+  <tr><td class="feat">Master Vol / Tabla Vol / Reverb</td><td>Overall loudness, how loud the percussion is relative to the melody, and how much "hall echo" (reverb) is mixed in — more reverb gives a bigger, more spacious sound; less keeps it dry and intimate.</td></tr>
+  <tr><td class="feat">🪕 Tanpura</td><td>Turns a continuous drone on or off — the same Sa-Pa-Sa hum a real tanpura gives a singer to stay in tune against. Turns green when on.</td></tr>
+  <tr><td class="feat">⛶ Full Screen</td><td>Hides the browser's own toolbar so the music sheet fills the whole screen — useful when performing from a tablet.</td></tr>
+</table>
+
+<h3>Row 2 — Play, compose, transcribe</h3>
+<table>
+  <tr><th>Control</th><th>What it does, in plain words</th></tr>
+  <tr><td class="feat">Loop</td><td>When checked, playback repeats forever instead of stopping at the end — good for rehearsal or for looping a backing track while you sing live over it.</td></tr>
+  <tr><td class="feat">▶ Play / ■ Stop</td><td>Starts and stops playback of the whole composition from the Start Beat.</td></tr>
+  <tr><td class="feat">+ Add Line</td><td>Adds a new empty line (one taal cycle) to the bottom of your composition.</td></tr>
+  <tr><td class="feat">Raga Mode</td><td>Switches on raga-awareness: pick a raga from the dropdown that appears, and the note grid highlights which notes belong to it, which is its vadi/samvadi, and shows its signature phrase. See <a href="#raga-mode">section 7</a>.</td></tr>
+  <tr><td class="feat">✨ AI Compose</td><td>Opens a dialog that asks an AI model to write a complete composition for you in a chosen raga and taal — optionally with lyrics too. See <a href="#ai-compose">section 9</a>.</td></tr>
+  <tr><td class="feat">🎤 Transcribe</td><td>Opens the audio-to-notation panel — load a recording and the Studio converts its melody into the note grid for you. See <a href="#transcribe">section 8</a>.</td></tr>
+  <tr><td class="feat">♪ Synth</td><td>Just a status light — shows whether the Studio is currently making sound with its built-in synthesized instruments (it always is, unless a transcription's original-audio playback is active).</td></tr>
+</table>
+
+<h3>Row 3 — Files and the cloud</h3>
+<table>
+  <tr><th>Control</th><th>What it does, in plain words</th></tr>
+  <tr><td class="feat">📂 Import JSON</td><td>Opens a composition file previously saved to your computer.</td></tr>
+  <tr><td class="feat">💾 Export JSON</td><td>Saves the current composition as a file on your own computer — good for backups or emailing to someone.</td></tr>
+  <tr><td class="feat">☁ Save to Cloud</td><td>Saves the composition to your account, so it's available from any device, any time. Asks you to sign in first if you haven't.</td></tr>
+  <tr><td class="feat">☁ My Compositions</td><td>Opens the list of everything you've saved to the cloud — click Load to bring one back into the editor, or Delete to remove it.</td></tr>
+  <tr><td class="feat">♪ Bhatkhande View</td><td>Shows the current composition typeset the way it would appear in a printed music book. See <a href="#bhatkhande">section 10</a>.</td></tr>
+</table>
+
+<!-- ───────────────────────────────────────────── 4. THE GRID ───────────────────────────────────────────── -->
+<h2 class="section" id="grid">4. Writing music in the note grid</h2>
+<p>Each line of your composition is one full cycle of the taal you chose. A line has two rows:</p>
+<div class="card">
+  <h4>Lyrics row</h4>
+  <p>One small text box per beat — type the syllable of the lyric that falls on that beat, if your song has words. Entirely optional; leave blank for a pure instrumental phrase.</p>
+</div>
+<div class="card">
+  <h4>Notes row</h4>
+  <p>One dropdown per beat — choose the swara that sounds on that beat: Sa, re, Re, ga, Ga, Ma, ma, Pa, dha, Dha, ni, Ni (the lowercase/uppercase pairs are the "komal" — flat — and "shuddha" — natural — versions of that note, and tivra Ma is the sharp fourth). Choose <span class="pill">-</span> for silence, or <span class="pill">~</span> to let the previous note continue ringing through this beat instead of re-striking it.</p>
+</div>
+<h3>Extra marks on every note</h3>
+<p>Click the small buttons next to any note to shape exactly how it should sound:</p>
+<table>
+  <tr><td class="feat">˙˙ / ˙ (above)</td><td>Taar saptak — sing/play this note one or two octaves <em>higher</em> than the middle register.</td></tr>
+  <tr><td class="feat">• / •• (below)</td><td>Mandra saptak — one or two octaves <em>lower</em>.</td></tr>
+  <tr><td class="feat">m (meend)</td><td>Glide smoothly into this note from the previous one, instead of jumping straight to it — the characteristic "slide" of Indian vocal and string music.</td></tr>
+  <tr><td class="feat">+ (add sub-note)</td><td>Pack more than one note into a single beat — this is how you write a <strong>gamak</strong> or fast ornamental run (taan), e.g. Ga-Pa-Ga-Dha all inside one beat. Click + again to add more; the × removes one.</td></tr>
+</table>
+<div class="tip"><strong>Tip:</strong> a plain melody is just one note per beat with no marks at all. Octaves, meend and gamak are entirely optional flourishes you add only where the music calls for them — don't feel obliged to use them everywhere.</div>
+
+<!-- ───────────────────────────────────────────── 5. LINE TOOLS ───────────────────────────────────────────── -->
+<h2 class="section" id="line-tools">5. Per-line tools — giving every line its own character</h2>
+<p>Every line has its own small settings bar above its grid, so different parts of the same song can sound completely different from one another:</p>
+<table>
+  <tr><td class="feat">Instrument</td><td>Which sound plays this line's melody: Harmonium, Flute, Sitar, Violin, Piano or Bellpad. Use a different instrument per line to simulate a call-and-response, or an instrumental interlude between vocal lines.</td></tr>
+  <tr><td class="feat">Percussion</td><td>Tabla, Dholak, or Mute (silence) for this line only — mute the percussion for a free, unaccompanied alap-style passage, or switch to Dholak for a folk/Dadra feel.</td></tr>
+  <tr><td class="feat">Volume</td><td>This line's own loudness, relative to the rest — fade a repeated phrase down, or bring a climactic line up.</td></tr>
+  <tr><td class="feat">Section</td><td>A free-text label like "Mukhda" (the opening refrain) or "Antara" (the verse that follows it) — purely for your own organisation; it's shown in Bhatkhande View and when browsing saved compositions.</td></tr>
+  <tr><td class="feat">Legato</td><td>Makes consecutive notes flow into each other with no gap, instead of each note cutting off sharply — gives a smoother, more "sung" quality.</td></tr>
+  <tr><td class="feat">Adlib/Alap</td><td>Marks this line as free-tempo: the beat grid becomes flexible (you can add or remove beat columns) and the tabla goes silent — exactly how a singer opens a raga with an unmetered alap before the rhythm comes in.</td></tr>
+  <tr><td class="feat">Line BPM</td><td>Overrides the Master BPM for just this line — leave blank to follow the master speed, or set a slow number for an Alap line and a faster one for a lively closing line.</td></tr>
+  <tr><td class="feat">▶ Line</td><td>Plays just this one line on repeat — perfect for rehearsing a tricky phrase in isolation before hearing it in context.</td></tr>
+  <tr><td class="feat">⤴ Insert Before / ×</td><td>Insert a new blank line just above this one, or delete this line entirely.</td></tr>
+</table>
+
+<!-- ───────────────────────────────────────────── 6. MODES ───────────────────────────────────────────── -->
+<h2 class="section" id="modes">6. The different ways to use this studio</h2>
+<p>There's no single "correct" way to work. Here are the ways artists actually use the Studio, and when each one fits:</p>
+
+<div class="idea">
+  <h4>🎼 Mode 1 — Compose from a blank page</h4>
+  <p>Start with nothing, pick a Taal and Scale, and build your bandish or bhajan note-by-note using the grid. Best when you already have a tune in your head and just want to notate and hear it back, refine the rhythm, and try different instruments on different lines before recording for real.</p>
+</div>
+
+<div class="idea">
+  <h4>🪔 Mode 2 — Riyaz / raga practice</h4>
+  <p>Turn on <strong>Raga Mode</strong>, choose a raga, and let the Studio show you which notes belong and play its pakkad (signature phrase) back to you on a chosen instrument. Great for daily practice, teaching a student the shape of a raga, or simply checking "am I allowed to use this note here?" while composing.</p>
+</div>
+
+<div class="idea">
+  <h4>🎙 Mode 3 — Transcribe a recording</h4>
+  <p>Already have a melody recorded — your own humming, a student's rendition, an old family recording, or a reference track? Load it into <strong>Transcribe</strong> and get it turned into editable swara notation automatically, which you can then correct, arrange, and build on. Useful for preserving an oral composition in written form, or for learning a song by seeing its notes rather than only hearing it.</p>
+</div>
+
+<div class="idea">
+  <h4>✨ Mode 4 — AI-assisted composition</h4>
+  <p>Short on time, or want a starting idea to react to? Tell <strong>AI Compose</strong> a raga, a taal, and a mood ("peaceful evening", "devotional morning") and get a full draft composition — with lyrics too, if wanted — that you then edit, re-arrange, and make your own. Works well as a first draft to refine rather than a finished product.</p>
+</div>
+
+<div class="idea">
+  <h4>🎚 Mode 5 — Arranging &amp; production sketch</h4>
+  <p>Once the notes exist (written by hand, by AI, or transcribed), use the per-line instrument, percussion, volume and section tools to build a full arrangement: a flute Alap opening, a harmonium Mukhda, a sitar Antara, a tanpura drone underneath it all, with reverb shaping the space. Export the result or keep refining it as a living sketch for a studio recording session.</p>
+</div>
+
+<div class="idea">
+  <h4>📖 Mode 6 — Reference &amp; teaching notation</h4>
+  <p>Use <strong>Bhatkhande View</strong> to display any composition — your own, AI-generated, or transcribed — in the traditional printed layout a student or fellow musician would recognise from a songbook, for teaching or sharing on paper.</p>
+</div>
+
+<!-- ───────────────────────────────────────────── 7. RAGA MODE ───────────────────────────────────────────── -->
+<h2 class="section" id="raga-mode">7. Raga Mode — composing and checking within a raga</h2>
+<p>
+A <strong>raga</strong> is a set of melodic rules: which notes are allowed, which direction they move in (ascending <em>aroha</em>, descending <em>avaroha</em>), which note is its most important ("vadi") and second-most-important ("samvadi"), and a short characteristic phrase (its "pakkad") that identifies it instantly to a listener.
+</p>
+<p>Turning on the <span class="pill">Raga Mode</span> checkbox reveals a raga picker and an information bar showing, for the chosen raga:</p>
+<table>
+  <tr><td class="feat" style="color:var(--gold)">Vadi note</td><td>highlighted in gold wherever it appears in your notation.</td></tr>
+  <tr><td class="feat" style="color:var(--blue)">Samvadi note</td><td>highlighted in blue.</td></tr>
+  <tr><td class="feat">Out-of-raga notes</td><td>dimmed, so a note that doesn't belong to the chosen raga stands out visually as worth a second look.</td></tr>
+  <tr><td class="feat">Aroha / Avaroha</td><td>the raga's official ascending and descending note sequences, shown as reference text.</td></tr>
+  <tr><td class="feat">Pakkad</td><td>the signature phrase, shown as a row of note-chips — click <kbd class="btn">▶ Play</kbd> next to it (choosing an instrument from the small dropdown first) to hear it performed.</td></tr>
+</table>
+<div class="note"><strong>Free vs. Premium:</strong> a free account can browse a limited starter set of ragas; signing in with a Premium account unlocks the full library (286 ragas at the time of writing). Raga Mode's highlighting is a guide for the ear and eye, not a hard lock — you can still enter any note you like; it simply tells you when you've stepped outside the raga.</div>
+
+<!-- ───────────────────────────────────────────── 8. TRANSCRIBE ───────────────────────────────────────────── -->
+<h2 class="section" id="transcribe">8. Transcribe — turning a recording into notation</h2>
+<p>Click <span class="pill">🎤 Transcribe</span> to open the panel. The general flow:</p>
+<ol class="steps">
+  <li><strong>Load an audio file</strong> (MP3, WAV or OGG) from your computer. A waveform picture of the recording appears.</li>
+  <li><strong>Mark a section</strong> on the waveform — click to set where it starts, then set how many lines (taal cycles) of music that section covers. Give it a label like "Mukhda" if useful.</li>
+  <li><strong>Click 🔍 Detect Notes.</strong> The Studio listens to that section and writes its best guess of the swaras straight into new "draft" lines in your sheet, shown in amber.</li>
+  <li><strong>Review the draft</strong>: play it back, compare it against the original recording with the ▶ Original button, and either <kbd class="btn">✔ Accept</kbd> it into your permanent composition, ask for <kbd class="btn">✨ AI Cleanup</kbd> to smooth out likely detection mistakes, or <kbd class="btn">✖ Discard</kbd> and try again.</li>
+  <li><strong>Repeat</strong> for each section of the recording — Mukhda, Antara, and so on — until the whole song is transcribed.</li>
+</ol>
+<p>A few settings worth knowing:</p>
+<table>
+  <tr><td class="feat">Melody octave</td><td>If every note comes out consistently one octave too high or too low, change this instead of correcting every note by hand.</td></tr>
+  <tr><td class="feat">Energy gate</td><td>Raise this if tabla or background noise is being mistaken for melody notes; lower it if quiet notes are being missed.</td></tr>
+  <tr><td class="feat">AI backend</td><td>An optional, more powerful detection engine that runs on a server instead of in the browser — gives more accurate results on complex recordings, at the cost of needing an internet round-trip. The "Cloud" option works out of the box; "Local" is for a backend running on your own computer.</td></tr>
+  <tr><td class="feat">Ad-lib (sec)</td><td>If a section opens with a free-tempo alap before the beat properly starts, tell the Studio how many seconds that is — it becomes its own untimed line, with the regular taal lines starting right after it.</td></tr>
+</table>
+<div class="tip">Transcription is a very capable first draft, not a perfect transcriber — always listen back and correct a few notes by hand. It saves the vast majority of the manual work, not all of it.</div>
+
+<!-- ───────────────────────────────────────────── 9. AI COMPOSE ───────────────────────────────────────────── -->
+<h2 class="section" id="ai-compose">9. AI Compose — let the computer write a tune for you</h2>
+<p>Click <span class="pill">✨ AI Compose</span> to open the dialog. Choose:</p>
+<table>
+  <tr><td class="feat">Raga &amp; Taal</td><td>which melodic framework and rhythm cycle to compose in.</td></tr>
+  <tr><td class="feat">Lines to generate</td><td>how much music to create — e.g. "4 lines (Sthayi + Antara)" for a short piece with an opening refrain and a verse.</td></tr>
+  <tr><td class="feat">Instrument</td><td>which sound the generated melody should play on.</td></tr>
+  <tr><td class="feat">Emotion / Subject / Intention</td><td>a short free-text description — "morning devotion", "longing for rain", "peaceful evening" — that steers the character of what's generated.</td></tr>
+  <tr><td class="feat">Also generate lyrics</td><td>optionally ask for matching lyrics too, in Hindi, Marathi or Sanskrit, fitted to the beat structure.</td></tr>
+  <tr><td class="feat">AI Model</td><td>which AI service does the writing. Several free options are listed (Google Gemini, Mistral AI, and free community models via OpenRouter) — each needs a free API key from that provider's own website the first time, which the dialog links to directly.</td></tr>
+</table>
+<p>Click <strong>✨ Generate Composition</strong> and the result appears as new lines in your sheet — ready to play, edit, re-arrange, or simply use as a seed idea to build something more personal from.</p>
+<div class="note">An API key is a free password-like code from the AI provider's own site that lets the Studio talk to it on your behalf — it is never sent anywhere except that provider, and can be remembered on your device so you don't need to paste it in again each time.</div>
+
+<!-- ───────────────────────────────────────────── 10. SAVING ───────────────────────────────────────────── -->
+<h2 class="section" id="saving">10. Saving, loading and sharing your work</h2>
+<p>There are two independent ways to keep a composition — use either, or both:</p>
+<div class="card">
+  <h4>📂 File on your own computer (Export / Import JSON)</h4>
+  <p>Works without signing in. <strong>Export JSON</strong> downloads the current composition as a small file; <strong>Import JSON</strong> opens one back up. Good for personal backups, or for sending a composition to someone else by email or messaging app — they just need the Studio open to import it too.</p>
+</div>
+<div class="card">
+  <h4>☁ Cloud account (Save to Cloud / My Compositions)</h4>
+  <p>Requires signing in once (with Google, or with an email and password — a new account is created automatically the first time). Everything saved this way is tied to your account and reachable from any computer or device, any time, under <strong>My Compositions</strong>. A free account can keep a small number of compositions; a Premium account has no limit.</p>
+</div>
+<div class="tip">Signing in with Google uses your existing Google account — no new password to remember. Signing in with Email creates a brand-new Studio-only account the first time you use a given email and password.</div>
+
+<!-- ───────────────────────────────────────────── 11. BHATKHANDE VIEW ───────────────────────────────────────────── -->
+<h2 class="section" id="bhatkhande">11. Bhatkhande View — traditional printed notation</h2>
+<p>
+Click <span class="pill">♪ Bhatkhande View</span> at any time to see the current composition laid out the way it would look printed in an Indian classical-music songbook — one row per taal cycle, with Sam (the first, strongest beat, marked "X") and Khali (the empty beat, marked "0") shown above the notes, exactly as a teacher would write it on a blackboard. This view is read-only — it's for looking and teaching, not editing; close it and go back to the grid to make changes.
+</p>
+
+<!-- ───────────────────────────────────────────── 12. TIPS ───────────────────────────────────────────── -->
+<h2 class="section" id="tips">12. Tips, shortcuts &amp; troubleshooting</h2>
+<table>
+  <tr><td class="feat">Nothing plays</td><td>Make sure a Taal has been chosen before adding lines, and that at least one note in the line isn't set to "-" (silence).</td></tr>
+  <tr><td class="feat">Notes sound in the wrong octave</td><td>Use the ˙ / • octave buttons on individual notes, or, during transcription, the Melody Octave setting.</td></tr>
+  <tr><td class="feat">"Sign in to use cloud features"</td><td>Appears when Save to Cloud or My Compositions is used while signed out — sign in once with Google or Email and it won't ask again this session.</td></tr>
+  <tr><td class="feat">Settings reset after closing the browser</td><td>Taal, BPM, Scale and Master Volume are remembered automatically on the device you used; a fresh browser profile or a different device starts from defaults.</td></tr>
+  <tr><td class="feat">Want more screen space</td><td>Use ⛶ Full Screen to hide the browser's own bars, especially useful on a tablet during a live performance.</td></tr>
+  <tr><td class="feat">Practising one tricky phrase</td><td>Use the ▶ Line button on just that line instead of playing the whole composition each time.</td></tr>
+</table>
+
+<!-- ───────────────────────────────────────────── 13. GLOSSARY ───────────────────────────────────────────── -->
+<h2 class="section" id="glossary">13. Glossary of terms used in the app</h2>
+<dl class="gloss">
+  <dt>Sa, Re, Ga, Ma, Pa, Dha, Ni</dt>
+  <dd>The seven swaras (notes) of Indian classical music — equivalent in role to Do-Re-Mi-Fa-Sol-La-Ti. Lowercase (re, ga, ma, dha, ni) marks the flat/altered form of that note; Ma uppercase vs lowercase is the one exception, where uppercase "Ma" is natural and lowercase "ma" is the sharp (tivra) form.</dd>
+  <dt>Sa / tonic</dt>
+  <dd>The "home" note everything else is measured against — set by the Scale (Sa) control.</dd>
+  <dt>Taal</dt>
+  <dd>A repeating rhythm cycle of a fixed number of beats, e.g. Teentaal has 16.</dd>
+  <dt>Theka</dt>
+  <dd>The standard pattern of tabla/dholak syllables (bols) that marks out a given Taal's beats.</dd>
+  <dt>Sam</dt>
+  <dd>The first and strongest beat of a taal cycle, marked "X" on the beat ruler.</dd>
+  <dt>Khali</dt>
+  <dd>An intentionally "empty" beat within the cycle, marked "0" — traditionally shown with an open hand wave rather than a clap.</dd>
+  <dt>Raga</dt>
+  <dd>A melodic framework — the set of allowed notes, their typical movement, and a characteristic mood — that a composition is built within.</dd>
+  <dt>Thaat</dt>
+  <dd>A parent scale that several ragas are grouped under, similar in idea to a Western musical "mode" family.</dd>
+  <dt>Vadi / Samvadi</dt>
+  <dd>A raga's most important note (vadi) and its second-most-important, often a supporting, note (samvadi).</dd>
+  <dt>Aroha / Avaroha</dt>
+  <dd>A raga's official ascending and descending note sequence.</dd>
+  <dt>Pakkad</dt>
+  <dd>A short phrase that instantly identifies a raga to a listener — its melodic "signature".</dd>
+  <dt>Jaati</dt>
+  <dd>How many of the seven notes a raga uses going up versus coming down (5 = Odav, 6 = Shadav, 7 = Sampurna).</dd>
+  <dt>Meend</dt>
+  <dd>A smooth glide from one note into the next, rather than a sharp jump — a defining feature of Indian melodic style.</dd>
+  <dt>Gamak / Taan</dt>
+  <dd>A fast ornamental run of several notes performed within a very short span of time (often a single beat).</dd>
+  <dt>Alap</dt>
+  <dd>A slow, free-tempo, unaccompanied opening exploration of a raga's notes, before the rhythm begins.</dd>
+  <dt>Mukhda / Antara</dt>
+  <dd>The opening refrain of a composition (Mukhda) and the verse section that follows and contrasts with it (Antara).</dd>
+  <dt>Tanpura</dt>
+  <dd>A drone instrument that sustains the Sa (and usually Pa) continuously underneath a performance, giving the singer or player a constant pitch reference.</dd>
+  <dt>BPM</dt>
+  <dd>Beats Per Minute — how many beats go by in one minute; the standard way to describe musical speed.</dd>
+</dl>
+
+</div>
+
+<a class="back-top" href="#what-is-it">↑ Top</a>
+<footer>Swar-Laya Studio — User Guide</footer>
+
+</body>
+</html>
