@@ -77,9 +77,9 @@
             <div class="control-item">
                 <label>Pre-roll</label>
                 <select id="pre-roll-select" style="width:80px;">
-                    <option value="0">Off</option>
+                    <option value="0" selected>Off</option>
                     <option value="2">2 Beats</option>
-                    <option value="4" selected>4 Beats</option>
+                    <option value="4">4 Beats</option>
                     <option value="8">8 Beats</option>
                 </select>
             </div>
@@ -103,18 +103,18 @@
             <button class="btn-fullscreen ctrl-row-push" id="btn-fullscreen" onclick="toggleFullscreen()" title="Maximise screen space (hides browser chrome)">⛶ Full Screen</button>
         </div>
 
-        <!-- ── Row 2: Transport + Add Line, and Composition/View tools ──────── -->
+        <!-- ── Row 2: Transport (Loop, Play, Stop), and Composition/View tools ── -->
         <div class="ctrl-row">
-            <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
-            <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
             <div class="ctrl-chip" title="Loop: repeat continuously. Off = play once and stop.">
                 <input type="checkbox" id="loop-toggle">
                 <label for="loop-toggle">Loop</label>
             </div>
-            <button class="btn-add" onclick="addLine()">+ Add Line</button>
+            <button class="btn-play" onclick="startPlayback()">&#9654; Play</button>
+            <button class="btn-stop" onclick="stopPlayback()">&#9632; Stop</button>
 
             <span class="ctrl-sep"></span>
 
+            <button class="btn-add" onclick="addLine()">+ Add Line</button>
             <div class="ctrl-chip" title="Highlight notes by raga — vadi (gold), samvadi (blue), out-of-raga (dimmed)">
                 <input type="checkbox" id="raga-mode-toggle">
                 <label for="raga-mode-toggle">Raga Mode</label>
