@@ -35,6 +35,12 @@ services:
       - path: /config.js
         name: Cache-Control
         value: no-cache
+      - path: /v5/*.js
+        name: Cache-Control
+        value: no-cache
+      - path: /v5/*.css
+        name: Cache-Control
+        value: no-cache
 
 
   - type: web
