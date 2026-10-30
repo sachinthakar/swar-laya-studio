@@ -230,7 +230,10 @@
         </div>
         <div class="sm-backend-row">
             <label><input type="checkbox" id="sm-use-backend" style="width:15px;height:15px;vertical-align:middle;"> AI backend</label>
-            <input type="text" id="sm-backend-url" value="http://127.0.0.1:8000" title="Backend URL" style="width:150px;">
+            <select id="sm-backend-url" title="Backend URL" onchange="smOnBackendUrlChange()">
+                <option value="https://swar-laya-model.onrender.com">Cloud (swar-laya-model.onrender.com)</option>
+                <option value="http://127.0.0.1:8000">Local (127.0.0.1:8000)</option>
+            </select>
             <select id="sm-backend-engine" title="Which engine the backend uses to detect swaras" onchange="smOnBackendEngineChange()">
                 <option value="crepe">Engine: CREPE (pitch-tracking)</option>
                 <option value="model">Engine: Our Trained Model</option>
@@ -240,6 +243,7 @@
             <button class="sm-btn sm-btn-neutral" onclick="SMB.analyze()" title="Pre-compute whole-file pitch so every Detect is instant" style="font-size:12px;padding:4px 8px;">⚡ Pre-analyze</button>
             <span id="sm-backend-status" class="sm-status"></span>
         </div>
+        <div id="sm-backend-note" style="font-size:11px;color:#888;margin-top:2px;"></div>
         <div id="sm-status" class="sm-status" style="margin-top:6px;"></div>
     </div>
 

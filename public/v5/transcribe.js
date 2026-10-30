@@ -925,9 +925,29 @@ function smOnBackendEngineChange() {
   modelEl.style.display = (engineEl.value === 'model') ? 'none' : '';
 }
 
+// Picking a Backend URL sets a sensible default engine for it: the cloud
+// trained-model service only ever runs that one engine, while the local
+// server.py needs to actually be started (start_backend.bat) before CREPE
+// (or the model) will respond. The engine dropdown stays changeable
+// afterward -- this just sets a sane starting point per backend.
+function smOnBackendUrlChange() {
+  const urlEl = document.getElementById('sm-backend-url');
+  const engineEl = document.getElementById('sm-backend-engine');
+  const noteEl = document.getElementById('sm-backend-note');
+  if (!urlEl || !engineEl) return;
+  const isLocal = urlEl.value.indexOf('127.0.0.1') !== -1 || urlEl.value.indexOf('localhost') !== -1;
+  engineEl.value = isLocal ? 'crepe' : 'model';
+  if (noteEl) {
+    noteEl.textContent = isLocal
+      ? '⚠ Start the local backend first: run start_backend.bat in the project folder, then reload this page.'
+      : '';
+  }
+  smOnBackendEngineChange();
+}
+
 // ── Wiring ─────────────────────────────────────────────────────────────────────
 (function wireTranscribe() {
-  smOnBackendEngineChange();
+  smOnBackendUrlChange();
   // Section inputs + the shared toolbar settings that change timing
   ['sm-start-sec', 'sm-adlib-sec', 'sm-seg-lines', 'bpm', 'taal-select'].forEach(id => {
     const el = document.getElementById(id);
