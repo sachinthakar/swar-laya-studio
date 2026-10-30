@@ -179,9 +179,47 @@ def classes_to_idx(melody_classes, octaves):
 
 def idx_from_model(y_22050, tonic_hz, crepe_f0, crepe_pd, crepe_fps, progress=None):
     """Full bridge: audio (+ a CREPE pitch track for octave) -> idx array at
-    MODEL_FPS, ready for sargam_mapper_v2.beat_subnotes()."""
+    MODEL_FPS, ready for sargam_mapper_v2.beat_subnotes(). Used by server.py
+    (the local backend, which already has torch/torchcrepe for the CREPE
+    engine, so reusing its pitch track for octave costs nothing extra)."""
     melody_classes = run_model_inference(y_22050, tonic_hz, progress=progress)
     octaves = octave_from_crepe(melody_classes, crepe_f0, crepe_pd, crepe_fps, tonic_hz)
+    return classes_to_idx(melody_classes, octaves), MODEL_FPS
+
+
+def octave_from_pyin(melody_classes, y_22050, sa_hz, conf=0.5):
+    """Octave source for a torch-free deployment (see server_model.py): same
+    job as octave_from_crepe(), but via librosa.pyin instead of CREPE, so this
+    module's only runtime dependencies stay TensorFlow + librosa -- no torch,
+    torchcrepe, or Demucs. Pitch accuracy is a notch below CREPE, but octave
+    only needs to land in the right 12-semitone bracket, which pyin does
+    reliably enough on a monophonic-ish melody line.
+
+    pyin is run with the SAME sr/hop_length as the model's CQT front end, so
+    its frames line up ~1:1 with `melody_classes` by index (no resampling, no
+    time lookup -- unlike octave_from_crepe, which must map between two
+    different frame rates)."""
+    import librosa
+    fmin, fmax = max(65.0, sa_hz * 0.4), sa_hz * 3.2
+    f0, _voiced_flag, voiced_prob = librosa.pyin(
+        y_22050, sr=SAMPLE_RATE, fmin=fmin, fmax=fmax,
+        frame_length=2048, hop_length=HOP_LENGTH, fill_na=0.0)
+    n = len(melody_classes)
+    octaves = np.zeros(n, dtype=int)
+    for i in range(min(n, len(f0))):
+        if voiced_prob[i] > conf and f0[i] > 0:
+            semitones = 12 * math.log2(f0[i] / sa_hz)
+            octaves[i] = int(np.floor(round(semitones) / 12))
+    return octaves
+
+
+def idx_from_model_standalone(y_22050, tonic_hz, progress=None):
+    """Self-contained bridge for server_model.py: no external pitch track
+    needed, just audio + tonic. This is what makes the trimmed Render
+    deployment possible -- everything it touches (this function, the model,
+    librosa.pyin) needs only TensorFlow + librosa, never torch/Demucs."""
+    melody_classes = run_model_inference(y_22050, tonic_hz, progress=progress)
+    octaves = octave_from_pyin(melody_classes, y_22050, tonic_hz)
     return classes_to_idx(melody_classes, octaves), MODEL_FPS
 
 

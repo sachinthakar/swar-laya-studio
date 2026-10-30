@@ -1,0 +1,14 @@
+# Dependencies for server_model.py -- the standalone "Our Trained Model"
+# backend deployed on Render. Deliberately NOT the same as
+# requirements_backend.txt: no torch, torchaudio, torchcrepe, or demucs.
+# That's the whole point of this file -- see README_backend.md, "Deploying
+# the trained-model engine on Render".
+fastapi
+uvicorn[standard]
+python-multipart
+
+numpy
+scipy
+librosa
+soundfile
+tensorflow

@@ -72,6 +72,41 @@ Both `/segment` and `/analyze` take an `engine` field:
 - Whole-file `/detect` uses a **vocal-only** pass (skips silent/instrumental
   gaps) by default; pass `whole_song=true` to process every frame.
 
+## Deploying the trained-model engine on Render (optional)
+To use "Our Trained Model" without running anything locally, `server_model.py`
+is a second, slimmer backend that can run as its own Render Web Service.
+
+What's different from `server.py`:
+- Only the trained model + `librosa.pyin` for octave (no CREPE/torch,
+  no Demucs vocal separation) -- so the install is small enough for a normal
+  paid Render plan. This matches how the offline CLI
+  (`transcribe_song_studio_v2.py`) actually runs the model: on the full mix,
+  pyin for octave, no vocal isolation.
+- The CREPE engine and vocal separation stay local-only; this service does
+  not replace `server.py`, it only takes over the trained-model engine.
+
+Files it needs: `server_model.py`, `model_engine.py`,
+`models/indian_transcriber_v2_best.h5`, `sargam_mapper_v2.py` (only its
+`parse_sa`/`detect_sa`/`beat_subnotes`/`beat_cell` helpers are used --
+none of those import torch/Demucs, so having the file present is enough,
+no extra install), `requirements_render.txt`.
+
+To deploy:
+1. Render Dashboard -> New -> Blueprint -> this repo, `render-deploy` branch.
+   It will offer `swar-laya-model` (defined in `render.yaml`) alongside the
+   existing static site. Pick an instance plan with enough RAM for
+   TensorFlow + librosa loaded together -- check Render's current plan specs
+   first; the free tier is unlikely to be enough and will sleep when idle.
+2. Once it's live, copy its URL (e.g. `https://swar-laya-model.onrender.com`).
+3. In the Studio's Transcribe-from-Audio panel: tick "AI backend", paste that
+   URL into "Backend URL" (replacing `http://127.0.0.1:8000`), and pick
+   "Engine: Our Trained Model". No local server needed for that engine from
+   then on; "Engine: CREPE" still needs `server.py` running locally.
+
+Endpoints: same shapes as `server.py`'s model-engine path --
+`GET /health` · `GET /job/{id}` · `POST /session` · `POST /segment` ·
+`POST /analyze` (no `/detect` batch endpoint on this service).
+
 ## CLI (no server)
 ```
 python sargam_mapper_v2.py "Lajun Hasane.mp3" --sa G#3 --bpm 140 --beats 6 \

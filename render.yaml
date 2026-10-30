@@ -1,8 +1,18 @@
 # Render Blueprint — Swar-Laya Studio
 #   swar-laya-studio : static site (Studio v5, metronome, instrument samples)
-# Ragas and user compositions both live in Firestore (see firestore.rules);
-# there is no backend service or database on Render.
+#   swar-laya-model   : API backend for the "Our Trained Model" transcription
+#                        engine only (server_model.py) -- NOT the CREPE engine
+#                        or Demucs vocal separation, which stay local-only
+#                        (server.py). See README_backend.md, "Deploying the
+#                        trained-model engine on Render", before enabling.
+# Ragas and user compositions both live in Firestore (see firestore.rules).
 # Create with: Render Dashboard -> New -> Blueprint -> select this repo/branch.
+#
+# NOTE: swar-laya-studio-1, the actually-live static site, was created
+# manually in the Render dashboard and does NOT sync from this file -- see
+# README/commit history if that ever needs reconciling. swar-laya-model
+# below is new, so creating it via Blueprint sync (or manually, pointing at
+# the build/start commands below) is the first time it needs to exist.
 
 services:
   - type: web
@@ -25,3 +35,23 @@ services:
       - path: /config.js
         name: Cache-Control
         value: no-cache
+
+
+  - type: web
+    name: swar-laya-model
+    runtime: python
+    # Pick a plan with enough RAM for TensorFlow + librosa loaded at once --
+    # check Render's current plan sizes/pricing before choosing; the free
+    # tier (512MB, sleeps when idle) is unlikely to be enough and will cold-
+    # start slowly even if it works at all.
+    plan: starter
+    buildCommand: pip install -r requirements_render.txt
+    startCommand: uvicorn server_model:app --host 0.0.0.0 --port $PORT
+    buildFilter:
+      paths:
+        - server_model.py
+        - model_engine.py
+        - sargam_mapper_v2.py
+        - models/**
+        - requirements_render.txt
+        - render.yaml
