@@ -116,6 +116,7 @@
     <li><a href="#toolbar">The toolbar, explained line by line</a></li>
     <li><a href="#grid">Writing music in the note grid</a></li>
     <li><a href="#line-tools">Per-line tools (instrument, rhythm, mood of each line)</a></li>
+    <li><a href="#off-sam">Entering slightly before or after the Sam</a></li>
     <li><a href="#modes">The different ways to use this studio</a></li>
     <li><a href="#raga-mode">Raga Mode — composing and checking within a raga</a></li>
     <li><a href="#transcribe">Transcribe — turning a recording into notation</a></li>
@@ -213,6 +214,7 @@ with a tabla or dholak keeping the beat underneath.
   <tr><td class="feat">+ (add sub-note)</td><td>Pack more than one note into a single beat — this is how you write a <strong>gamak</strong> or fast ornamental run (taan), e.g. Ga-Pa-Ga-Dha all inside one beat. Click + again to add more; the × removes one.</td></tr>
 </table>
 <div class="tip"><strong>Tip:</strong> a plain melody is just one note per beat with no marks at all. Octaves, meend and gamak are entirely optional flourishes you add only where the music calls for them — don't feel obliged to use them everywhere.</div>
+<div class="tip">Want a phrase to lead into, or trail, the first beat (Sam) instead of starting squarely on it? See <a href="#off-sam">Entering slightly before or after the Sam</a> in the next section.</div>
 
 <!-- ───────────────────────────────────────────── 5. LINE TOOLS ───────────────────────────────────────────── -->
 <h2 class="section" id="line-tools">5. Per-line tools — giving every line its own character</h2>
@@ -228,6 +230,43 @@ with a tabla or dholak keeping the beat underneath.
   <tr><td class="feat">▶ Line</td><td>Plays just this one line on repeat — perfect for rehearsing a tricky phrase in isolation before hearing it in context.</td></tr>
   <tr><td class="feat">⤴ Insert Before / ×</td><td>Insert a new blank line just above this one, or delete this line entirely.</td></tr>
 </table>
+
+<h3 id="off-sam">Entering slightly before or after the Sam</h3>
+<p>
+In Hindustani music a phrase often doesn't begin squarely on Sam — a singer may enter a beat or two
+<em>before</em> it, letting the melody arrive and resolve exactly on Sam (a common way to open a
+mukhda), or deliberately hold back and enter just <em>after</em> it. The note grid itself always
+treats a regular line's very first beat-box as Sam, so there's no single switch for "start 1 beat
+early" — but both effects are easy to get with tools you already have:
+</p>
+<div class="card">
+  <h4>To lead into Sam from just before it</h4>
+  <p>
+  Add a short <strong>Adlib/Alap</strong> line (see the table above) right before the metered line
+  whose Sam you want to land on. Trim it down to just one or two beats with the <span class="pill">− Beat</span>
+  button, set its <strong>Line BPM</strong> close to the Master BPM so it doesn't feel like a tempo
+  change, and write only your pickup note(s) in it. Because an Adlib line is free-tempo with the
+  tabla silenced, it plays as a brief, unmetered run that flows straight into the next line's Sam —
+  the same shape as a singer's pickup phrase before the beat.
+  </p>
+</div>
+<div class="card">
+  <h4>To hold back and enter just after Sam</h4>
+  <p>
+  In the metered line itself, set the Sam beat's note to <span class="pill">-</span> (silence) and
+  let the melody's first real note fall on beat 2 or 3 instead. The tabla still marks Sam on time
+  underneath, so the rhythm cycle isn't disturbed — only the melody's entry is delayed, exactly the
+  effect of a singer holding back before coming in.
+  </p>
+</div>
+<div class="card">
+  <h4>For a very short flourish right into Sam</h4>
+  <p>
+  Rather than a whole extra line, use the <span class="pill">+</span> (add sub-note) button on the
+  last beat <em>before</em> Sam to pack two or three quick notes into that single beat — a gamak run
+  that resolves onto the note landing on Sam. See <a href="#grid">section 4</a> for how sub-notes work.
+  </p>
+</div>
 
 <!-- ───────────────────────────────────────────── 6. MODES ───────────────────────────────────────────── -->
 <h2 class="section" id="modes">6. The different ways to use this studio</h2>
