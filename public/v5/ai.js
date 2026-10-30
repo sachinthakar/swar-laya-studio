@@ -126,7 +126,12 @@ async function raAdminSave() {
     const samvadi = document.getElementById('ra-samvadi').value.trim();
     const aroha   = document.getElementById('ra-aroha').value.trim();
     const avaroha = document.getElementById('ra-avaroha').value.trim();
-    const pakkad  = parsePakkadText(document.getElementById('ra-pakkad').value);
+    // Firestore has no nested-array support, so pakkad is stored as an array
+    // of {note, oct} objects (the shape engine.js's SEED_RAGAS and the read
+    // side here already use) -- not the [swara, octave] tuples
+    // parsePakkadText() returns for editing convenience.
+    const pakkad  = parsePakkadText(document.getElementById('ra-pakkad').value)
+                        .map(([note, oct]) => ({ note, oct }));
 
     if (!key || !name) { alert('Key and Name are required.'); return; }
 
