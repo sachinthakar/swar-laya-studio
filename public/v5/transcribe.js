@@ -835,6 +835,7 @@ const SMB = {
   cfg() {
     return {
       url: (document.getElementById('sm-backend-url').value || 'http://127.0.0.1:8000').replace(/\/+$/, ''),
+      engine: (document.getElementById('sm-backend-engine') || {}).value || 'crepe',
       model: document.getElementById('sm-backend-model').value,
       demucs: document.getElementById('sm-backend-demucs').checked,
       device: 'cpu',   // set to 'auto' or 'cuda' once a CUDA torch build is installed
@@ -877,7 +878,7 @@ const SMB = {
     try {
       this.status('⏳ pre-analyzing whole song…');
       const fd = new FormData();
-      fd.append('session_id', SM.sessionId); fd.append('model', c.model); fd.append('device', c.device);
+      fd.append('session_id', SM.sessionId); fd.append('model', c.model); fd.append('device', c.device); fd.append('engine', c.engine);
       const r = await fetch(c.url + '/analyze', { method: 'POST', body: fd });
       const { job_id } = await r.json();
       await this.poll(c.url, job_id, (p) => this.status('⏳ pre-analyzing ' + Math.round(p * 100) + '%'));
@@ -893,7 +894,7 @@ const SMB = {
       fd.append('session_id', SM.sessionId);
       fd.append('start', start); fd.append('beats', beats);
       fd.append('bpm', bpm); fd.append('sa', smDetectSa());
-      fd.append('model', c.model); fd.append('device', c.device);
+      fd.append('model', c.model); fd.append('device', c.device); fd.append('engine', c.engine);
       const r = await fetch(c.url + '/segment', { method: 'POST', body: fd });
       if (!r.ok) throw new Error(await r.text());
       const data = await r.json();
@@ -914,8 +915,19 @@ const SMB = {
   }
 };
 
+// capacity (full/tiny) only means anything for the CREPE engine -- our
+// trained model always runs its own fixed architecture, so hide that
+// dropdown when "Our Trained Model" is selected.
+function smOnBackendEngineChange() {
+  const engineEl = document.getElementById('sm-backend-engine');
+  const modelEl = document.getElementById('sm-backend-model');
+  if (!engineEl || !modelEl) return;
+  modelEl.style.display = (engineEl.value === 'model') ? 'none' : '';
+}
+
 // ── Wiring ─────────────────────────────────────────────────────────────────────
 (function wireTranscribe() {
+  smOnBackendEngineChange();
   // Section inputs + the shared toolbar settings that change timing
   ['sm-start-sec', 'sm-adlib-sec', 'sm-seg-lines', 'bpm', 'taal-select'].forEach(id => {
     const el = document.getElementById(id);

@@ -229,8 +229,12 @@
             <span id="sm-section-info"></span>
         </div>
         <div class="sm-backend-row">
-            <label><input type="checkbox" id="sm-use-backend" style="width:15px;height:15px;vertical-align:middle;"> AI backend (CREPE)</label>
+            <label><input type="checkbox" id="sm-use-backend" style="width:15px;height:15px;vertical-align:middle;"> AI backend</label>
             <input type="text" id="sm-backend-url" value="http://127.0.0.1:8000" title="Backend URL" style="width:150px;">
+            <select id="sm-backend-engine" title="Which engine the backend uses to detect swaras" onchange="smOnBackendEngineChange()">
+                <option value="crepe">Engine: CREPE (pitch-tracking)</option>
+                <option value="model">Engine: Our Trained Model</option>
+            </select>
             <select id="sm-backend-model" title="full = accurate, tiny = fast"><option value="full">full (accurate)</option><option value="tiny">tiny (fast)</option></select>
             <label title="Separate the vocal from the accompaniment (runs once per file)"><input type="checkbox" id="sm-backend-demucs" checked style="width:15px;height:15px;vertical-align:middle;"> separate vocal</label>
             <button class="sm-btn sm-btn-neutral" onclick="SMB.analyze()" title="Pre-compute whole-file pitch so every Detect is instant" style="font-size:12px;padding:4px 8px;">⚡ Pre-analyze</button>

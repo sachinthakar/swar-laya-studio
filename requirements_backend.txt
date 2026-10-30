@@ -12,5 +12,8 @@ torch
 torchaudio
 torchcrepe
 
+# optional: our trained CRNN model as an alternate swara-detection engine
+tensorflow
+
 # optional but recommended: vocal separation (large model download on first use)
 demucs

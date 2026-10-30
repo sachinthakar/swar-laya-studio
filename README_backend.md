@@ -5,7 +5,9 @@ workflow: the vocal is separated once when you open a file, then each Detect
 transcribes only that segment — fast on CPU. GPU is config-ready for later.
 
 ## Files
-- `sargam_mapper_v2.py` — engine (`transcribe`, `detect_segment`, CLI).
+- `sargam_mapper_v2.py` — CREPE engine (`transcribe`, `detect_segment`, CLI).
+- `model_engine.py` — our trained CRNN as an alternate engine (see "Two engines" below).
+- `models/indian_transcriber_v2_best.h5` — the trained model weights `model_engine.py` loads.
 - `server.py` — FastAPI app.
 - `requirements_backend.txt` — dependencies.
 
@@ -22,10 +24,13 @@ First run with Demucs downloads its model (~a few hundred MB) once.
    `job_id`; poll `GET /job/{id}` until it returns `{session_id, duration}`.
    This is the only place Demucs runs (a few minutes on CPU, once per file).
 2. **Each Detect** → `POST /segment` with `session_id, start, beats, bpm, sa,
-   model`. Runs CREPE on just that slice and returns per-beat cells. Fast.
-3. **Optional pre-analyze** → `POST /analyze` (session_id, model) computes the
-   whole-file pitch track in the background with progress, after which every
-   `/segment` is instant. Use `model=tiny` here (whole-song `full` is slow).
+   model, engine`. Runs the selected engine on just that slice and returns
+   per-beat cells. Fast.
+3. **Optional pre-analyze** → `POST /analyze` (session_id, model, engine)
+   computes the whole-file pitch/class track in the background with progress,
+   after which every `/segment` is instant. Use `model=tiny` here when
+   `engine=crepe` (whole-song `full` is slow); `model` is ignored for
+   `engine=model`.
 4. **Whole song** → `POST /detect` (file + params) runs the batch pipeline
    (vocal-only speedup) and returns the full Studio JSON. For CLI/batch.
 
@@ -37,6 +42,23 @@ First run with Demucs downloads its model (~a few hundred MB) once.
 `notes`/`octs` are per beat with 1–4 sub-parts (off-beat notes split the beat),
 `-` = rest. Feed straight into the Studio's existing display/accept/edit flow;
 its `smApplySustain` adds the `~` holds across beats.
+
+## Two engines
+Both `/segment` and `/analyze` take an `engine` field:
+- `engine=crepe` (default) — pitch-tracking via `sargam_mapper_v2.py`. No
+  extra install beyond `requirements_backend.txt`'s base dependencies.
+- `engine=model` — our trained CRNN (`model_engine.py` +
+  `models/indian_transcriber_v2_best.h5`), the same model the offline
+  `transcribe_song_studio_v2.py` CLI uses (in the separate Indian Music
+  Transcription project). Needs `tensorflow` installed (in
+  `requirements_backend.txt`) and the model file present. The model predicts
+  swara class only (not octave), so octave is filled in from a CREPE pitch
+  pass over the same audio — a deliberate choice for interactive use (the
+  offline CLI's own octave step is a slow, resumable pyin pass meant to be
+  re-run several times on one file, which doesn't fit a single HTTP call).
+  `model` (full/tiny) is a CREPE-only setting and has no effect on this engine.
+  `/health` reports `model_engine` (file present) and `tensorflow` (installed)
+  so the Studio UI can tell whether this engine is actually usable.
 
 ## Speed & quality knobs
 - `model`: `full` (best; ~25 s per 6-beat segment on CPU) or `tiny`
