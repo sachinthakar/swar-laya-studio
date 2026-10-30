@@ -59,7 +59,7 @@ const TaalBols = {
     "8_bhajani":["Dhin","Dha","Dhin","Dhinna","Tin","Ta","Tin","Tina"],
     "6":        ["Dha","Dhi","Na","Dha","Tu","Na"],
     "7":           ["Ti","Ti","Na","Dhi","Na","Dhi","Na"],
-    "12":          ["Dhin","Dhin","Dha","Ge","Tirkit","Tirkit","Tu","Na","Kat","Ta","Dhin","Dha"],
+    "12":          ["Dhin","Dhin","DhaGe","Tirkit","Tu","Na","Kat","Ta","DhaGe","Tirkit","Dhi","Na"],
     "16":          ["Dha","Dhin","Dhin","Dha","Dha","Dhin","Dhin","Dha","Dha","Tin","Tin","Ta","Ta","Dhin","Dhin","Dha"],
     "10":          ["Dhi","Na","Dhi","Dhi","Na","Ti","Na","Dhi","Dhi","Na"],
     "12_chautaal": ["Dha","Dha","Din","Ta","Kita","Dha","Din","Ta","Tita","Kata","Gadi","Gana"],

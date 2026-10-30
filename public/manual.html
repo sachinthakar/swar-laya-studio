@@ -175,6 +175,7 @@ with a tabla or dholak keeping the beat underneath.
 <h3>Row 2 — Play, compose, transcribe</h3>
 <table>
   <tr><th>Control</th><th>What it does, in plain words</th></tr>
+  <tr><td class="feat">↶ Undo / ↷ Redo</td><td>Steps backward or forward through your recent edits — notes, lyrics, line settings, title, anything. Also works from the keyboard: <strong>Ctrl+Z</strong> to undo, <strong>Ctrl+Shift+Z</strong> or <strong>Ctrl+Y</strong> to redo (⌘ instead of Ctrl on a Mac).</td></tr>
   <tr><td class="feat">Loop</td><td>When checked, playback repeats forever instead of stopping at the end — good for rehearsal or for looping a backing track while you sing live over it.</td></tr>
   <tr><td class="feat">▶ Play / ■ Stop</td><td>Starts and stops playback of the whole composition from the Start Beat.</td></tr>
   <tr><td class="feat">+ Add Line</td><td>Adds a new empty line (one taal cycle) to the bottom of your composition.</td></tr>
@@ -189,9 +190,10 @@ with a tabla or dholak keeping the beat underneath.
   <tr><th>Control</th><th>What it does, in plain words</th></tr>
   <tr><td class="feat">📂 Import Song</td><td>Opens a composition file previously saved to your computer.</td></tr>
   <tr><td class="feat">💾 Export Song</td><td>Saves the current composition as a file on your own computer — good for backups or emailing to someone.</td></tr>
+  <tr><td class="feat">🎧 Export Audio</td><td>Plays the composition through once and downloads a recording of it as an audio (.wav) file — an actual sound file you can send, upload, or keep, not just notation. See <a href="#saving">section 10</a>.</td></tr>
   <tr><td class="feat">☁ Save to Cloud</td><td>Saves the composition to your account, so it's available from any device, any time. Asks you to sign in first if you haven't.</td></tr>
-  <tr><td class="feat">☁ My Compositions</td><td>Opens the list of everything you've saved to the cloud — click Load to bring one back into the editor, or Delete to remove it.</td></tr>
-  <tr><td class="feat">♪ Bhatkhande View</td><td>Shows the current composition typeset the way it would appear in a printed music book. See <a href="#bhatkhande">section 10</a>.</td></tr>
+  <tr><td class="feat">☁ My Compositions</td><td>Opens the list of everything you've saved to the cloud — click Load to bring one back into the editor, Delete to remove it, or <strong>🔗 Share</strong> to get a read-only link anyone can open. See <a href="#saving">section 10</a>.</td></tr>
+  <tr><td class="feat">♪ Bhatkhande View</td><td>Shows the current composition typeset the way it would appear in a printed music book. See <a href="#bhatkhande">section 11</a>.</td></tr>
 </table>
 
 <!-- ───────────────────────────────────────────── 4. THE GRID ───────────────────────────────────────────── -->
@@ -351,8 +353,8 @@ A <strong>raga</strong> is a set of melodic rules: which notes are allowed, whic
 <div class="note">An API key is a free password-like code from the AI provider's own site that lets the Studio talk to it on your behalf — it is never sent anywhere except that provider, and can be remembered on your device so you don't need to paste it in again each time.</div>
 
 <!-- ───────────────────────────────────────────── 10. SAVING ───────────────────────────────────────────── -->
-<h2 class="section" id="saving">10. Saving, loading and sharing your work</h2>
-<p>There are two independent ways to keep a composition — use either, or both:</p>
+<h2 class="section" id="saving">10. Saving, exporting audio, and sharing your work</h2>
+<p>There are four independent ways to get a composition out of the Studio — use whichever fits what you're doing:</p>
 <div class="card">
   <h4>📂 File on your own computer (Export / Import Song)</h4>
   <p>Works without signing in. <strong>Export Song</strong> downloads the current composition as a small file; <strong>Import Song</strong> opens one back up. Good for personal backups, or for sending a composition to someone else by email or messaging app — they just need the Studio open to import it too.</p>
@@ -360,6 +362,18 @@ A <strong>raga</strong> is a set of melodic rules: which notes are allowed, whic
 <div class="card">
   <h4>☁ Cloud account (Save to Cloud / My Compositions)</h4>
   <p>Requires signing in once (with Google, or with an email and password — a new account is created automatically the first time). Everything saved this way is tied to your account and reachable from any computer or device, any time, under <strong>My Compositions</strong>. A free account can keep a small number of compositions; a Premium account has no limit.</p>
+</div>
+<div class="card">
+  <h4>🎧 An actual audio file (Export Audio)</h4>
+  <p>
+  Export Song and Save to Cloud keep the <em>notation</em> — the swaras, taal and settings — so only the Studio can play it back. <strong>Export Audio</strong> is different: click it and the Studio plays the composition through once (so wait for it to finish) and hands you back a real recording, a <code>.wav</code> audio file, with the tabla, tanpura, instruments and reverb all mixed in exactly as you hear them. Use this when you want something you can send to someone who doesn't have the Studio, upload somewhere, or just keep as a finished recording.
+  </p>
+</div>
+<div class="card">
+  <h4>🔗 A read-only link anyone can open (Share)</h4>
+  <p>
+  Inside <strong>My Compositions</strong>, click <strong>🔗 Share</strong> next to any saved composition. The Studio copies a link to your clipboard that opens the piece for anyone, on any device, with <em>no account or sign-in needed</em> — they can press Play and listen, but can't change the notation. This is the easiest way to let a student, a fellow musician, or family hear a composition without walking them through saving a file or creating an account. Sharing it again after making changes updates the same link rather than creating a new one.
+  </p>
 </div>
 <div class="tip">Signing in with Google uses your existing Google account — no new password to remember. Signing in with Email creates a brand-new Studio-only account the first time you use a given email and password.</div>
 
