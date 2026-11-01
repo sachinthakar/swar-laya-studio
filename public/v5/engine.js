@@ -530,11 +530,17 @@ function playTablaSound(bol, isSam) {
     const D = {
         'Tin'   : [1150, 560, 0.013, 0.92, 0.52, 4800, 0.38],
         'Tina'  : [1100, 545, 0.013, 0.88, 0.48, 4600, 0.36],
-        'Dhin'  : [1100, 540, 0.012, 0.88, 0.46, 4500, 0.35],
+        // Dhin widened from Dha below: measured (via an analyser on the real
+        // synth output) at only ~305Hz vs ~330Hz with similar decay before
+        // this change -- both ride the same bass "boom", so that gap wasn't
+        // enough to tell the two apart by ear. Dhin now rings higher,
+        // brighter and longer (the "open" stroke); Dha is lower, duller and
+        // snappier (the "closed" stroke) -- see 'Dha' below.
+        'Dhin'  : [1150, 560, 0.012, 0.90, 0.52, 4900, 0.38],
         'Dhinna': [1050, 520, 0.012, 0.85, 0.42, 4400, 0.34],
         'Dhi'   : [1050, 510, 0.011, 0.84, 0.38, 4400, 0.33],
         'Na'    : [1050, 488, 0.011, 0.85, 0.36, 4200, 0.32],
-        'Dha'   : [1000, 470, 0.010, 0.82, 0.30, 4000, 0.30],
+        'Dha'   : [ 950, 430, 0.010, 0.82, 0.24, 3600, 0.30],
         'Tu'    : [1000, 505, 0.012, 0.80, 0.55, 3800, 0.25],
         'Tun'   : [1000, 505, 0.013, 0.80, 0.60, 3800, 0.24],
         'Ti'    : [ 950, 470, 0.009, 0.75, 0.22, 4000, 0.30],
