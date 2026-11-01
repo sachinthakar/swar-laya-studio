@@ -164,6 +164,10 @@ function initAudio() {
     noiseBuffer  = buildNoiseBuffer(0.18);  // short burst for tabla head-slap
     breathBuffer = buildNoiseBuffer(2.0);   // long loopable buffer for flute breath
 
+    // Real tabla samples (tabla-samples.js) -- kicks off loading now so
+    // buffers are ready well before the first beat plays.
+    if (typeof loadTablaSamples === 'function') loadTablaSamples();
+
     // Sample bus: a single gain that all sampled notes route through.
     // Setting it to 0 on Stop immediately silences all ringing samples.
     sampleBus = audioCtx.createGain();
@@ -455,6 +459,21 @@ function playTablaSound(bol, isSam) {
     // proportionally so the tabla sounds in tune with the melody.
     const tuningSa   = parseFloat(document.getElementById('scale-select').value);
     const scaleRatio = tuningSa / 415.3;
+
+    // ── Real sample playback (tabla-samples.js) ──────────────────────────
+    // Tries an actual recorded tabla hit first; only falls back to the
+    // synthesized tones below when no sample is loaded for this bol.
+    if (typeof playTablaSample === 'function') {
+        const sampleGain = vol * sw;
+        if (bol.toLowerCase().indexOf('tirkit') !== -1) {
+            if (typeof playTirkitSample === 'function' &&
+                playTirkitSample(now, scaleRatio, sampleGain, out)) {
+                return;
+            }
+        } else if (playTablaSample(bol, now, scaleRatio, sampleGain, out)) {
+            return;
+        }
+    }
 
     // ── Helper: sine oscillator with frequency glide then exponential decay ──
     function sineSwoop(f0, f1, sweepSec, gain, decaySec) {
