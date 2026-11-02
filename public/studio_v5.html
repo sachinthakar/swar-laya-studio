@@ -140,6 +140,7 @@
             <button class="btn-save-cloud" onclick="saveToCloud()">&#9729; Save to Cloud</button>
             <button class="btn-cloud"      onclick="openCompositions()">&#9729; My Compositions</button>
             <button class="btn-bhatkhande" onclick="openBhatkhandeView()" title="Show this song in traditional Bhatkhande notation (read-only)">&#9834; Bhatkhande View</button>
+            <button class="btn-bhatkhande" onclick="openStaffView()" title="Show this song in Western staff notation (read-only)">&#119070; Staff Notation View</button>
             <a class="btn-bhatkhande" href="manual.html" target="_blank" rel="noopener" title="Open the User Guide in a new tab — explains every feature in plain language">&#128214; User Guide</a>
             <input type="file" id="file-input" hidden accept=".json" onchange="loadJsonFile(event)">
         </div>
@@ -412,9 +413,21 @@
 <div id="bhatkhande-modal" class="modal-overlay">
     <div class="modal-box bk-modal-box">
         <h3>&#9834; Bhatkhande View
-            <button class="modal-close" onclick="closeBhatkhandeView()">✕</button>
+            <button class="modal-close no-print" onclick="closeBhatkhandeView()">✕</button>
+            <button class="modal-print no-print" onclick="printBhatkhandeView()" title="Print this notation, or save it as a PDF, via your browser's print dialog">&#128438; Print</button>
         </h3>
         <div id="bhatkhande-content" class="bk-content"></div>
+    </div>
+</div>
+
+<!-- ── Staff Notation Modal (read-only) ── -->
+<div id="staff-modal" class="modal-overlay">
+    <div class="modal-box bk-modal-box">
+        <h3>&#119070; Staff Notation View
+            <button class="modal-close no-print" onclick="closeStaffView()">✕</button>
+            <button class="modal-print no-print" onclick="printStaffView()" title="Print this notation, or save it as a PDF, via your browser's print dialog">&#128438; Print</button>
+        </h3>
+        <div id="staff-content" class="bk-content"></div>
     </div>
 </div>
 
@@ -583,6 +596,7 @@
 <script src="v5/ai.js"></script>
 <script src="v5/transcribe.js"></script>
 <script src="v5/bhatkhande.js"></script>
+<script src="v5/staff.js"></script>
 <script src="v5/history.js"></script>
 <script src="v5/export.js"></script>
 <script src="v5/share.js"></script>

@@ -150,3 +150,25 @@ function openBhatkhandeView() {
 function closeBhatkhandeView() {
     document.getElementById('bhatkhande-modal').style.display = 'none';
 }
+
+// ─── Printing (shared by Bhatkhande View and Staff Notation View) ──────────
+// There is no way for a web page to pick a printer or paper size itself --
+// that is deliberately the browser/OS's job. So this just hands the one
+// open modal's content to the browser's own print dialog (window.print()),
+// where the user picks the printer (including "Save as PDF" / "Microsoft
+// Print to PDF" as a destination), paper size, orientation and margins --
+// exactly the controls a native app's Print dialog would offer. CSS in
+// studio.css's @media print block hides everything else on the page and
+// the two "no-print" buttons inside the modal itself.
+function _printModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('print-active');
+    window.print();
+}
+window.addEventListener('afterprint', () => {
+    document.querySelectorAll('.modal-overlay.print-active')
+        .forEach(m => m.classList.remove('print-active'));
+});
+
+function printBhatkhandeView() { _printModal('bhatkhande-modal'); }
