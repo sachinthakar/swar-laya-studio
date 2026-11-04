@@ -57,7 +57,7 @@ if (auth) {
 // ── Auth UI ───────────────────────────────────────────────────────────────────
 function updateAuthBar(user) {
     const bar = document.getElementById('auth-bar');
-    const logo = '<img src="swar-laya-logo-1line.png" alt="Swar-Laya Studio" style="height:28px;width:auto;display:block;">';
+    const logo = '<img src="swar-laya-logo-header.png" alt="Swar-Laya Studio" style="height:32px;width:auto;display:block;">';
     if (user) {
         const avatar  = user.photoURL
             ? `<img src="${user.photoURL}" class="user-avatar" onerror="this.style.display='none'">`
