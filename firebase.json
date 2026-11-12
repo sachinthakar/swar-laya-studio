@@ -9,11 +9,11 @@
     "rewrites": [
       {
         "source": "/",
-        "destination": "/studio_v5.html"
+        "destination": "/studio_v5_fast-entry.html"
       },
       {
         "source": "/index.html",
-        "destination": "/studio_v5.html"
+        "destination": "/studio_v5_fast-entry.html"
       }
     ],
     "headers": [
